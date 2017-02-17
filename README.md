@@ -1,0 +1,2 @@
+# framework_for_detecting_outlier_in_trajectories
+A Framework for Outlier Detection in Heterogeneous User Trajectories
