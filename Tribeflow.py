@@ -123,8 +123,8 @@ class TribeFlow (DetectionTechnique):
         newSeqIds_np = np.array(newSeqIds, dtype = 'i4').copy()
         logSeqProbZ = np.zeros(self.Psi_sz.shape[1], dtype='d').copy()
         #print(logSeqProbZ)
-        logSeqScore = _eval_outlier.calculateSequenceProb(newSeqIds_np, len(newSeqIds_np), logSeqProbZ, self.true_mem_size, userId, self.Theta_zh, self.Psi_sz) 
-        #seqScore = _eval_outlier.calculateSequenceProb(newSeqIds_np, len(newSeqIds_np), self.true_mem_size, userId, self.Theta_zh, self.Psi_sz)                                            
+        logSeqScore = cythonOptimize.calculateSequenceProb(newSeqIds_np, len(newSeqIds_np), logSeqProbZ, self.true_mem_size, userId, self.Theta_zh, self.Psi_sz) 
+        #seqScore = cythonOptimize.calculateSequenceProb(newSeqIds_np, len(newSeqIds_np), self.true_mem_size, userId, self.Theta_zh, self.Psi_sz)                                            
         #seqScore = calculateSequenceProb(newSeq, true_mem_size, userId, obj2id, Theta_zh, Psi_sz)
         #asd = open('logprob','w')
         #for x in seqScore:

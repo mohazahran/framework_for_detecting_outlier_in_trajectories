@@ -3,9 +3,6 @@ Created on Jan 22, 2017
 
 @author: mohame11
 '''
-from scipy.stats import chisquare
-from collections import OrderedDict
-from multiprocessing import Process, Queue
 
 import pandas as pd
 #import plac
@@ -13,7 +10,7 @@ import numpy as np
 import math
 import os.path
 import cProfile
-import _eval_outlier
+import cythonOptimize
 from MyEnums import *
 from TestSample import *
 from bokeh.colors import gold

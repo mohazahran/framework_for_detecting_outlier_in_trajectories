@@ -19,7 +19,10 @@ from MyEnums import *
 from TestSample import *
 from bokeh.colors import gold
 from DetectionTechnique import *
-import _eval_outlier
+from Tribeflow import *
+from NgramLM import *
+from RNNLM import *
+import cythonOptimize
 
 '''
 CORES = 1
@@ -117,9 +120,9 @@ def outlierDetection(coreTestDic, quota, coreId, q, myModel):
                 #if(normalizingConst <= 1e-10000): #very small almost zero probability
                 #    break
                 #logNormalizingConst = get_norm_from_logScores(scores.values())
-		allScores = np.array(scores.values(), dtype = 'd').copy()
+                    allScores = np.array(scores.values(), dtype = 'd').copy()
                 #print(scores.values(),allScores)
-		logNormalizingConst = _eval_outlier.getLogProb(allScores,len(allScores))
+                    logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
                 for j in range(len(actions)): #for all possible actions that can replace the current action
                     logProb = float(scores[j]) - float(logNormalizingConst)
                     probabilities[j] = math.pow(10, logProb)
