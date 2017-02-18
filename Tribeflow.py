@@ -4,6 +4,9 @@ Created on Feb 16, 2017
 @author: mohame11
 '''
 from DetectionTechnique import *
+import sys
+sys.path.append('Cython/')
+import cythonOptimize
 import MyEnums
 
 class TribeFlow (DetectionTechnique):

@@ -10,7 +10,6 @@ import numpy as np
 import math
 import os.path
 import cProfile
-import cythonOptimize
 from MyEnums import *
 from TestSample import *
 from bokeh.colors import gold

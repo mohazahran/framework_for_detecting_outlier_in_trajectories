@@ -22,6 +22,8 @@ from DetectionTechnique import *
 from Tribeflow import *
 from NgramLM import *
 from RNNLM import *
+import sys
+sys.path.append('Cython/')
 import cythonOptimize
 
 '''
@@ -40,16 +42,16 @@ useWindow = USE_WINDOW.FALSE
 '''
 #COMMON
 CORES = 40
-PATH = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/'
-RESULTS_PATH = PATH+'simulatedData/pvalues_injected'
-SEQ_FILE_PATH = PATH+'simulatedData/simData_perUser_1000_injected'
-MODEL_PATH = PATH + 'training_tribeflow_burst_4_noop.h5'
+PATH = '/home/mohame11/pins_repins_fixedcat/'
+RESULTS_PATH = PATH+'allLikes/pvalues_withWindow_log'
+SEQ_FILE_PATH = PATH+'allLikes/likes.trace'
+MODEL_PATH = PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
 seq_prob = SEQ_PROB.TRIBEFLOW
-useWindow = USE_WINDOW.TRUE
+useWindow = USE_WINDOW.FALSE
 
 #TRIBEFLOW
-TRACE_PATH = PATH + 'training_tribeflow_burst_4'
-STAT_FILE = PATH+'Stats'
+TRACE_PATH = PATH + 'pins_repins_win10.trace'
+STAT_FILE = PATH+'Stats_win10'
 UNBIAS_CATS_WITH_FREQ = True
 smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
 
