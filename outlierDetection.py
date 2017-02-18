@@ -95,7 +95,6 @@ def outlierDetection(coreTestDic, quota, coreId, q, myModel):
             #print(myCnt)
             seq = testSample.actions
             goldMarkers = testSample.goldMarkers
-            #actions = myModel.obj2id.keys()    
             actions = myModel.getAllPossibleActions()              
             pValuesWithRanks = {}
             pValuesWithoutRanks = {}
@@ -107,7 +106,7 @@ def outlierDetection(coreTestDic, quota, coreId, q, myModel):
                 #currentActionId = myModel.obj2id[newSeq[i]] #current action id
                 currentActionIndex = actions.index(newSeq[i])# the current action index in the action list.
                 #cal scores (an un-normalized sequence prob in tribeflow)
-                #normalizingConst = 0
+               
                 for j in range(len(actions)): #for all possible actions that can replace the current action
                     del newSeq[i]                
                     newSeq.insert(i, actions[j])    
@@ -117,14 +116,9 @@ def outlierDetection(coreTestDic, quota, coreId, q, myModel):
                     else:
                         seqScore = myModel.getProbability(userId, newSeq)  
                     scores[j] = seqScore
-                    #normalizingConst += seqScore
-                #cal probabilities                                                                                                                             
-                #if(normalizingConst <= 1e-10000): #very small almost zero probability
-                #    break
-                #logNormalizingConst = get_norm_from_logScores(scores.values())
-                    allScores = np.array(scores.values(), dtype = 'd').copy()
-                #print(scores.values(),allScores)
-                    logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
+        
+                allScores = np.array(scores.values(), dtype = 'd').copy()
+                logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
                 for j in range(len(actions)): #for all possible actions that can replace the current action
                     logProb = float(scores[j]) - float(logNormalizingConst)
                     probabilities[j] = math.pow(10, logProb)
