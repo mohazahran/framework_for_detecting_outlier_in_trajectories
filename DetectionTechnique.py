@@ -4,21 +4,9 @@ Created on Jan 22, 2017
 @author: mohame11
 '''
 
-import pandas as pd
-#import plac
-import numpy as np
-import math
-import os.path
-import cProfile
-from MyEnums import *
-from TestSample import *
-from bokeh.colors import gold
 
 import sys
-from astropy import log
 sys.path.append('/Users/mohame11/anaconda/lib/python2.7/site-packages/')
-import kenlm
-#import rnnlm
 import subprocess
 
 #testDic, quota, coreId, q, store, true_mem_size, hyper2id, obj2id, Theta_zh, Psi_sz, smoothedProbs

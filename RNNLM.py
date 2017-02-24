@@ -4,7 +4,11 @@ Created on Feb 16, 2017
 @author: mohame11
 '''
 from DetectionTechnique import *
-import MyEnums
+from MyEnums import *
+sys.path.append('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/RNNLM_pyWrap/pythonWrap')
+import rnnlmlib
+#sys.path.append('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/rnnlm-python-master/rnnlm-python')
+#import rnnlm
 
 class RNNLM (DetectionTechnique):
     def __init__(self):
@@ -15,8 +19,8 @@ class RNNLM (DetectionTechnique):
        
         
     def loadModel(self):
-        '''
-        self.model = rnnlm.CRnnLM()
+        
+        self.model = rnnlmlib.CRnnLM()
         lmda = 0.75
         regularization = 0.0000001
         dynamic = 0
@@ -26,18 +30,27 @@ class RNNLM (DetectionTechnique):
         self.model.setDynamic(dynamic)
         self.model.setRnnLMFile(self.model_path)
         self.model.setRandSeed(rand_seed)
-        '''
+    
         r = open(self.ALL_ACTIONS_PATH, 'r')
         for line in r:
-           line = line.strip()
-           if(len(line)>0):
+            line = line.strip()
+            if(len(line)>0):
                 self.allActions.append(line)
         r.close()
-
         
-    def getProbability(self, userId, newSeq, coreId):
+    
+    def getProbability(self, userId, newSeq):
+        tokens = newSeq.split()
+        line = ' '.join(tokens)
+        logprob = self.model.testNetOne(line.strip())
+        return logprob
+        
+        
+    
+    def getProbability_commandLine(self, userId, newSeq, coreId):
         #test_file = self.RESULTS_PATH+'tmp'+str(coreId)
         test_file = '/Users/mohame11/Desktop/'+'tmp'+str(coreId)
+        
         w = open(test_file,'w')
         strSeq = ' '.join(newSeq)
         w.write(strSeq)
@@ -46,8 +59,9 @@ class RNNLM (DetectionTechnique):
         #self.model.setTestFile(test_file)
         #prob = self.model.testNet() 
         py2output = subprocess.check_output(['python', self.RNNLM_PYTHON_PATH+'main.py', '-rnnlm', self.model_path, '-test', test_file])
-        logProb = py2output.split('log probability:')[-1].split('PPL')[0].strip()
-        return logProb
+        print(py2output)
+        #logProb = py2output.split('log probability:')[-1].split('PPL')[0].strip()
+        #return logProb
         #prob = 10**float(logProb)
         #return prob
         
@@ -109,3 +123,36 @@ class RNNLM (DetectionTechnique):
     
     def getUserId(self, uid):
         return uid
+
+
+
+
+def experiments():
+    RNNLM_PYTHON_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/RNNLM_pyWrap/pythonWrap/'
+    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/pins_repins_for_training_RNNLM/'
+    rnn = RNNLM()
+    rnn.model_path = path+'pins_repins_win10_RNNLM'
+    rnn.loadModel()
+    rnn.RNNLM_PYTHON_PATH = RNNLM_PYTHON_PATH
+    r = open(path+'pins_repins_win4.trace_forLM_RNN_validate', 'r')
+    for line in r:
+        #words = line.split()
+        #logprob = rnn.model.testNetOne(words, len(words))
+        
+        logprob = rnn.model.testNetOne(line.strip())
+        print('logprob1',logprob)
+        
+        lp = rnn.getProbability('1', line.split(), '4')
+        print('logprob2', lp)
+        print()
+        
+        #print('testNetOne',logprob)
+        #w = open(path+'tmp', 'w')
+        #w.write(line)
+        #w.close()
+        #rnn.model.setTestFile(path+'tmp')
+        #rnn.model.testNet()
+    r.close()
+    
+    
+experiments()

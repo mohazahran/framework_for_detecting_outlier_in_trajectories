@@ -111,10 +111,7 @@ def outlierDetection(coreTestDic, quota, coreId, q, myModel):
                     del newSeq[i]                
                     newSeq.insert(i, actions[j])    
                     userId = myModel.getUserId(user)     
-                    if(myModel.type == SEQ_PROB.RNNLM):
-                        seqScore = myModel.getProbability(userId, newSeq, coreId)
-                    else:
-                        seqScore = myModel.getProbability(userId, newSeq)  
+                    seqScore = myModel.getProbability(userId, newSeq)  
                     scores[j] = seqScore
         
                 allScores = np.array(scores.values(), dtype = 'd').copy()
