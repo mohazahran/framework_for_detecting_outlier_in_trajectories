@@ -42,11 +42,11 @@ useWindow = USE_WINDOW.FALSE
 '''
 #COMMON
 CORES = 40
-PATH = '/home/mohame11/pins_repins_fixedcat/'
-RESULTS_PATH = PATH+'allLikes/pvalues_withWindow_log'
-SEQ_FILE_PATH = PATH+'allLikes/likes.trace'
-MODEL_PATH = PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
-seq_prob = SEQ_PROB.TRIBEFLOW
+PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/'
+RESULTS_PATH = PATH+'allLikes/pvalues_rnnlm3'
+SEQ_FILE_PATH = PATH+'allLikes/likes_withFriendship_win4.trace'
+MODEL_PATH = PATH + 'pins_repins_win4.RNNLMmodel'
+seq_prob = SEQ_PROB.RNNLM
 useWindow = USE_WINDOW.FALSE
 
 #TRIBEFLOW
@@ -57,12 +57,10 @@ smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
 
 #NGRM/RNNLM
 HISTORY_SIZE = 3
-DATA_HAS_USER_INFO = False #has no effect on tribeflow
-VARIABLE_SIZED_DATA = True #has no effect on tribeflow
-ALL_ACTIONS_PATH = PATH + 'training_Ngram_ALL_ACTIONS'
+DATA_HAS_USER_INFO = True #has no effect on tribeflow
+VARIABLE_SIZED_DATA = False #has no effect on tribeflow
+ALL_ACTIONS_PATH = PATH + 'pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'
 
-#RNNLM
-RNNLM_PYTHON_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/rnnlm-python-master/scripts/'
 
                            
 def getPvalueWithoutRanking(currentActionRank, keySortedProbs, probabilities):
@@ -158,7 +156,6 @@ def distributeOutlierDetection():
         myModel.SEQ_FILE_PATH = SEQ_FILE_PATH
         myModel.DATA_HAS_USER_INFO = DATA_HAS_USER_INFO
         myModel.VARIABLE_SIZED_DATA = VARIABLE_SIZED_DATA
-        myModel.RNNLM_PYTHON_PATH = RNNLM_PYTHON_PATH
         myModel.RESULTS_PATH = RESULTS_PATH
         myModel.ALL_ACTIONS_PATH=ALL_ACTIONS_PATH
         myModel.loadModel()

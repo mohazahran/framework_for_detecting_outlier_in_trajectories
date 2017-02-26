@@ -5,7 +5,7 @@ Created on Feb 16, 2017
 '''
 from DetectionTechnique import *
 from MyEnums import *
-sys.path.append('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/RNNLM_pyWrap/pythonWrap')
+sys.path.append('/home/mohame11/RNNLM_pyWrap/pythonWrap')
 import rnnlmlib
 #sys.path.append('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/rnnlm-python-master/rnnlm-python')
 #import rnnlm
@@ -30,6 +30,8 @@ class RNNLM (DetectionTechnique):
         self.model.setDynamic(dynamic)
         self.model.setRnnLMFile(self.model_path)
         self.model.setRandSeed(rand_seed)
+	self.model.restoreNet()
+        self.model.copyHiddenLayerToInput()
     
         r = open(self.ALL_ACTIONS_PATH, 'r')
         for line in r:
@@ -40,8 +42,7 @@ class RNNLM (DetectionTechnique):
         
     
     def getProbability(self, userId, newSeq):
-        tokens = newSeq.split()
-        line = ' '.join(tokens)
+        line = ' '.join(newSeq)
         logprob = self.model.testNetOne(line.strip())
         return logprob
         
@@ -65,9 +66,6 @@ class RNNLM (DetectionTechnique):
         #prob = 10**float(logProb)
         #return prob
         
-        
-        
-        
     def prepareTestSet(self):
         testDic = {}
         print(">>> Preparing testset ...")
@@ -78,20 +76,27 @@ class RNNLM (DetectionTechnique):
             line = line.strip() 
             tmp = line.split()  
             actionStartIndex = 0
-            user += 1
+            #user += 1
             if (self.DATA_HAS_USER_INFO == True):
                 user = tmp[0]   
                 actionStartIndex = 1
-            
+            else:
+                user += 1
             if(self.VARIABLE_SIZED_DATA == True):
-                seq = tmp[actionStartIndex:]
-                goldMarkers = ['false']*len(seq)
+                if('###' not in tmp):
+                    seq = tmp[actionStartIndex:]
+                    goldMarkers = ['false']*len(seq)
+                else:
+                    indx = tmp.index('###')
+                    seq = tmp[:indx]
+                    goldMarkers = tmp[indx+1:]
+            #print(seq,goldMarkers)
             else:
                 seq = tmp[actionStartIndex:self.true_mem_size+2]
                 goldMarkers = tmp[self.true_mem_size+2:]
                 if(len(goldMarkers) != len(seq)):
                     goldMarkers = ['false']*len(seq)
-
+       
             t = TestSample()  
             t.user = user
             t.actions = list(seq)
@@ -113,7 +118,10 @@ class RNNLM (DetectionTechnique):
                 t.actions = list(originalSeq)
                 t.goldMarkers = list(originalGoldMarkers)   
                 testDic[u] = [t]
-        return testDic, testSetCount    
+        return testDic, testSetCount         
+        
+        
+
         
               
 #self, testDic, quota, coreId, q, store, true_mem_size, hyper2id, obj2id, Theta_zh, Psi_sz, smoothedProbs
@@ -155,4 +163,4 @@ def experiments():
     r.close()
     
     
-experiments()
+#experiments()

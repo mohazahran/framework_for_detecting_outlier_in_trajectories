@@ -214,7 +214,7 @@ def main():
     #ALPHA_RANKING = np.arange(0.000005,0.1,0.005)    
     
     
-    ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/unix_user_data/3gram/simulatedData/pvalues_injected/'
+    ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_withWindow_log/'
     #ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pvalues_3gram/'
     FILE_NAME = 'outlier_analysis_pvalues_'
     
@@ -224,12 +224,12 @@ def main():
     
     actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
     
-    metricList = [METRIC.REC_PREC_FSCORE]
-    #metricList = [METRIC.FISHER]
-    techList = [TECHNIQUE.ALL_OR_NOTHING,TECHNIQUE.MAJORITY_VOTING,TECHNIQUE.ONE_IS_ENOUGH]
-    #techList = [TECHNIQUE.MAJORITY_VOTING]
-    #alphaList = [5e-50, 5e-20, 5e-15, 5e-10, 5e-9, 5e-8, 5e-7, 5e-6, 5e-5, 5e-4, 5e-3, 5e-2, 5e-1, 0.6, 0.7, 0.8, 0.9, 1, 3, 5, 10, 20, 50, 100]
-    alphaList = [20, 50, 100, 200, 500]
+    #metricList = [METRIC.REC_PREC_FSCORE]
+    metricList = [METRIC.FISHER]
+    #techList = [TECHNIQUE.ALL_OR_NOTHING,TECHNIQUE.MAJORITY_VOTING,TECHNIQUE.ONE_IS_ENOUGH]
+    techList = [TECHNIQUE.MAJORITY_VOTING]
+    alphaList = [1e-20, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.6, 0.7, 0.8, 0.9, 1, 3, 5, 10, 20, 50, 100]
+    #alphaList = [20, 50, 100, 200, 500]
     hypList = [HYP.BONFERRONI]
     #hypList = [HYP.BONFERRONI, HYP.HOLMS]
     #pvalueList = [PVALUE.WITH_RANKING]

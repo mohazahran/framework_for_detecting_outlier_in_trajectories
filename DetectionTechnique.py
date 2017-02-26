@@ -8,7 +8,7 @@ Created on Jan 22, 2017
 import sys
 sys.path.append('/Users/mohame11/anaconda/lib/python2.7/site-packages/')
 import subprocess
-
+from TestSample import *
 #testDic, quota, coreId, q, store, true_mem_size, hyper2id, obj2id, Theta_zh, Psi_sz, smoothedProbs
 class DetectionTechnique():
     def __init__(self):
