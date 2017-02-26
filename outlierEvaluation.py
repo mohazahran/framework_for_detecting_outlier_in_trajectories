@@ -36,6 +36,8 @@ class OutlierEvaluation:
             self.hypObj = Bonferroni(self.alpha, self.testSetCountAdjust, self.allTestsCount)
         elif(hyp == HYP.HOLMS):
             self.hypObj = Holms(self.alpha, self.testSetCountAdjust, self.allTestsCount)
+        elif(hyp == HYP.EMPIRICAL):
+            self.hypObj = Empirical(self.alpha, self.testSetCountAdjust, self.allTestsCount)
         
         if(self.metricType == METRIC.CHI_SQUARE):
             self.metricObj = Chisq()
@@ -222,15 +224,15 @@ def main():
     allData = TestSample.parseAnalysisFiles(FILE_NAME, ANALYSIS_FILES_PATH)
     print('>>> Evaluating ...')
     
-    actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
+    #actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
     
     #metricList = [METRIC.REC_PREC_FSCORE]
     metricList = [METRIC.FISHER]
     #techList = [TECHNIQUE.ALL_OR_NOTHING,TECHNIQUE.MAJORITY_VOTING,TECHNIQUE.ONE_IS_ENOUGH]
     techList = [TECHNIQUE.MAJORITY_VOTING]
-    alphaList = [1e-20, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.6, 0.7, 0.8, 0.9, 1, 3, 5, 10, 20, 50, 100]
+    alphaList = [1e-20, 1e-10, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
     #alphaList = [20, 50, 100, 200, 500]
-    hypList = [HYP.BONFERRONI]
+    hypList = [HYP.EMPIRICAL]
     #hypList = [HYP.BONFERRONI, HYP.HOLMS]
     #pvalueList = [PVALUE.WITH_RANKING]
     pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]

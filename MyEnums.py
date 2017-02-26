@@ -23,6 +23,7 @@ class PVALUE(Enum):
 class HYP(Enum):    
     BONFERRONI = 1
     HOLMS = 2
+    EMPIRICAL = 3
     
 class DECISION (Enum):
     OUTLIER = 1

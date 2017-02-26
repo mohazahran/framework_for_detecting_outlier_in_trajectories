@@ -19,6 +19,21 @@ class HypTesting:
     def classifyOne(self, rank, keySortedPvalues, pValues):
         pass
 
+#Empirical means there is no notion of hypothesis testing.
+class Empirical(HypTesting):
+    def __init__(self, alpha, testsetCountAdjust, testsetCount):
+        HypTesting.__init__(self, alpha, testsetCountAdjust, testsetCount)
+        self.type = HYP.EMPIRICAL
+        
+    def classify(self, keySortedPvalues, pValues):
+        outlierVector = [DECISION.UNDECIDED]*len(keySortedPvalues)
+        for i in range(len(keySortedPvalues)):
+            if(pValues[keySortedPvalues[i]] <= self.sigLevel):
+                outlierVector[keySortedPvalues[i]] = DECISION.OUTLIER# rejecting H0 (i.e rejecting that the action is normal ==> outlier)
+            else:
+                outlierVector[keySortedPvalues[i]] = DECISION.NORMAL
+        return outlierVector
+
 
 class Bonferroni(HypTesting):
     def __init__(self, alpha, testsetCountAdjust, testsetCount):
