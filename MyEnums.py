@@ -9,6 +9,12 @@ class METRIC (Enum):
     CHI_SQUARE = 1
     REC_PREC_FSCORE = 2
     FISHER = 3
+    #for plotting
+    TRUE_NEGATIVE_RATE = 4
+    ACCURACY = 5
+    RECALL = 6
+    PRECISION = 7
+    FSCORE = 8
 
 class TECHNIQUE(Enum):
     ALL_OR_NOTHING = 1

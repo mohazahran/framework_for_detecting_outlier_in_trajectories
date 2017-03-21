@@ -7,9 +7,9 @@ import pandas as pd
 import random
 
 #common
-SRC_FILE = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/simulatedData/simData_perUser_1000'
-INJECTED_TRAIN = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/simulatedData/simData_perUser_1000_injected'
-isTribeflow = True
+SRC_FILE = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pins_repins_bbtt3_simulatedData_fixed_3'
+INJECTED_TRAIN = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData_injected/pins_repins_bbtt3_simulatedData_fixed_3_injected'
+isTribeflow = False
 injectedInstancesCount = 0 # 0 for all the training data
 doRandomization = False
 maxInjections = 1
@@ -19,11 +19,9 @@ isTraceFile = False #tracefile has the same format as tribeflow's training data
 MODEL_PATH = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/training_tribeflow_burst_4_noop.h5'
 
 #ngram
-ALL_ACTION_PATH = '/scratch/snyder/m/mohame11/unix_user_data/3gram/training_Ngram_ALL_ACTIONS'
-n = 3 #n-gram
+ALL_ACTION_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'
 
 def main():
-    winSize=n
     if(isTribeflow):
     	store = pd.HDFStore(MODEL_PATH)     
     	obj2id = dict(store['source2id'].values)
@@ -79,10 +77,11 @@ def main():
             		user = parts[0]
             		cats = parts[1:winSize+2]
 	else:
-		cats = parts[:winSize+1]	
+		cats = parts	
         for c in cats:
             allCats.discard(c)
-        markers = ['false']*(winSize+1)
+        markers = ['false']*(len(cats))
+	#print(len(cats), maxInjections)
         injectedIdx = random.sample(list(range(len(cats))), maxInjections)
         for idx in injectedIdx:
             originalCat = cats[idx]                                        

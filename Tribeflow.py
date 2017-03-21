@@ -5,6 +5,9 @@ Created on Feb 16, 2017
 '''
 from DetectionTechnique import *
 import sys
+import math
+import numpy as np
+import os.path
 sys.path.append('Cython/')
 import cythonOptimize
 import MyEnums
