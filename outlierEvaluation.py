@@ -144,6 +144,7 @@ class OutlierEvaluation:
                     
                     self.metricObj.update(decisionVec, goldMarkers)
                     
+                self.metricObj.calculateStats()   
         #----------------------------------------------------------------------------------------------------------------------  
         #when self.testSetCountAdjust == True   
         else:
@@ -200,6 +201,7 @@ class OutlierEvaluation:
                                
                 self.metricObj.update(decisionsForOriginalSeq, originalGoldMarkers)
                 
+            self.metricObj.calculateStats()     
                 
                 
                 

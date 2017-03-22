@@ -44,7 +44,8 @@ class Chisq(Metric):
                 self.NT += 1
             elif(decisions[i] == DECISION.NORMAL and goldMarkers[i] == GOLDMARKER.FALSE):
                 self.NF += 1
-            
+        
+        ''' 
         row0 = self.OT + self.OF # no. of outliers
         row1 = self.NT + self.NF
         col0 = self.OT + self.NT
@@ -67,7 +68,21 @@ class Chisq(Metric):
         #if(not cm):       
         #    print('\nERROR in exp cnt\n')
         #print('\n')
+        '''
+                
+    def calculateStats(self):
+        row0 = self.OT + self.OF # no. of outliers
+        row1 = self.NT + self.NF
+        col0 = self.OT + self.NT
+        col1 = self.OF + self.NF
+        grandTotal = row0+row1
+                
+        self.expectedOT = float(row0*col0)/float(grandTotal)
+        self.expectedOF = float(row0*col1)/float(grandTotal)
+        self.expectedNT = float(row1*col0)/float(grandTotal)
+        self.expectedNF = float(row1*col1)/float(grandTotal)
         
+        self.stats = chisquare([self.OT, self.OF, self.NT, self.NF], f_exp=[self.expectedOT, self.expectedOF, self.expectedNT, self.expectedNF], ddof=2)
         
         
         
@@ -97,7 +112,9 @@ class Fisher(Metric):
                 self.NF += 1
             
         
-        
+        #self.stats = [fisher_exact([[self.OT, self.OF], [self.NT, self.NF]])]
+    
+    def calculateStats(self):
         self.stats = [fisher_exact([[self.OT, self.OF], [self.NT, self.NF]])]
         
         
@@ -125,7 +142,7 @@ class rpf(Metric): #recall_precision_fscore
                 self.NT += 1
             elif(decisions[i] == DECISION.NORMAL and goldMarkers[i] == GOLDMARKER.FALSE):
                 self.NF += 1
-    
+    '''
         try:         
             rec  = float(self.OT)/float(self.OT + self.NT) #tp/tp+fn
             prec = float(self.OT)/float(self.OT + self.OF)
@@ -133,6 +150,18 @@ class rpf(Metric): #recall_precision_fscore
             self.stats = [rec, prec, fscore]
         except:
             self.stats = [0,0,0]
+    '''
+            
+    def calculateStats(self):
+        try:         
+            rec  = float(self.OT)/float(self.OT + self.NT) #tp/tp+fn
+            prec = float(self.OT)/float(self.OT + self.OF)
+            fscore= (2*prec*rec) / (prec+rec)
+            self.stats = [rec, prec, fscore]
+        except:
+            self.stats = [0,0,0]
+        
+    
     
     
     
