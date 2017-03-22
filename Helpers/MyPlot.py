@@ -18,13 +18,14 @@ from MyEnums import *
 
 class MyPlot():
 
-    def __init__(self, tag, path, metric, figs):
+    def __init__(self, tag, path, metric, figs, smallestAlpha):
         self.tag = tag
         self.path = path
         self.metric = metric        
         self.mapping = {}
         self.x = []
         self.figs = figs
+        self.smallestAlpha = smallestAlpha
         self.parse()       
     
     def parse(self):
@@ -36,6 +37,8 @@ class MyPlot():
             
             config = ', '.join(params[1:])
             alpha = float(params[0].split('=')[-1])
+            if(alpha < self.smallestAlpha):
+                continue
             if(alpha not in self.x):
                 self.x.append(alpha)
                 
@@ -117,7 +120,7 @@ class MyPlot():
        
     @staticmethod
     def fusePlots(allPlots, useLog=True, my_yaxis_label='', savedFigFileName = 'foo.pdf'):
-        plt.rc('legend',**{'fontsize':5})        
+        plt.rc('legend',**{'fontsize':10})        
         plt.figure(0)
         plt.ylabel(my_yaxis_label)
         if(useLog):
@@ -146,7 +149,7 @@ class MyPlot():
             if(useLog):
                 lgx = [log(x,10) for x in p.x]
             else:
-                lgx = [x for x in p.x]     
+                lgx = [x for x in  p.x]     
                 
             
             for cf in figConfigSet:   
@@ -185,6 +188,8 @@ class MyPlot():
 
 def main():
     mpl.rcParams.update({'font.size': 14})
+    
+    smallestAlpha = -1
     
     lastFm_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/'
     pins_win10_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/'
@@ -241,6 +246,7 @@ def main():
     
     
     #rnnlm3
+    smallestAlpha = 0.0001
     rnn3_likes = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
     rnn3_sim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
@@ -250,10 +256,10 @@ def main():
     rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     '''
     
-    p1 = MyPlot('rnn3_likes', rnn3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)])
-    p2 = MyPlot('rnn3_sim', rnn3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)])
-    p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)])
-    MyPlot.fusePlots([p1 , p2, p3], useLog=True, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'rnn3.pdf')
+    p1 = MyPlot('rnn3_likes', rnn3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], smallestAlpha)
+    p2 = MyPlot('rnn3_sim', rnn3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], smallestAlpha)
+    p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], smallestAlpha)
+    MyPlot.fusePlots([p1 , p2, p3], useLog=False, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'rnn3.pdf')
     
     
     ########################################################################
