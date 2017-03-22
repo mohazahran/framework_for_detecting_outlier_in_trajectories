@@ -11,7 +11,8 @@ import math
 
 ANALYSIS_FILES_PATH = '/Users/mohame11/Desktop/pvalues_rnnlm3'
 FILE_NAME = 'outlier_analysis_pvalues_'
-NUM_ITERATIONS = 10
+NUM_ITERATIONS = 100
+BATCH_SIZE = -1 # -1 means use all data
 
 alphaList = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
 pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
@@ -37,7 +38,9 @@ def main():
                 r.close()
     
     threshDic = {p:[] for p in pvalueList}
-    batchSize = len(lines)//NUM_ITERATIONS
+    batchSize = BATCH_SIZE
+    if(batchSize == -1):
+        batchSize = len(lines)//NUM_ITERATIONS
     for i in range(NUM_ITERATIONS):
         print i,'/',NUM_ITERATIONS
         samplesIds = set(random.sample(xrange(len(lines)), batchSize))
