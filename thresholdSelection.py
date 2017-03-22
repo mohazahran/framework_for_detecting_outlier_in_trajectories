@@ -37,7 +37,11 @@ def main():
                     lines.append(line)
                 r.close()
     
-    threshDic = {p:[] for p in pvalueList}
+    #threshDic = {p:[] for p in pvalueList}
+    threshDic = {}
+    for p in pvalueList:
+        threshDic[p] = []
+        
     batchSize = BATCH_SIZE
     if(batchSize == -1):
         batchSize = len(lines)//NUM_ITERATIONS
