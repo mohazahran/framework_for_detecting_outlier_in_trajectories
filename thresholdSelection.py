@@ -67,7 +67,8 @@ class ThresholdSelection:
                 bestScore = 0
                 for alpha in self.alphaList:            
                     #print(metric, pv,alpha,tech,hyp,tadj)           
-                    ev = OutlierEvaluation(pasredData, self.tech, self.hyp, self.metric, pv, alpha, self.tadj)
+                    debugPath = self.INPUT_PATH+'DEBUG_'+str(pv)+'_'+str(alpha)
+                    ev = OutlierEvaluation(pasredData, self.tech, self.hyp, self.metric, pv, alpha, self.tadj, '')
                     ev.evaluate()
                     fscore = ev.metricObj.stats[-1]
                     if(fscore > bestScore):

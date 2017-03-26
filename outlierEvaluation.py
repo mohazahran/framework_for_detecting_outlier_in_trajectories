@@ -17,7 +17,7 @@ from TestSample import *
     
 
 class OutlierEvaluation:
-    def __init__(self, allData, techType, hyp, metricType, pvalueTyp, alpha, testSetCountAdjust):
+    def __init__(self, allData, techType, hyp, metricType, pvalueTyp, alpha, testSetCountAdjust, debugPath = ''):
         self.allData = allData
         self.techType = techType
         self.hypType = hyp
@@ -25,6 +25,11 @@ class OutlierEvaluation:
         self.pvalueTyp = pvalueTyp
         self.alpha = alpha
         self.testSetCountAdjust = testSetCountAdjust
+        self.debugPath = debugPath
+        
+        if(len(self.debugPath) != 0):
+            self.debugger = open(self.debugPath, 'w')
+            
         
         allTestsCount = 0
         for u in self.allData:
@@ -61,6 +66,16 @@ class OutlierEvaluation:
         return origSeq, origGoldMarkers
     
     
+    def dumpDebuggingInfo(self, u, seq ,pValues, decisionVec, goldMarkers):
+        self.debugger.write('\nUser: '+str(u)+'\n')
+        for i in range(len(seq)):
+            self.debugger.write(seq[i] + ' || ')
+            self.debugger.write(pValues[i] + ' || ')
+            self.debugger.write(decisionVec[i] + ' || ')
+            self.debugger.write(goldMarkers[i] + ' || ')
+            self.debugger.write('\n')
+            
+        
     
     def aggregateDecisions(self, actionDecisions):
         if(self.techType == TECHNIQUE.ALL_OR_NOTHING):
@@ -128,6 +143,7 @@ class OutlierEvaluation:
                         decisionsForOriginalSeq.append(finalDecision)
                                    
                     self.metricObj.update(decisionsForOriginalSeq, originalGoldMarkers)
+                    self.dumpDebuggingInfo(u, originalSeq, pValues, decisionsForOriginalSeq, originalGoldMarkers)
                     
                 elif(len(tests) == 1): # the number of sequences is 1, no need to get original sequences.
                     t = tests[0]
@@ -143,6 +159,7 @@ class OutlierEvaluation:
                     decisionVec = self.hypObj.classify(keySortedPvalues, pValues)  
                     
                     self.metricObj.update(decisionVec, goldMarkers)
+                    self.dumpDebuggingInfo(u, originalSeq, pValues, decisionVec, goldMarkers)
                     
                 self.metricObj.calculateStats()   
         #----------------------------------------------------------------------------------------------------------------------  
@@ -200,11 +217,14 @@ class OutlierEvaluation:
                     decisionsForOriginalSeq.append(finalDecision)
                                
                 self.metricObj.update(decisionsForOriginalSeq, originalGoldMarkers)
+                self.dumpDebuggingInfo(u, originalSeq, pValues, decisionsForOriginalSeq, originalGoldMarkers)
                 
             self.metricObj.calculateStats()     
                 
                 
-                
+        if(len(self.debugPath) != 0):
+            self.debugger.close()
+                    
                             
         
         
@@ -240,6 +260,8 @@ def work():
     #pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
     testSetCountAdjustList = [False]
     
+    debugMode = True
+    
     for metric in metricList:
         for pv in pvalueList:
             logger = open(ANALYSIS_FILES_PATH+str(metric)+'_'+str(pv),'w')
@@ -250,7 +272,7 @@ def work():
                             
                             print(metric, pv,alpha,tech,hyp,tadj)
                             
-                            ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj)
+                            ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj, debugMode, ANALYSIS_FILES_PATH+'DEBUG_MODE_'+str(metric)+'_'+str(pv))
                             ev.evaluate()   
                             
                             logger.write('alpha='+str(alpha))
