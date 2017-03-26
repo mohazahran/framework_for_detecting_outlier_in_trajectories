@@ -31,11 +31,11 @@ class ThresholdSelection:
         lines = []
         
         pattern = re.compile(self.FILE_NAME+'\d+')
-        allfiles = listdir(self.ANALYSIS_FILES_PATH)
+        allfiles = listdir(self.INPUT_PATH)
         for file in allfiles:    
-            if isfile(join(self.ANALYSIS_FILES_PATH, file)):            
+            if isfile(join(self.INPUT_PATH, file)):            
                 if(pattern.match(file) and '~' not in file):
-                    r = open(join(self.ANALYSIS_FILES_PATH, file), 'r')                                         
+                    r = open(join(self.INPUT_PATH, file), 'r')                                         
                     for line in r:
                         lines.append(line)
                     r.close()
@@ -49,7 +49,7 @@ class ThresholdSelection:
         if(batchSize == -1):
             batchSize = len(lines)//self.NUM_ITERATIONS
         for i in range(self.NUM_ITERATIONS):
-            print i,'/',self.NUM_ITERATIONS
+            #print i,'/',self.NUM_ITERATIONS
             samplesIds = set(random.sample(xrange(len(lines)), batchSize))
             samples = []
             leftOvers = []
@@ -93,10 +93,10 @@ class ThresholdSelection:
         
                     
                 
-def main():
+def work():
     t = ThresholdSelection()
     t.selectThreshold()        
                 
 if __name__ == "__main__":
-    main()
+    work()
     print('DONE!')

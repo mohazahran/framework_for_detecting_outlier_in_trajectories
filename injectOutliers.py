@@ -16,6 +16,7 @@ class InjectOutliers:
         self.isTraceFile = False #The input data file is a tracefile: has the same format as tribeflow's training data
         #maxInjections = 1
         self.injectionRatio = 0.1
+        self.samplesCount = 1000
         
         #tribeflow
         self.MODEL_PATH = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/training_tribeflow_burst_4_noop.h5'
@@ -40,6 +41,7 @@ class InjectOutliers:
     
         r = open(self.INPUT_FILE, 'r')  
         inputSequences = r.readlines()
+        inputSequences = random.sample(inputSequences, self.samplesCount)
         r.close()
         
         if(self.OUTPUT_FILE == ''):
@@ -51,6 +53,7 @@ class InjectOutliers:
             allPossibleActions = set(allCategories)
             line = line.strip()
             parts = line.split()
+            user = None
             if(self.METHOD == SEQ_PROB.TRIBEFLOW):
                 if self.isTraceFile == True:
                     times = parts[:winSize]
@@ -93,8 +96,9 @@ class InjectOutliers:
                         
                 cats[idx]= randCat
                 markers[idx] = 'true'
-           
-            w.write(user+'\t')
+
+            if(user != None):
+                w.write(user+'\t')
             for c in cats:
                 w.write(c+'\t')
                 
@@ -114,11 +118,11 @@ class InjectOutliers:
 
 
 
-def main():
+def work():
     inj = InjectOutliers()
     inj.inject()
     
 if __name__ == "__main__":
-    main()
+    work()
     print('DONE !')
 

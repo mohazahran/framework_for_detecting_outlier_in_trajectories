@@ -215,14 +215,14 @@ class OutlierDetection:
         #store.close()
 
                                        
-def main():  
+def work():  
     detect = OutlierDetection() 
     detect.distributeOutlierDetection() 
   
     
 
 if __name__ == "__main__":
-    main()    
+    work()    
     #cProfile.run('distributeOutlierDetection()')
     #plac.call(main)
     print('DONE!')
