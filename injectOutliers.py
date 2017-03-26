@@ -4,127 +4,121 @@ Created on Oct 3, 2016
 @author: zahran
 '''
 import pandas as pd
+from MyEnums import *
 import random
 
-#common
-SRC_FILE = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pins_repins_bbtt3_simulatedData_fixed_3'
-INJECTED_TRAIN = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData_injected/pins_repins_bbtt3_simulatedData_fixed_3_injected'
-isTribeflow = False
-injectedInstancesCount = 0 # 0 for all the training data
-doRandomization = False
-maxInjections = 1
-isTraceFile = False #tracefile has the same format as tribeflow's training data
+class InjectOutliers:
+    def __init__(self):
+        #common
+        self.INPUT_FILE = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData_injected/pins_repins_bbtt3_simulatedData_fixed_3_injected'
+        self.OUTPUT_FILE = ''
+        self.METHOD = SEQ_PROB.TRIBEFLOW
+        self.isTraceFile = False #The input data file is a tracefile: has the same format as tribeflow's training data
+        #maxInjections = 1
+        self.injectionRatio = 0.1
+        
+        #tribeflow
+        self.MODEL_PATH = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/training_tribeflow_burst_4_noop.h5'
+        
+        #ngram
+        self.ALL_ACTION_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'
+    
+    def inject(self):
+        if(self.METHOD == SEQ_PROB.TRIBEFLOW):
+            store = pd.HDFStore(self.MODEL_PATH)     
+            obj2id = dict(store['source2id'].values)
+            allPossibleActions = obj2id.keys()
+            Dts = store['Dts']
+            winSize = Dts.shape[1]    
+        else:
+            alla = open(self.ALL_ACTION_PATH,'r')
+            allPossibleActions = []
+            for line in alla:
+                allPossibleActions.append(line.strip())
+            alla.close()
+              
+    
+        r = open(self.INPUT_FILE, 'r')  
+        inputSequences = r.readlines()
+        r.close()
+        
+        if(self.OUTPUT_FILE == ''):
+            self.OUTPUT_FILE = self.INPUT_FILE+'_injected_'+str(self.injectionRatio)
+        w = open(self.OUTPUT_FILE, 'w')
+        
+        allCategories = set(allPossibleActions)
+        for line in inputSequences:
+            allPossibleActions = set(allCategories)
+            line = line.strip()
+            parts = line.split()
+            if(self.METHOD == SEQ_PROB.TRIBEFLOW):
+                if self.isTraceFile == True:
+                    times = parts[:winSize]
+                    user = parts[winSize]
+                    cats = parts[winSize+1:]
+                else:
+                    user = parts[0]
+                    cats = parts[1:winSize+2]
+            else:
+                cats = parts	
+            for c in cats:
+                allPossibleActions.discard(c)
+                
+            markers = ['false']*(len(cats))
+            
+            maxInjections = int(len(cats) * self.injectionRatio)
 
-#tribeflow
-MODEL_PATH = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/training_tribeflow_burst_4_noop.h5'
+            injectedIdx = random.sample(list(range(len(cats))), maxInjections)
+            
+            for idx in injectedIdx:
+                originalCat = cats[idx]                                        
+                if(idx == 0):                    
+                    while True:
+                        randCat = random.sample(allPossibleActions, 1)[0]                        
+                        ok = (randCat != originalCat) and (randCat != cats[idx+1])
+                        if(ok):
+                            break                            
+                elif (idx == len(cats)-1):
+                    while True:
+                        randCat = random.sample(allPossibleActions, 1)[0]                        
+                        ok = (randCat != originalCat) and (randCat != cats[-2])
+                        if(ok):
+                            break
+                else:
+                    while True:
+                        randCat = random.sample(allPossibleActions, 1)[0]                        
+                        ok = (randCat != originalCat) and (randCat != cats[idx+1]) and (randCat != cats[idx-1])
+                        if(ok):
+                            break
+                        
+                cats[idx]= randCat
+                markers[idx] = 'true'
+           
+            w.write(user+'\t')
+            for c in cats:
+                w.write(c+'\t')
+                
+                
+            if(not self.METHOD == SEQ_PROB.TRIBEFLOW):
+                w.write('###\t')
+            for m in markers:
+                w.write(m+'\t')
+            w.write('\n')
+            
+        w.close()
+        if(self.METHOD == SEQ_PROB.TRIBEFLOW):
+            store.close()
+        
+                                        
+                
 
-#ngram
-ALL_ACTION_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'
+
 
 def main():
-    if(isTribeflow):
-    	store = pd.HDFStore(MODEL_PATH)     
-    	obj2id = dict(store['source2id'].values)
-    	allCats = obj2id.keys()
-    	Dts = store['Dts']
-    	winSize = Dts.shape[1]    
-    else:
-	alla = open(ALL_ACTION_PATH,'r')
-	allCats = []
-	for line in alla:
-		allCats.append(line.strip())
-	alla.close()
-        print(len(allCats))
-
-    w = open(INJECTED_TRAIN, 'w')        
-    r = open(SRC_FILE, 'r')
-    N = 0
-    if(injectedInstancesCount == 0):        
-        for l in r:
-            N += 1
-    else:           
-        N = injectedInstancesCount
-    r.close()
-    r = open(SRC_FILE, 'r')
-    #Reservoir Sampling Algorithm
-    sample = []
-    for i,line in enumerate(r):
-        if i < N:
-            sample.append(line)
-        else:
-            break
-       
-#     for i,line in enumerate(r):
-#         if i < N:
-#             sample.append(line)
-#         elif i >= N and random.random() < N/float(i+1):
-#             replace = random.randint(0,len(sample)-1)
-#             sample[replace] = line
-        #else:
-        #    break
-    print('injectedInstancesCount=',injectedInstancesCount)
-    allCategories = set(allCats)
-    for line in sample:
-        allCats = set(allCategories)
-        line = line.strip()
-        parts = line.split()
-        if(isTribeflow):
-        	if isTraceFile == True:
-            		times = parts[:winSize]
-            		user = parts[winSize]
-            		cats = parts[winSize+1:]
-        	else:
-            		user = parts[0]
-            		cats = parts[1:winSize+2]
-	else:
-		cats = parts	
-        for c in cats:
-            allCats.discard(c)
-        markers = ['false']*(len(cats))
-	#print(len(cats), maxInjections)
-        injectedIdx = random.sample(list(range(len(cats))), maxInjections)
-        for idx in injectedIdx:
-            originalCat = cats[idx]                                        
-            if(idx == 0):                    
-                while True:
-                    randCat = random.sample(allCats, 1)[0]                        
-                    ok = (randCat != originalCat) and (randCat != cats[idx+1])
-                    if(ok):
-                        break                            
-            elif (idx == len(cats)-1):
-                while True:
-                    randCat = random.sample(allCats, 1)[0]                        
-                    ok = (randCat != originalCat) and (randCat != cats[-2])
-                    if(ok):
-                        break
-            else:
-                while True:
-                    randCat = random.sample(allCats, 1)[0]                        
-                    ok = (randCat != originalCat) and (randCat != cats[idx+1]) and (randCat != cats[idx-1])
-                    if(ok):
-                        break
-                    
-            cats[idx]= randCat
-            markers[idx] = 'true'
-        if(isTribeflow):
-        	w.write(user+'\t')
-	
-        for c in cats:
-            w.write(c+'\t')
-	if(not isTribeflow):
-		w.write('###\t')
-        for m in markers:
-            w.write(m+'\t')
-        w.write('\n')
-    w.close()
-    if(isTribeflow):
-	    store.close()
+    inj = InjectOutliers()
+    inj.inject()
     
-                                    
-            
+if __name__ == "__main__":
+    main()
+    print('DONE !')
 
-
-
-
-main()
-print('DONE !')

@@ -134,9 +134,6 @@ class MyPlot():
             plt.xticks([x for x in allPlots[0].x])
             plt.xlabel('Alpha 1')  
         
-        
-        
-        flg = 0 
         for p in allPlots:
             figConfigSet = {}               
             for cf in p.mapping:                
@@ -151,36 +148,35 @@ class MyPlot():
                     figConfigSet[cf].append(p.mapping[cf][x])
             
             if(useLog):
-                lgx = [log(x,10) for x in p.x]
+                xvalues = [log(x,10) for x in p.x]
             else:
-                lgx = [x for x in  p.x]     
+                xvalues = [x for x in  p.x]     
                 
             
             for cf in figConfigSet:   
-                if(len(allPlots) == 2):
-                    if(flg == 0):
-                        #lines = plt.plot(lgx, figConfigSet[cf], '--r', label=p.tag+'_'+cf)
-                        #lines = plt.plot(lgx, figConfigSet[cf], '--r', label='Simulated data: True negative rate')
-                        lines = plt.plot(lgx, figConfigSet[cf], '--r', label='Tribeflow')
-                        flg = 1
-                    else:
-                        lines = plt.plot(lgx, figConfigSet[cf], 'b', label='Ngram LM')
-                        #lines = plt.plot(lgx, figConfigSet[cf], 'b', label='Likes trajectories: Fisher\'s test pvalue')
-                        #lines = plt.plot(lgx, figConfigSet[cf], 'b', label=p.tag+'_'+cf)
-                else:                                                                     
-                    lines = plt.plot(lgx, figConfigSet[cf], label=p.tag+'_'+cf)
-                    
-                plt.setp(lines, linewidth=2.0)  
-                plt.legend(bbox_to_anchor=(0., 1.00, 1.00, .101), loc=3, ncol=2, mode="expand", borderaxespad=0., prop={'size':10}) #legend font size
-                
-                axes = plt.gca()
-                #axes.set_xlim([-10,0.01])
-                axes.set_ylim([-0.1,1.1])
-                plt.yticks(list(np.arange(-0.1, 1.1, 0.1)))
-                
-                #add a line at y=0.05 (Alpha2)
-                lines = plt.plot(lgx, [0.05 for x in lgx], ':g', label='Alpha2')
-                                                                                        
+                #lines = plt.plot(xvalues, figConfigSet[cf], '--r', label='Tribeflow')
+                #lines = plt.plot(xvalues, figConfigSet[cf], 'b', label='Ngram LM')
+                lines = plt.plot(xvalues, figConfigSet[cf], label=p.tag)
+        
+        #add a line at y=0.05 (Alpha2)
+        lines = plt.plot(xvalues, [0.05 for x in xvalues], ':g', label='Alpha2')
+        
+        #add a line at 0.95 for the simulated data (false discovery rate)
+        lines = plt.plot(xvalues, [0.95 for x in xvalues], '-o', label='False Discovery Rate')
+                  
+        plt.setp(lines, linewidth=2.0)
+          
+        plt.legend(bbox_to_anchor=(0., 1.00, 1.00, .101), loc=3, ncol=2, mode="expand", borderaxespad=0., prop={'size':10}) #legend font size
+        
+        axes = plt.gca()
+        #axes.set_xlim([-10,0.01])
+        
+        #control the value ranges of yaxis
+        axes.set_ylim([-0.1,1.1])
+        
+        #control values ranges to show in the yaxis
+        plt.yticks(list(np.arange(-0.1, 1.1, 0.1)))
+                                                                                         
         #plt.savefig(savedFigFileName, bbox_inches='tight')
         plt.show()
         
@@ -206,8 +202,8 @@ def main():
     allLikes10_chisq = pins_win10_path+'tribeflow/'+'allLikes_METRIC.CHI_SQUARE_PVALUE.WITHOUT_RANKING'
     '''
     #without ranking
-    minAlpha = -1
-    maxAlpha = 0.0001
+    minAlpha = 0
+    maxAlpha = 0.001
     
     tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
     tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
@@ -222,7 +218,7 @@ def main():
     p1 = MyPlot('tr9_likes', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p2 = MyPlot('tr9_sim', tr9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('tr9_injSim', tr9_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1 , p2, p3], useLog=True, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'tr9.pdf')
+    MyPlot.fusePlots([p1 , p2, p3], useLog=False, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'tr9.pdf')
     
     #tribeflow win 4
     pins4_sim = pins_win4_path +'tribeflow/'+'pins_repins_win4_simData_new_1perBurst_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
@@ -252,22 +248,22 @@ def main():
     
     
     #rnnlm3
-    smallestAlpha = 0.1
-    '''
     rnn3_likes = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
     rnn3_sim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    '''
     
+    '''
     rnn3_likes = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
     rnn3_sim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
-    
     '''
-    p1 = MyPlot('rnn3_likes', rnn3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], smallestAlpha)
-    p2 = MyPlot('rnn3_sim', rnn3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], smallestAlpha)
-    p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], smallestAlpha)
-    MyPlot.fusePlots([p1 , p2, p3], useLog=False, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'rnn3.pdf')
+    '''
+    minAlpha = 0
+    maxAlpha = 0.1
+    p1 = MyPlot('rnn3_likes', rnn3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('rnn3_sim', rnn3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    MyPlot.fusePlots([p1 , p2, p3], useLog=True, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'rnn3.pdf')
     '''
     
     ########################################################################
