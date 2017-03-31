@@ -50,6 +50,8 @@ class ThresholdSelection:
             batchSize = len(lines)//self.NUM_ITERATIONS
         for i in range(self.NUM_ITERATIONS):
             #print i,'/',self.NUM_ITERATIONS
+            if(batchSize > len(lines)):
+                batchSize = len(lines)
             samplesIds = set(random.sample(xrange(len(lines)), batchSize))
             samples = []
             leftOvers = []
@@ -89,8 +91,8 @@ class ThresholdSelection:
             stddAlphas = math.sqrt( sum([(x-avgAlpha)**2 for x in alphas]) / float(len(alphas)) )
             stddScores = math.sqrt( sum([(x-avgScore)**2 for x in scores]) / float(len(scores)) )
             
-            print 'Alpha=', avgAlpha, '+/-', stddAlphas
-            print 'Fscore=', avgScore, '+/-', stddScores
+            print 'Alpha=', avgAlpha, '+/-', stddAlphas, alphas
+            print 'Fscore=', avgScore, '+/-', stddScores, scores
         
                     
                 

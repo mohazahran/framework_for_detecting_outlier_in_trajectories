@@ -67,12 +67,14 @@ class OutlierEvaluation:
     
     
     def dumpDebuggingInfo(self, u, seq ,pValues, decisionVec, goldMarkers):
+	if(len(self.debugPath) == 0):
+	    return
         self.debugger.write('\nUser: '+str(u)+'\n')
         for i in range(len(seq)):
             self.debugger.write(seq[i] + ' || ')
-            self.debugger.write(pValues[i] + ' || ')
-            self.debugger.write(decisionVec[i] + ' || ')
-            self.debugger.write(goldMarkers[i] + ' || ')
+            self.debugger.write(str(pValues[i]) + ' || ')
+            self.debugger.write(str(decisionVec[i]) + ' || ')
+            self.debugger.write(str(goldMarkers[i]) + ' || ')
             self.debugger.write('\n')
             
         
@@ -148,7 +150,7 @@ class OutlierEvaluation:
                 elif(len(tests) == 1): # the number of sequences is 1, no need to get original sequences.
                     t = tests[0]
                     goldMarkers = t.goldMarkers    
-                                
+                    seq = t.actions            
                     if(self.pvalueTyp == PVALUE.WITH_RANKING):
                         pValues = t.PvaluesWithRanks
                     elif(self.pvalueTyp == PVALUE.WITHOUT_RANKING):
@@ -159,9 +161,9 @@ class OutlierEvaluation:
                     decisionVec = self.hypObj.classify(keySortedPvalues, pValues)  
                     
                     self.metricObj.update(decisionVec, goldMarkers)
-                    self.dumpDebuggingInfo(u, originalSeq, pValues, decisionVec, goldMarkers)
+                    self.dumpDebuggingInfo(u, seq , pValues, decisionVec, goldMarkers)
                     
-                self.metricObj.calculateStats()   
+                #self.metricObj.calculateStats()   
         #----------------------------------------------------------------------------------------------------------------------  
         #when self.testSetCountAdjust == True   
         else:
@@ -219,10 +221,9 @@ class OutlierEvaluation:
                 self.metricObj.update(decisionsForOriginalSeq, originalGoldMarkers)
                 self.dumpDebuggingInfo(u, originalSeq, pValues, decisionsForOriginalSeq, originalGoldMarkers)
                 
-            self.metricObj.calculateStats()     
-                
-                
+        self.metricObj.calculateStats()            
         if(len(self.debugPath) != 0):
+            self.debugger.write('\n'+self.metricObj.getSummary())
             self.debugger.close()
                     
                             
@@ -239,7 +240,7 @@ def work():
     
     
     #ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/simulatedData/pvalues_noWindow_log/'
-    ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/pvalues_rnnlm3/'
+    ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pvalues_3gram/'
     FILE_NAME = 'outlier_analysis_pvalues_'
     
     print('>>> Reading Data ...')
@@ -248,19 +249,20 @@ def work():
     
     #actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
     
-    #metricList = [METRIC.REC_PREC_FSCORE]
-    metricList = [METRIC.FISHER]
+    metricList = [METRIC.REC_PREC_FSCORE]
+    #metricList = [METRIC.FISHER]
     #techList = [TECHNIQUE.ALL_OR_NOTHING,TECHNIQUE.MAJORITY_VOTING,TECHNIQUE.ONE_IS_ENOUGH]
     techList = [TECHNIQUE.MAJORITY_VOTING]
-    #alphaList = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
-    alphaList = [0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
+    alphaList = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
+    #alphaList = [0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
+    #alphaList= [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
     hypList = [HYP.EMPIRICAL]
     #hypList = [HYP.BONFERRONI, HYP.HOLMS]
-    pvalueList = [PVALUE.WITHOUT_RANKING]
-    #pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
+    #pvalueList = [PVALUE.WITHOUT_RANKING]
+    pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
     testSetCountAdjustList = [False]
     
-    debugMode = True
+    #debugMode = True
     
     for metric in metricList:
         for pv in pvalueList:
@@ -272,7 +274,8 @@ def work():
                             
                             print(metric, pv,alpha,tech,hyp,tadj)
                             
-                            ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj, debugMode, ANALYSIS_FILES_PATH+'DEBUG_MODE_'+str(metric)+'_'+str(pv))
+                            #ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj, ANALYSIS_FILES_PATH+'DEBUG_MODE_'+str(metric)+'_'+str(pv)+'_'+str(alpha))
+			    ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj)
                             ev.evaluate()   
                             
                             logger.write('alpha='+str(alpha))

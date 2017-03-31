@@ -5,6 +5,7 @@ Created on Feb 16, 2017
 '''
 from DetectionTechnique import *
 import MyEnums
+import kenlm
 
 class NgramLM (DetectionTechnique):
     def __init__(self):
