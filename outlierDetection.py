@@ -32,10 +32,10 @@ class OutlierDetection:
         #COMMON
         self.CORES = 40
         self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_rnnlm9'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_actionsBag'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10_btt9.RNNLMmodel'
-        self.seq_prob = SEQ_PROB.RNNLM
+        self.seq_prob = SEQ_PROB.BAG_OF_ACTIONS
         self.useWindow = USE_WINDOW.FALSE
         
         #TRIBEFLOW
@@ -83,6 +83,7 @@ class OutlierDetection:
                 seq = testSample.actions
                 goldMarkers = testSample.goldMarkers
                 actions = myModel.getAllPossibleActions()              
+                #print len(actions), actions[0:20]
                 pValuesWithRanks = {}
                 pValuesWithoutRanks = {}
                 for i in range(len(seq)): #for all actions in the sequence.
@@ -182,6 +183,7 @@ class OutlierDetection:
             myModel.true_mem_size = self.HISTORY_SIZE
             myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
             myModel.RESULTS_PATH = self.RESULTS_PATH
+            myModel.loadModel()
         
         testDic,testSetCount = myModel.prepareTestSet()
         print('Number of test samples: '+str(testSetCount))   

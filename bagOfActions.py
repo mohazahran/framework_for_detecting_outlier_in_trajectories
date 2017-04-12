@@ -14,11 +14,11 @@ class BagOfActions (DetectionTechnique):
         DetectionTechnique.__init__(self)  
         self.type = SEQ_PROB.BAG_OF_ACTIONS
         self.allActions = []
-        self.smoothingParam = 1.0
+        #self.smoothingParam = 1.0
        
         
     def loadModel(self):
-        self.calculatingItemsFreq(self.smoothedProbs)
+        self.calculatingItemsFreq(self.smoothingParam)
         for action in self.smoothedProbs:
             self.allActions.append(action)
         
