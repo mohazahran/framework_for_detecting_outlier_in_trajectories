@@ -123,9 +123,9 @@ class MyPlot():
     
        
     @staticmethod
-    def fusePlots(allPlots, optAlpa='' , useLog=True, my_yaxis_label='', savedFigFileName = 'foo.pdf'):
+    def fusePlots(allPlots, optAlpa='' , useLog=True, my_yaxis_label='', title='', savedFigFileName = 'foo.pdf'):
         plt.rc('legend',**{'fontsize':5})        
-        plt.figure(0)
+        fig = plt.figure(0)
         plt.ylabel(my_yaxis_label)
         if(useLog):
             plt.xticks([log(x,10) for x in allPlots[0].x])
@@ -166,20 +166,10 @@ class MyPlot():
         
         #0.169 +/- 0.0560267793113
         if(optAlpa != ''):
-            parts = optAlpa.split('+/-')
-            a = float(parts[0])
-            stdd = float(parts[1])
-            low_a = a-stdd
-            high_a = a+stdd
+            a = float(optAlpa)
             if(useLog):
                 a = log(a,10)
-                low_a = log(low_a,10)
-                high_a = log(high_a,10)
-                
             lines = plt.plot([a, a], [-0.1, 1.1], '--', label='Chosen Alpha')
-            lines = plt.plot([low_a, high_a], [0.05, 0.05], '--')
-            #lines = plt.plot([a-stdd, a-stdd], [-0.1, 1.1], '--')
-            #lines = plt.plot([a+stdd, a+stdd], [-0.1, 1.1], '--')
             
                   
         plt.setp(lines, linewidth=2.0)
@@ -194,126 +184,216 @@ class MyPlot():
         
         #control values ranges to show in the yaxis
         plt.yticks(list(np.arange(-0.1, 1.1, 0.1)))
-                                                                                         
+        
+        #caption
+        if(title != ''):
+            fig.suptitle(title, fontsize=9, fontweight='bold', horizontalalignment='center', y=.95)
+            #fig.text(.3, .9, title, fontsize=10)
+            #fig.text(.1, .1, r'an equation: $E=mc^2$', fontsize=15)
+
+                                                                                
         plt.savefig(savedFigFileName, bbox_inches='tight')
         plt.show()
         
             
-        
-            
-        
 
-
-def main():
-    mpl.rcParams.update({'font.size': 10})
-    
-    lastFm_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/'
-    pins_win10_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/'
-    pins_win4_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win4/'
-    
+def tribflow9(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
+    title = 'Tribeflow: win=9, '
+    if(pv == PVALUE.WITHOUT_RANKING):
+        title += 'non-ranking pvalue'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = True
+        optAlpha = 1.93103637695e-14#currentAlpha= 1.93103637695e-14  metric= 0.949128546326
+        tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+        tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
-    #tribeflow win 10
-    #without ranking
-    '''
-    minAlpha = 0
-    maxAlpha = 1
-    useLog = True
-    optAlpha = '3.6400032e-10 +/- 0'   #3.6400032e-10 +/- 1.40815615861e-09
-    tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
-    tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    '''
-    #with ranking
+    elif(pv == PVALUE.WITH_RANKING):
+        title += 'ranking pvalue'
+        minAlpha = 0.001
+        maxAlpha = 1
+        useLog = False
+        optAlpha = 0.663492063492 #currentAlpha= 0.663492063492  metric= 0.950273711071
+        tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+        tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
-    minAlpha = 0.001
-    maxAlpha = 1
-    useLog = False
-    optAlpha = '0.608 +/- 0' #0.608 +/- 0.0890842298053
-    tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
-    tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
-    tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
-    '''
-    p1 = MyPlot('tribeflow_likes', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('tribeflow_simulation', tr9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Likes', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Simulation', tr9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('tr9_injSim', tr9_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2], '', useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue', savedFigFileName = 'tr9.pdf')
-    '''
+    MyPlot.fusePlots([p1, p2], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'tr9_'+str(pv)+'.pdf')   
+
+
+def tribflow3(pv):
+    resultsPath = '/Users/mohame11/Documents/newResults/'
+    title = 'Tribeflow: win=3, '
+    if(pv == PVALUE.WITHOUT_RANKING):
+        title += 'non-ranking pvalue'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = True
+        optAlpha = 1.6328125e-06 #currentAlpha= 1.6328125e-06  metric= 0.949703225457
+        tr3_likes = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        tr3_sim = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+        tr3_injSim = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
-    #tribeflow win 4
-    pins4_sim = pins_win4_path +'tribeflow/'+'pins_repins_win4_simData_new_1perBurst_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    allLikes_fisher_win4 = pins_win4_path+'tribeflow/'+'allLikes_win4_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+    elif(pv == PVALUE.WITH_RANKING):
+        title += 'ranking pvalue'
+        minAlpha = 0.001
+        maxAlpha = 1
+        useLog = False
+        optAlpha = 0.66875 #currentAlpha= 0.66875  metric= 0.949882445972
+        tr3_likes = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        tr3_sim = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+        tr3_injSim = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
-    #p3 = MyPlot('pins4_sim', pins4_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.ALL_OR_NOTHING)])
-    #p4 = MyPlot('allLikes_fisher_win4', allLikes_fisher_win4, METRIC.FISHER, [str(TECHNIQUE.ALL_OR_NOTHING)])
-    #MyPlot.fusePlots([p3 , p4], useLog=True, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'tr_burst4_bon_AND.pdf')
     
-    #ngram3
+    p1 = MyPlot('Likes', tr3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Simulation', tr3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    #p3 = MyPlot('tr9_injSim', tr9_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    MyPlot.fusePlots([p1, p2], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'tr3_'+str(pv)+'.pdf')   
+        
+def ngram3(pv):
+    resultsPath = '/Users/mohame11/Documents/newResults/'
+    title = 'Ngram LM: win=3, '
+    if(pv == PVALUE.WITHOUT_RANKING):
+        title += 'non-ranking p-value'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = True
+        optAlpha = 0.01474609375 #currentAlpha= 0.01474609375  metric= 0.950344687785
+        ngram3_likes = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        ngram3_sim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+        ngram3_injSim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
-    minAlpha = 0
-    maxAlpha = 1
-    useLog = True
-    optAlpha = '0.0098 +/- 0' #0.0098 +/- 0.0014
-    ngram3_likes = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
-    ngram3_sim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    ngram3_injSim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+    else:
+        title += 'ranking p-value'
+        minAlpha = 0.001
+        maxAlpha = 1
+        useLog = False
+        optAlpha = 0.7265625 #currentAlpha= 0.7265625  metric= 0.949231892086
+        ngram3_likes = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        ngram3_sim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+        ngram3_injSim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
-    '''
-    minAlpha = 0.001
-    maxAlpha = 1
-    useLog = False
-    optAlpha = '0.629420620835 +/- 0' #0.629420620835 +/- 0.093339555041
-    ngram3_likes = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
-    ngram3_sim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
-    ngram3_injSim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
-    '''
-    
-    '''
-    p1 = MyPlot('ngram_likes', ngram3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('ngram3_simulation', ngram3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+
+    p1 = MyPlot('likes', ngram3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('simulation', ngram3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('ngram3_injSim', ngram3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2], '', useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue', savedFigFileName = 'ngram3.pdf')
-    '''
+    MyPlot.fusePlots([p1, p2], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'ngram3_'+str(pv)+'.pdf')
+
+def ngram9(pv):
+    resultsPath = '/Users/mohame11/Documents/newResults/'
+    title = 'Ngram LM: win=9, '
+    if(pv == PVALUE.WITHOUT_RANKING):
+        title += 'non-ranking p-value'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = True
+        optAlpha = 0.0152734375 #currentAlpha= 0.0152734375  metric= 0.94963912974
+        ngram9_likes = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        ngram9_sim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+        ngram9_injSim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+    
+    else:
+        title += 'ranking p-value'
+        minAlpha = 0.001
+        maxAlpha = 1
+        useLog = False
+        optAlpha = 0.725 #currentAlpha= 0.725  metric= 0.949647407388
+        ngram9_likes = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        ngram9_sim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+        ngram9_injSim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+    
+
+    p1 = MyPlot('likes', ngram9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('simulation', ngram9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    #p3 = MyPlot('ngram3_injSim', ngram3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    MyPlot.fusePlots([p1, p2], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'ngram9_'+str(pv)+'.pdf')
+    
+def rnnlm3(pv):
+    resultsPath = '/Users/mohame11/Documents/newResults/'
+    title = 'RNN LM: win=3, '
+    if(pv == PVALUE.WITHOUT_RANKING):
+        title += 'non-ranking p-value'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = True
+        optAlpha = 0.050078125#currentAlpha= 0.050078125  metric= 0.95029157259 '0.01 +/- 0' #'0.01 +/- 6.93889390391e-18'
+        rnn3_likes = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        rnn3_sim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+        rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
     
-    #9gram win10
-    #pins_sim_norank_9gram = pins_win10_path+'ngram/'+'pins_repins_simulatedDate_9gram_log_allActions_noWin_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    #allLikes_fisher_9gramLM = pins_win10_path+'ngram/'+'pins_repins_allLikes_9gram_log_allActions_noWin_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
-    #pins_sim_rank_9gram = pins_win4_path+ 'pins_repins_simulatedData_4gram_noWindow_logprob_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
-    
-    #p7 = MyPlot('pins_sim_norank_9gram', pins_sim_norank_9gram, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)])
-    #p8 = MyPlot('allLikes_fisher_9gramLM', allLikes_fisher_9gramLM, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)])
-    #MyPlot.fusePlots([p7 , p8], useLog=True, my_yaxis_label = 'True negative rate / Fisher\'s test pvalue', savedFigFileName = 'ngram_burst10_bon_noRank.pdf')
-    
-    
-    #rnnlm3
-    '''
-    minAlpha = 0
-    maxAlpha = 1
-    useLog = True
-    optAlpha = '0.01 +/- 0' #'0.01 +/- 6.93889390391e-18'
-    rnn3_likes = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
-    rnn3_sim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
-    '''
-    
-    
-    minAlpha = 0.001
-    maxAlpha = 1
-    useLog= False
-    optAlpha = '0.653 +/- 0' #'0.653 +/- 0.0607536007163'
-    rnn3_likes = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
-    rnn3_sim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
-    rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+    else:
+        title += 'ranking p-value' 
+        minAlpha = 0.001
+        maxAlpha = 1
+        useLog= False
+        optAlpha = 0.84375 #currentAlpha= 0.84375  metric= 0.948298457199'0.653 +/- 0' #'0.653 +/- 0.0607536007163'
+        rnn3_likes = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        rnn3_sim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+        rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
     
     p1 = MyPlot('rnn3_likes', rnn3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p2 = MyPlot('rnn3_simulation', rnn3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1,p2 ], '', useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue', savedFigFileName = 'rnn3.pdf')
+    MyPlot.fusePlots([p1,p2 ], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'rnn3_'+str(pv)+'.pdf')
+
+
+def rnnlm9(pv):
+    resultsPath = '/Users/mohame11/Documents/newResults/'
+    title = 'RNN LM: win=9, '
+    if(pv == PVALUE.WITHOUT_RANKING):
+        title += 'non-ranking p-value'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = True
+        optAlpha = 0.051484375 #currentAlpha= 0.051484375  metric= 0.949489375515
+        rnn9_likes = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        rnn9_sim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+        rnn9_injSim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
     
+    else:
+        title += 'ranking p-value' 
+        minAlpha = 0.001
+        maxAlpha = 1
+        useLog= False
+        optAlpha = 0.84375 #currentAlpha= 0.84375  metric= 0.949382091047
+        rnn9_likes = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        rnn9_sim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+        rnn9_injSim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+    
+    
+    p1 = MyPlot('rnn9_likes', rnn9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('rnn9_simulation', rnn9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    MyPlot.fusePlots([p1,p2 ], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'rnn9_'+str(pv)+'.pdf')
+
+
+
+def main():
+    mpl.rcParams.update({'font.size': 10})
+    
+    #tribflow3(PVALUE.WITH_RANKING)
+    #ngram3(PVALUE.WITH_RANKING)
+    #rnnlm3(PVALUE.WITH_RANKING)
+    
+    tribflow9(PVALUE.WITH_RANKING)
+    #ngram9(PVALUE.WITHOUT_RANKING)
+    #rnnlm9(PVALUE.WITHOUT_RANKING)
+    
+   
+    
+
+
+
+    '''
     ########################################################################
     unixdata_win10_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/UNIX_user_data/win10/'
     unixdata_win4_path =  '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/UNIX_user_data/win4/'
@@ -325,9 +405,7 @@ def main():
     #p9 =  MyPlot('tribeflow_win10_simInj', tribeflow_win10_simInj, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)])
     #p10 = MyPlot('ngram_win10_simInj', ngram_win10_simInj, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)])  
     #MyPlot.fusePlots([p9 , p10], useLog=True, my_yaxis_label = 'F1 score', savedFigFileName = 'unixdata_simInj_win10.pdf')
-    
-    
-    
+
     #win4
     tribeflow_win4_simInj = unixdata_win4_path + 'tribeflow/' + 'unixdata_tribeflow4_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     ngram_win4_simInj = unixdata_win4_path + 'ngram/' + 'unixdata_ngram3_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
@@ -335,7 +413,7 @@ def main():
     #p11 =  MyPlot('tribeflow_win4_simInj', tribeflow_win4_simInj, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)])
     #p12 = MyPlot('ngram_win4_simInj', ngram_win4_simInj, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)])  
     #MyPlot.fusePlots([p11 , p12], useLog=True, my_yaxis_label = 'F1 score', savedFigFileName = 'unixdata_simInj_win4.pdf')
-    
+    '''
     
 
     print('Done !')

@@ -22,6 +22,7 @@ from Tribeflow import *
 from NgramLM import *
 from RNNLM import *
 import sys
+from bagOfActions import BagOfActions
 sys.path.append('Cython/')
 import cythonOptimize
 
@@ -170,6 +171,17 @@ class OutlierDetection:
             if(self.UNBIAS_CATS_WITH_FREQ):
                 print('>>> calculating statistics for unbiasing categories ...')
                 myModel.calculatingItemsFreq(self.smoothingParam)
+        
+        elif(self.seq_prob == SEQ_PROB.BAG_OF_ACTIONS):
+            myModel = BagOfActions()  
+            myModel.trace_fpath = self.TRACE_PATH
+            myModel.smoothingParam = self.smoothingParam
+            myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
+            myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
+            myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
+            myModel.true_mem_size = self.HISTORY_SIZE
+            myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
+            myModel.RESULTS_PATH = self.RESULTS_PATH
         
         testDic,testSetCount = myModel.prepareTestSet()
         print('Number of test samples: '+str(testSetCount))   

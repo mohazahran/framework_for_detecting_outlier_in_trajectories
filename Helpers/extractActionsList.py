@@ -6,7 +6,7 @@ Created on Feb 4, 2017
 
 
 
-TRAINING_FILE = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/UNIX_user_data/data/training_Ngram'
+TRAINING_FILE = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/rnnlm-0.3e/pins_repins_win10.trace_forLM_shuffledTrain'
 ACTIONS_LIST = TRAINING_FILE+'_ALL_ACTIONS'
 
 r = open(TRAINING_FILE, 'r')

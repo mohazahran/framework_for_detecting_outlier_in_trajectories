@@ -30,7 +30,7 @@ class RNNLM (DetectionTechnique):
         self.model.setDynamic(dynamic)
         self.model.setRnnLMFile(self.model_path)
         self.model.setRandSeed(rand_seed)
-	self.model.restoreNet()
+        self.model.restoreNet()
         self.model.copyHiddenLayerToInput()
     
         r = open(self.ALL_ACTIONS_PATH, 'r')

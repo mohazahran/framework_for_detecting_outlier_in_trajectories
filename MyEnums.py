@@ -44,6 +44,7 @@ class SEQ_PROB(Enum):
     TRIBEFLOW = 1
     NGRAM = 2
     RNNLM = 3
+    BAG_OF_ACTIONS = 4
 
 class USE_WINDOW (Enum):
     TRUE = 1
