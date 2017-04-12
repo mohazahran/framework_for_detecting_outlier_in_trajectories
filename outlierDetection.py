@@ -183,6 +183,7 @@ class OutlierDetection:
             myModel.true_mem_size = self.HISTORY_SIZE
             myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
             myModel.RESULTS_PATH = self.RESULTS_PATH
+            myModel.useWindow = self.useWindow
             myModel.loadModel()
         
         testDic,testSetCount = myModel.prepareTestSet()
