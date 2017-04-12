@@ -12,11 +12,11 @@ import math
 class thresholdSelectionByMetric:
     
     def __init__(self):
-        self.INPUT_PATH = '/Users/mohame11/Desktop/pvalues_noWindow_log'
+        self.INPUT_PATH = '/home/mohame11/pins_repins_fixedcat/simulatedData/pvalues_rnnlm9'
         self.resultsFilePath = self.INPUT_PATH + '/METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
         self.FILE_NAME = 'outlier_analysis_pvalues_'
         self.requiredLevel = 0.95
-        self.epsilon = 1e-3
+        self.epsilon = 1e-4
         self.metric = METRIC.REC_PREC_FSCORE
         self.PVALUE = PVALUE.WITHOUT_RANKING
         self.tech = TECHNIQUE.MAJORITY_VOTING
@@ -40,6 +40,7 @@ class thresholdSelectionByMetric:
             fn=float(results[2].split('=')[-1])
             tn=float(results[3].split('=')[-1])
             res = (tp+tn)/(tp+tn+fp+fn)
+            #print res
           
                 
             if(abs(res - self.requiredLevel) <= self.epsilon):
@@ -48,7 +49,7 @@ class thresholdSelectionByMetric:
             if(res  < self.requiredLevel):
                 self.lowerAlpha = [alpha,res]
                 
-            elif(res  > self.requiredLevel):
+            if(res  > self.requiredLevel):
                 self.upperAlpha = [alpha,res]
             
             if(self.lowerAlpha != None and self.upperAlpha != None):
@@ -63,6 +64,7 @@ class thresholdSelectionByMetric:
         pattern = re.compile(self.FILE_NAME+'\d+')
         allfiles = listdir(self.INPUT_PATH)
         for file in allfiles:    
+	    #print file
             if isfile(join(self.INPUT_PATH, file)):            
                 if(pattern.match(file) and '~' not in file):
                     r = open(join(self.INPUT_PATH, file), 'r')                                         
@@ -74,7 +76,7 @@ class thresholdSelectionByMetric:
             
         
         diff = self.epsilon + 1
-        
+        print 'starting'
         while(diff > self.epsilon):
             currAlpha = (self.lowerAlpha[0] + self.upperAlpha[0])/2
             #debugPath = self.INPUT_PATH+'DEBUG_'+str(pv)+'_'+str(alpha)
@@ -105,8 +107,9 @@ class thresholdSelectionByMetric:
 
 def work():
     tr = thresholdSelectionByMetric()
-    
     ret = tr.getBoundingAlphas()
+    #print 'ret=', ret
+    print 'upperAlpha=', tr.upperAlpha, ' lowerAlpha=', tr.lowerAlpha
     if(ret != None):
         print 'Alpha=',ret[0],' metric=',ret[1]
         return

@@ -151,6 +151,8 @@ class TribeFlow (DetectionTechnique):
         return logSeqScore      
     
     def prepareTestSet(self):
+        seqsCountWithNonExistingUsers = 0
+        nonExistingUsers = set()
         testDic = {}
         print(">>> Preparing testset ...")
         testSetCount = 0
@@ -162,6 +164,8 @@ class TribeFlow (DetectionTechnique):
             user = tmp[0]   
             if(user not in self.hyper2id):
                 #print("User: "+str(user)+" is not found in training set !")
+                seqsCountWithNonExistingUsers += 1
+                nonExistingUsers.add(user)
                 continue
             seq = tmp[actionStartIndex:self.true_mem_size+2]
             goldMarkers = tmp[self.true_mem_size+2:]
@@ -188,6 +192,8 @@ class TribeFlow (DetectionTechnique):
                 t.actions = list(originalSeq)
                 t.goldMarkers = list(originalGoldMarkers)   
                 testDic[u] = [t]
+        print 'seqsCountWithNonExistingUsers=',seqsCountWithNonExistingUsers
+        print 'number of nonExistingUsers=',len(nonExistingUsers)
         return testDic, testSetCount    
     
     def getAllPossibleActions(self):

@@ -30,24 +30,24 @@ class OutlierDetection:
         
         #COMMON
         self.CORES = 40
-        self.PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/'
-        self.RESULTS_PATH = self.PATH+'/simulatedData_injected/pvalues_rnnlm3'
-        self.SEQ_FILE_PATH = self.PATH+'/simulatedData_injected/pins_repins_bbtt3_simulatedData_fixed_3_injected'
-        self.MODEL_PATH = self.PATH+'pins_repins_bbtt3.RNNLMmodel'
+        self.PATH = '/home/mohame11/pins_repins_fixedcat/'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_rnnlm9'
+        self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10_btt9.RNNLMmodel'
         self.seq_prob = SEQ_PROB.RNNLM
         self.useWindow = USE_WINDOW.FALSE
         
         #TRIBEFLOW
-        self.TRACE_PATH = '/home/mohame11/pins_repins_fixedcat/' + 'pins_repins_win10.trace'
-        self.STAT_FILE = '/home/mohame11/pins_repins_fixedcat/' +'Stats_win10'
+        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
+        self.STAT_FILE = self.PATH +'Stats_win10'
         self.UNBIAS_CATS_WITH_FREQ = True
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
         
         #NGRM/RNNLM
-        self.HISTORY_SIZE = 3
-        self.DATA_HAS_USER_INFO = False #has no effect on tribeflow
-        self.VARIABLE_SIZED_DATA = True #has no effect on tribeflow
-        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'
+        self.HISTORY_SIZE = 9
+        self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
+        self.VARIABLE_SIZED_DATA = False #has no effect on tribeflow
+        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_forLM_RNNLM_shuffledTrain_ALL_ACTIONS'
 
 
                            
