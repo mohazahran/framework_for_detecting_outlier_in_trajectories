@@ -8,6 +8,8 @@ from DetectionTechnique import *
 from MyEnums import *
 import os.path
 import math 
+import random
+import numpy as np
 
 class BagOfActions (DetectionTechnique):
     def __init__(self):
@@ -97,7 +99,7 @@ class BagOfActions (DetectionTechnique):
     def getUserId(self, uid):
         return uid
 
-    def calculatingItemsFreq(self, smoothingParam):
+    def calculatingItemsFreq(self, smoothingParam, useLog = True):
         self.smoothedProbs = {}    
         freqs = {}            
         r = open(self.trace_fpath)
@@ -112,5 +114,25 @@ class BagOfActions (DetectionTechnique):
                 counts += 1
         for k in freqs:
             prob = float(freqs[k]+ smoothingParam) / float(counts + (len(freqs) * smoothingParam))
-            self.smoothedProbs[k] = math.log10(prob)
+            if(useLog):
+                self.smoothedProbs[k] = math.log10(prob)
+            else:
+                self.smoothedProbs[k] = prob
         
+
+    def simulatedData(self, numberOfSequences, seqLenRange, outfile):
+        self.calculateSequenceProb(self.smoothingParam, useLog = False)
+        w = open(outfile, 'w')
+        for i in range(numberOfSequences):
+            num = random.randint(seqLenRange[0], seqLenRange[1])
+            for j in num:
+                action = np.random.choice(self.smoothedProbs.keys(), len(self.smoothedProbs), replace=True, p=self.smoothedProbs.values())
+                w.write(action + ' ')
+            w.write('\n')
+        w.close()
+            
+        
+    
+    
+    
+    
