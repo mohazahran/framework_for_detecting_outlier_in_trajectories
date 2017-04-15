@@ -32,10 +32,10 @@ class OutlierDetection:
         #COMMON
         self.CORES = 40
         self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_actionsBag'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_rnnlm9'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10_btt9.RNNLMmodel'
-        self.seq_prob = SEQ_PROB.BAG_OF_ACTIONS
+        self.seq_prob = SEQ_PROB.RNNLM
         self.useWindow = USE_WINDOW.FALSE
         
         #TRIBEFLOW
