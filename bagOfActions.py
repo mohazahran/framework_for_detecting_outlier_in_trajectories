@@ -130,6 +130,16 @@ class BagOfActions (DetectionTechnique):
                 w.write(action + ' ')
             w.write('\n')
         w.close()
+    
+    
+    
+
+def main():
+    bag = BagOfActions()
+    bag.smoothingParam = 1.0
+    bag.simulatedData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedDat/simulatedData_bagOfActions')
+        
+        
             
         
     
