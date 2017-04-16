@@ -156,6 +156,12 @@ class BagOfActions (DetectionTechnique):
             for testSample in testDic[user]:
                 seq = testSample.actions
                 goldMarkers = testSample.goldMarkers
+                for i in range(len(goldMarkers)):
+                    if (goldMarkers[i] == 'false'):
+                        goldMarkers[i] = GOLDMARKER.FALSE
+                    else:
+                        goldMarkers[i] = GOLDMARKER.TRUE
+                    
                 decisionVector = []
                 for action in seq:
                     if(action in outlierActions):
@@ -163,10 +169,10 @@ class BagOfActions (DetectionTechnique):
                     else:
                         decisionVector.append(DECISION.NORMAL)
                 
-                print decisionVector
-                print goldMarkers
+               
                 metric.update(decisionVector, goldMarkers)
         
+        metric.calculateStats()           
         print metric.getSummary()
                         
             
