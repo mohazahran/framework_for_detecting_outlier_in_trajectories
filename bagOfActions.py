@@ -145,7 +145,7 @@ class BagOfActions (DetectionTechnique):
         outlierActions = set()
         accum = 0.0
         for key in keySortedProbs:
-            accum += self.smoothedProbs
+            accum += self.smoothedProbs[key]
             outlierActions.add(key)
             if(accum > self.probMassCutOff):
                 break
@@ -171,12 +171,13 @@ class BagOfActions (DetectionTechnique):
     
 
 def main():
+    '''
     bag = BagOfActions()
     bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
     bag.smoothingParam = 1.0
     bag.true_mem_size = 9
     bag.simulatedData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
-    
+    '''
     
     #####
     bag = BagOfActions()
