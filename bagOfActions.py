@@ -10,6 +10,7 @@ import os.path
 import math 
 import random
 import numpy as np
+from Metric import *
 
 class BagOfActions (DetectionTechnique):
     def __init__(self):
@@ -135,6 +136,38 @@ class BagOfActions (DetectionTechnique):
         w.close()
     
     
+    def detectOutliers(self, testDic, metric): #probMassCutOff = 0.05 to correspond to 5% tail
+        print '>> Calculating probabilities ...'
+        self.calculatingItemsFreq(self.smoothingParam, useLog = False)
+        print '>> Number of actions: ', len(self.smoothedProbs)
+        #sorting ascendingly
+        keySortedProbs = sorted(self.smoothedProbs, key=lambda k: (-self.smoothedProbs[k], k), reverse=True)
+        outlierActions = set()
+        accum = 0.0
+        for key in keySortedProbs:
+            accum += self.smoothedProbs
+            outlierActions.add(key)
+            if(accum > self.probMassCutOff):
+                break
+            
+        
+        for user in testDic:
+            for testSample in testDic[user]:
+                seq = testSample.actions
+                goldMarkers = testSample.goldMarkers
+                decisionVector = []
+                for action in seq:
+                    if(action in outlierActions):
+                        decisionVector.append(DECISION.OUTLIER)
+                    else:
+                        decisionVector.append(DECISION.NORMAL)
+                
+                metric.update(decisionVector, goldMarkers)
+        
+        print metric.getSummary()
+                        
+            
+        
     
 
 def main():
@@ -143,6 +176,27 @@ def main():
     bag.smoothingParam = 1.0
     bag.true_mem_size = 9
     bag.simulatedData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
+    
+    
+    #####
+    bag = BagOfActions()
+    
+
+    bag.true_mem_size = 9
+    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.smoothingParam = 1.0
+    bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
+    bag.DATA_HAS_USER_INFO = True
+    bag.VARIABLE_SIZED_DATA = False
+    bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
+    bag.useWindow = False
+    bag.probMassCutOff = 0.05
+    
+    testDic,testSetCount = bag.prepareTestSet()
+    
+    fisher = Fisher()
+    
+    bag.detectOutliers(testDic, fisher)
         
         
             

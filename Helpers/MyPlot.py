@@ -374,6 +374,37 @@ def rnnlm9(pv):
     p2 = MyPlot('rnn9_simulation', rnn9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     MyPlot.fusePlots([p1,p2 ], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'rnn9_'+str(pv)+'.pdf')
+    
+    
+def bagOfAction(pv):
+    resultsPath = '/Users/mohame11/Documents/newResults/'
+    title = 'Bag of actions, '
+    if(pv == PVALUE.WITHOUT_RANKING):
+        title += 'non-ranking p-value'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = True
+        optAlpha = 0.0504296875 #currentAlpha= 0.0504296875  metric= 0.950514517272
+        bag_likes = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        bag_sim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+        bag_injSim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
+    
+    
+    else:
+        title += 'ranking p-value' 
+        minAlpha = 0.001
+        maxAlpha = 1
+        useLog= False
+        optAlpha = 0.7984375 #currentAlpha= 0.7984375  metric= 0.950514517272
+        bag_likes = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        bag_sim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+        bag_injSim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+    
+    
+    p1 = MyPlot('bagOfActions_likes', bag_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('bagOfActions_simulation', bag_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    MyPlot.fusePlots([p1,p2 ], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'bagOfActions_'+str(pv)+'.pdf')
 
 
 
@@ -384,9 +415,11 @@ def main():
     #ngram3(PVALUE.WITH_RANKING)
     #rnnlm3(PVALUE.WITH_RANKING)
     
-    tribflow9(PVALUE.WITH_RANKING)
+    #tribflow9(PVALUE.WITH_RANKING)
     #ngram9(PVALUE.WITHOUT_RANKING)
     #rnnlm9(PVALUE.WITHOUT_RANKING)
+    
+    bagOfAction(PVALUE.WITHOUT_RANKING)
     
    
     
