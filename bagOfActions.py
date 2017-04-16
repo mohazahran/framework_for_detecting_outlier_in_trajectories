@@ -163,6 +163,8 @@ class BagOfActions (DetectionTechnique):
                     else:
                         decisionVector.append(DECISION.NORMAL)
                 
+                print decisionVector
+                print goldMarkers
                 metric.update(decisionVector, goldMarkers)
         
         print metric.getSummary()
