@@ -32,10 +32,10 @@ class OutlierDetection:
         #COMMON
         self.CORES = 40
         self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_rnnlm9'
-        self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
+        self.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pvalues_bagOfActions'
+        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10_btt9.RNNLMmodel'
-        self.seq_prob = SEQ_PROB.RNNLM
+        self.seq_prob = SEQ_PROB.BAG_OF_ACTIONS
         self.useWindow = USE_WINDOW.FALSE
         
         #TRIBEFLOW
@@ -46,8 +46,8 @@ class OutlierDetection:
         
         #NGRM/RNNLM
         self.HISTORY_SIZE = 9
-        self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
-        self.VARIABLE_SIZED_DATA = False #has no effect on tribeflow
+        self.DATA_HAS_USER_INFO = False #has no effect on tribeflow
+        self.VARIABLE_SIZED_DATA = True #has no effect on tribeflow
         self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_forLM_RNNLM_shuffledTrain_ALL_ACTIONS'
 
 

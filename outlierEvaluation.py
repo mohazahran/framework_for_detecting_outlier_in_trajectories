@@ -239,8 +239,8 @@ def work():
     #ALPHA_RANKING = np.arange(0.000005,0.1,0.005)    
     
     
-    #ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pvalues/'
-    ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_rnnlm9/'
+    ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pvalues_bagOfActions/'
+    #ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_rnnlm9/'
     FILE_NAME = 'outlier_analysis_pvalues_'
     
     print('>>> Reading Data ...')
@@ -249,8 +249,8 @@ def work():
     
     #actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
     
-    #metricList = [METRIC.REC_PREC_FSCORE]
-    metricList = [METRIC.FISHER]
+    metricList = [METRIC.REC_PREC_FSCORE]
+    #metricList = [METRIC.FISHER]
     #techList = [TECHNIQUE.ALL_OR_NOTHING,TECHNIQUE.MAJORITY_VOTING,TECHNIQUE.ONE_IS_ENOUGH]
     techList = [TECHNIQUE.MAJORITY_VOTING]
     alphaList = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]

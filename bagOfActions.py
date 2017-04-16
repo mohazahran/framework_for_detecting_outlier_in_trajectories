@@ -121,13 +121,16 @@ class BagOfActions (DetectionTechnique):
         
 
     def simulatedData(self, numberOfSequences, seqLenRange, outfile):
-        self.calculateSequenceProb(self.smoothingParam, useLog = False)
+        print '>> Calculating probabilities ...'
+        self.calculatingItemsFreq(self.smoothingParam, useLog = False)
+        print '>> Number of actions: ', len(self.smoothedProbs)
         w = open(outfile, 'w')
         for i in range(numberOfSequences):
             num = random.randint(seqLenRange[0], seqLenRange[1])
-            for j in num:
-                action = np.random.choice(self.smoothedProbs.keys(), len(self.smoothedProbs), replace=True, p=self.smoothedProbs.values())
-                w.write(action + ' ')
+            for j in range(num):
+                action = np.random.choice(self.smoothedProbs.keys(), 1, replace=True, p=self.smoothedProbs.values())
+                #print action[0], '##'
+                w.write(action[0] + ' ')
             w.write('\n')
         w.close()
     
@@ -136,8 +139,10 @@ class BagOfActions (DetectionTechnique):
 
 def main():
     bag = BagOfActions()
+    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
     bag.smoothingParam = 1.0
-    bag.simulatedData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedDat/simulatedData_bagOfActions')
+    bag.true_mem_size = 9
+    bag.simulatedData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
         
         
             
@@ -145,4 +150,5 @@ def main():
     
     
     
-    
+if __name__ == "__main__":
+    main() 
