@@ -150,7 +150,8 @@ class BagOfActions (DetectionTechnique):
             if(accum > self.probMassCutOff):
                 break
             
-        
+        print 'accumalted_pdf=', accum
+        print 'outlier actions count = ', len(outlierActions)
         for user in testDic:
             for testSample in testDic[user]:
                 seq = testSample.actions
