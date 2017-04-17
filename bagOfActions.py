@@ -189,8 +189,8 @@ def performOutLierDetection():
     bag.smoothingParam = 1.0
     #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
     bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
-    bag.DATA_HAS_USER_INFO = True
-    bag.VARIABLE_SIZED_DATA = False
+    bag.DATA_HAS_USER_INFO = False
+    bag.VARIABLE_SIZED_DATA = True
     bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
     bag.useWindow = False
     bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
@@ -222,7 +222,7 @@ def performDataSimulation():
 
 
 
-def performThresholdSelection():
+#def performThresholdSelection():
     
       
 
