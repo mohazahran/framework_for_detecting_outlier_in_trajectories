@@ -153,7 +153,7 @@ class BagOfActions (DetectionTechnique):
         #sorting ascendingly
         keySortedProbs = sorted(self.smoothedProbs, key=lambda k: (-self.smoothedProbs[k], k), reverse=True)
         
-        for probMassCutOff in [0.0, 0.001, 0.005, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.0]:
+        for probMassCutOff in [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]:
             metric = Fisher()
             self.probMassCutOff = probMassCutOff
             outlierActions = set()
