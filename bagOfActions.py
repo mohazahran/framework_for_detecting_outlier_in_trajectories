@@ -140,9 +140,21 @@ class BagOfActions (DetectionTechnique):
         print '>> Calculating probabilities ...'
         self.calculatingItemsFreq(self.smoothingParam, useLog = False)
         print '>> Number of actions: ', len(self.smoothedProbs)
+        for user in testDic:
+            for testSample in testDic[user]:
+                seq = testSample.actions
+                goldMarkers = testSample.goldMarkers
+                for i in range(len(goldMarkers)):
+                    if (goldMarkers[i] == 'false'):
+                        goldMarkers[i] = GOLDMARKER.FALSE
+                    else:
+                        goldMarkers[i] = GOLDMARKER.TRUE
+                            
         #sorting ascendingly
         keySortedProbs = sorted(self.smoothedProbs, key=lambda k: (-self.smoothedProbs[k], k), reverse=True)
+        
         for probMassCutOff in [0.0, 0.001, 0.005, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.0]:
+            metric = Fisher()
             self.probMassCutOff = probMassCutOff
             outlierActions = set()
             accum = 0.0
@@ -152,19 +164,12 @@ class BagOfActions (DetectionTechnique):
                 accum += self.smoothedProbs[key]
                 outlierActions.add(key)
                 
-                
             print 'accumalted_pdf=', accum
             print 'outlier actions count = ', len(outlierActions)
             for user in testDic:
                 for testSample in testDic[user]:
                     seq = testSample.actions
                     goldMarkers = testSample.goldMarkers
-                    for i in range(len(goldMarkers)):
-                        if (goldMarkers[i] == 'false'):
-                            goldMarkers[i] = GOLDMARKER.FALSE
-                        else:
-                            goldMarkers[i] = GOLDMARKER.TRUE
-                        
                     decisionVector = []
                     for action in seq:
                         if(action in outlierActions):
@@ -212,9 +217,7 @@ def main():
     
     testDic,testSetCount = bag.prepareTestSet()
     
-    fisher = Fisher()
-    
-    bag.detectOutliers(testDic, fisher)
+    bag.detectOutliers(testDic)
         
         
             
