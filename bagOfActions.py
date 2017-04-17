@@ -142,39 +142,46 @@ class BagOfActions (DetectionTechnique):
         print '>> Number of actions: ', len(self.smoothedProbs)
         #sorting ascendingly
         keySortedProbs = sorted(self.smoothedProbs, key=lambda k: (-self.smoothedProbs[k], k), reverse=True)
-        outlierActions = set()
-        accum = 0.0
-        for key in keySortedProbs:
-            accum += self.smoothedProbs[key]
-            outlierActions.add(key)
-            if(accum > self.probMassCutOff):
-                break
-            
-        print 'accumalted_pdf=', accum
-        print 'outlier actions count = ', len(outlierActions)
-        for user in testDic:
-            for testSample in testDic[user]:
-                seq = testSample.actions
-                goldMarkers = testSample.goldMarkers
-                for i in range(len(goldMarkers)):
-                    if (goldMarkers[i] == 'false'):
-                        goldMarkers[i] = GOLDMARKER.FALSE
-                    else:
-                        goldMarkers[i] = GOLDMARKER.TRUE
-                    
-                decisionVector = []
-                for action in seq:
-                    if(action in outlierActions):
-                        decisionVector.append(DECISION.OUTLIER)
-                    else:
-                        decisionVector.append(DECISION.NORMAL)
+        for probMassCutOff in [0.0, 0.001, 0.005, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.0]:
+            self.probMassCutOff = probMassCutOff
+            outlierActions = set()
+            accum = 0.0
+            for key in keySortedProbs:
+                accum += self.smoothedProbs[key]
+                outlierActions.add(key)
+                if(accum > self.probMassCutOff):
+                    break
                 
-               
-                metric.update(decisionVector, goldMarkers)
-        
-        metric.calculateStats()           
-        print metric.getSummary()
+            print 'accumalted_pdf=', accum
+            print 'outlier actions count = ', len(outlierActions)
+            for user in testDic:
+                for testSample in testDic[user]:
+                    seq = testSample.actions
+                    goldMarkers = testSample.goldMarkers
+                    for i in range(len(goldMarkers)):
+                        if (goldMarkers[i] == 'false'):
+                            goldMarkers[i] = GOLDMARKER.FALSE
+                        else:
+                            goldMarkers[i] = GOLDMARKER.TRUE
                         
+                    decisionVector = []
+                    for action in seq:
+                        if(action in outlierActions):
+                            decisionVector.append(DECISION.OUTLIER)
+                        else:
+                            decisionVector.append(DECISION.NORMAL)
+                    
+                   
+                    metric.update(decisionVector, goldMarkers)
+            
+            metric.calculateStats() 
+            print 'alpha='+str(self.probMassCutOff),
+            print ', '+str(TECHNIQUE.MAJORITY_VOTING),       
+            print ', '+str(HYP.EMPIRICAL),                                
+            print ', TScountAdj='+str(False),
+            print metric.getSummary()
+            print ''
+                            
             
         
     
