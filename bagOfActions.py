@@ -121,7 +121,7 @@ class BagOfActions (DetectionTechnique):
                 self.smoothedProbs[k] = prob
         
 
-    def simulatedData(self, numberOfSequences, seqLenRange, outfile):
+    def simulateData(self, numberOfSequences, seqLenRange, outfile):
         print '>> Calculating probabilities ...'
         self.calculatingItemsFreq(self.smoothingParam, useLog = False)
         print '>> Number of actions: ', len(self.smoothedProbs)
@@ -137,24 +137,15 @@ class BagOfActions (DetectionTechnique):
     
     
     def detectOutliers(self, testDic): #probMassCutOff = 0.05 to correspond to 5% tail
-        print '>> Calculating probabilities ...'
-        self.calculatingItemsFreq(self.smoothingParam, useLog = False)
-        print '>> Number of actions: ', len(self.smoothedProbs)
-        for user in testDic:
-            for testSample in testDic[user]:
-                seq = testSample.actions
-                goldMarkers = testSample.goldMarkers
-                for i in range(len(goldMarkers)):
-                    if (goldMarkers[i] == 'false'):
-                        goldMarkers[i] = GOLDMARKER.FALSE
-                    else:
-                        goldMarkers[i] = GOLDMARKER.TRUE
-                            
+       
         #sorting ascendingly
         keySortedProbs = sorted(self.smoothedProbs, key=lambda k: (-self.smoothedProbs[k], k), reverse=True)
         
-        for probMassCutOff in [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]:
-            metric = Fisher()
+        for probMassCutOff in self.probMassCutOff:
+            if(self.metricType == METRIC.FISHER):
+                metric = Fisher()
+            else:
+                metric = rpf()
             self.probMassCutOff = probMassCutOff
             outlierActions = set()
             accum = 0.0
@@ -182,42 +173,64 @@ class BagOfActions (DetectionTechnique):
             
             metric.calculateStats() 
             print 'alpha='+str(self.probMassCutOff),
-            print ', '+str(TECHNIQUE.MAJORITY_VOTING),       
-            print ', '+str(HYP.EMPIRICAL),                                
-            print ', TScountAdj='+str(False),
+            print ','+str(TECHNIQUE.MAJORITY_VOTING),       
+            print ','+str(HYP.EMPIRICAL),                                
+            print ',TScountAdj='+str(False),
             print metric.getSummary()
-            print ''
+            
                             
             
         
-    
 
-def main():
-    '''
+def performOutLierDetection():
     bag = BagOfActions()
-    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
-    bag.smoothingParam = 1.0
-    bag.true_mem_size = 9
-    bag.simulatedData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
-    '''
-    
-    #####
-    bag = BagOfActions()
-    
-
     bag.true_mem_size = 9
     bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
     bag.smoothingParam = 1.0
-    bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
+    #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
+    bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
     bag.DATA_HAS_USER_INFO = True
     bag.VARIABLE_SIZED_DATA = False
     bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
     bag.useWindow = False
-    bag.probMassCutOff = 0.05
+    bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
+    bag.metricType = METRIC.REC_PREC_FSCORE
     
     testDic,testSetCount = bag.prepareTestSet()
-    
+    for user in testDic:
+        for testSample in testDic[user]:
+            goldMarkers = testSample.goldMarkers
+            for i in range(len(goldMarkers)):
+                if (goldMarkers[i] == 'false'):
+                    goldMarkers[i] = GOLDMARKER.FALSE
+                else:
+                    goldMarkers[i] = GOLDMARKER.TRUE
+                    
+    print '>> Calculating probabilities ...'
+    bag.calculatingItemsFreq(bag.smoothingParam, useLog = False)
+    print '>> Number of actions: ', len(bag.smoothedProbs)
     bag.detectOutliers(testDic)
+
+
+def performDataSimulation():
+    bag = BagOfActions()
+    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.smoothingParam = 1.0
+    bag.true_mem_size = 9
+    bag.simulateData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
+    
+
+
+
+def performThresholdSelection():
+    
+      
+
+
+def main():
+    #performDataSimulation()
+    performOutLierDetection()
+    #performThresholdSelection()
         
         
             
