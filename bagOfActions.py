@@ -136,7 +136,7 @@ class BagOfActions (DetectionTechnique):
         w.close()
     
     
-    def detectOutliers(self, testDic, metric): #probMassCutOff = 0.05 to correspond to 5% tail
+    def detectOutliers(self, testDic): #probMassCutOff = 0.05 to correspond to 5% tail
         print '>> Calculating probabilities ...'
         self.calculatingItemsFreq(self.smoothingParam, useLog = False)
         print '>> Number of actions: ', len(self.smoothedProbs)
@@ -164,8 +164,8 @@ class BagOfActions (DetectionTechnique):
                 accum += self.smoothedProbs[key]
                 outlierActions.add(key)
                 
-            print 'accumalted_pdf=', accum
-            print 'outlier actions count = ', len(outlierActions)
+            #print 'accumalted_pdf=', accum
+            #print 'outlier actions count = ', len(outlierActions)
             for user in testDic:
                 for testSample in testDic[user]:
                     seq = testSample.actions
