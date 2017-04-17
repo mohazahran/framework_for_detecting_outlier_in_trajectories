@@ -178,8 +178,39 @@ class BagOfActions (DetectionTechnique):
             print ',TScountAdj='+str(False),
             print metric.getSummary()
             
-                            
+        return metric.getSummary()
             
+    
+    def getBoundingAlphas(self):
+        r = open(self.RESULTS_PATH, 'r')
+        self.upperAlpha = None
+        self.lowerAlpha = None
+        for line in r:
+            parts = line.split(':')
+            params = parts[0].split(', ')
+            results = parts[-1].replace(')','').replace('(','').split(', ')
+            config = ', '.join(params[1:])
+            alpha = float(params[0].split('=')[-1])
+            
+            tp=float(results[0].split('=')[-1])
+            fp=float(results[1].split('=')[-1])
+            fn=float(results[2].split('=')[-1])
+            tn=float(results[3].split('=')[-1])
+            res = (tp+tn)/(tp+tn+fp+fn)
+            #print res
+          
+                
+            if(abs(res - self.requiredLevel) <= self.epsilon):
+                return alpha,res
+            
+            if(res  < self.requiredLevel):
+                self.lowerAlpha = [alpha,res]
+                
+            if(res  > self.requiredLevel):
+                self.upperAlpha = [alpha,res]
+            
+            if(self.lowerAlpha != None and self.upperAlpha != None):
+                return        
         
 
 def performOutLierDetection():
@@ -222,7 +253,61 @@ def performDataSimulation():
 
 
 
-#def performThresholdSelection():
+def performThresholdSelection():
+    bag = BagOfActions()
+    bag.true_mem_size = 9
+    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.smoothingParam = 1.0
+    bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
+    bag.DATA_HAS_USER_INFO = False
+    bag.VARIABLE_SIZED_DATA = True
+    bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/standAlone_bagOfActions_simulatedData'
+    bag.useWindow = False
+    bag.metricType = METRIC.REC_PREC_FSCORE
+    bag.requiredLevel = 0.95
+    bag.epsilon = 1e-4
+    
+    testDic,testSetCount = bag.prepareTestSet()
+    for user in testDic:
+        for testSample in testDic[user]:
+            goldMarkers = testSample.goldMarkers
+            for i in range(len(goldMarkers)):
+                if (goldMarkers[i] == 'false'):
+                    goldMarkers[i] = GOLDMARKER.FALSE
+                else:
+                    goldMarkers[i] = GOLDMARKER.TRUE
+                    
+    
+    ret = bag.getBoundingAlphas()
+    print 'upperAlpha=', tr.upperAlpha, ' lowerAlpha=', tr.lowerAlpha
+    if(ret != None):
+        print 'Alpha=',ret[0],' metric=',ret[1]
+        return
+    
+    
+    
+    diff = bag.epsilon + 1
+    print 'starting'
+    while(diff > bag.epsilon):
+        currAlpha = (bag.lowerAlpha[0] + bag.upperAlpha[0])/2
+        #debugPath = self.INPUT_PATH+'DEBUG_'+str(pv)+'_'+str(alpha)
+        bag.probMassCutOff = currAlpha
+        summary = bag.outlierDetection(testDic)
+        results = summary.replace(')','').replace('(','').split(', ')
+        tp=float(results[0].split('=')[-1])
+        fp=float(results[1].split('=')[-1])
+        fn=float(results[2].split('=')[-1])
+        tn=float(results[3].split('=')[-1])
+        res = (tp+tn)/(tp+tn+fp+fn)
+        if(abs(res-bag.requiredLevel) <= bag.epsilon):
+            return currAlpha, res
+        
+        if(bag.requiredLevel > res):
+            bag.lowerAlpha = [currAlpha, res]
+        elif(bag.requiredLevel < res):
+            bag.upperAlpha = [currAlpha, res]
+        
+        print 'currentAlpha=', currAlpha, ' metric=', res
     
       
 
