@@ -147,10 +147,11 @@ class BagOfActions (DetectionTechnique):
             outlierActions = set()
             accum = 0.0
             for key in keySortedProbs:
+                if(accum >= self.probMassCutOff):
+                    break
                 accum += self.smoothedProbs[key]
                 outlierActions.add(key)
-                if(accum > self.probMassCutOff):
-                    break
+                
                 
             print 'accumalted_pdf=', accum
             print 'outlier actions count = ', len(outlierActions)
