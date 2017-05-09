@@ -144,8 +144,10 @@ class BagOfActions (DetectionTechnique):
         for probMassCutOff in self.probMassCutOff:
             if(self.metricType == METRIC.FISHER):
                 metric = Fisher()
-            else:
+            elif(self.metricType == METRIC.REC_PREC_FSCORE):
                 metric = rpf()
+	    elif(self.metricType == METRIC.CHI_SQUARE):
+	        metric = Chisq()
             self.probMassCutOff = probMassCutOff
             outlierActions = set()
             accum = 0.0
@@ -156,7 +158,7 @@ class BagOfActions (DetectionTechnique):
                 outlierActions.add(key)
                 
             #print 'accumalted_pdf=', accum
-            #print 'outlier actions count = ', len(outlierActions)
+            print 'outlier actions count = ', len(outlierActions)
             for user in testDic:
                 for testSample in testDic[user]:
                     seq = testSample.actions
@@ -187,10 +189,11 @@ class BagOfActions (DetectionTechnique):
         self.lowerAlpha = None
         for line in r:
             parts = line.split(':')
-            params = parts[0].split(', ')
+            params = parts[0].split(',')
             results = parts[-1].replace(')','').replace('(','').split(', ')
-            config = ', '.join(params[1:])
+            config = ','.join(params[1:])
             alpha = float(params[0].split('=')[-1])
+            print alpha
             
             tp=float(results[0].split('=')[-1])
             fp=float(results[1].split('=')[-1])
@@ -219,13 +222,15 @@ def performOutLierDetection():
     bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
     bag.smoothingParam = 1.0
     #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
-    bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
-    bag.DATA_HAS_USER_INFO = False
-    bag.VARIABLE_SIZED_DATA = True
+    #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
+    bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
+    bag.DATA_HAS_USER_INFO = True
+    bag.VARIABLE_SIZED_DATA = False
     bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
     bag.useWindow = False
-    bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
-    bag.metricType = METRIC.REC_PREC_FSCORE
+    #bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
+    bag.probMassCutOff = [0.0494244384766]
+    bag.metricType = METRIC.CHI_SQUARE
     
     testDic,testSetCount = bag.prepareTestSet()
     for user in testDic:
@@ -266,6 +271,11 @@ def performThresholdSelection():
     bag.metricType = METRIC.REC_PREC_FSCORE
     bag.requiredLevel = 0.95
     bag.epsilon = 1e-4
+
+    print '>> Calculating probabilities ...'
+    bag.calculatingItemsFreq(bag.smoothingParam, useLog = False)
+    print '>> Number of actions: ', len(bag.smoothedProbs)
+
     
     testDic,testSetCount = bag.prepareTestSet()
     for user in testDic:
@@ -279,7 +289,7 @@ def performThresholdSelection():
                     
     
     ret = bag.getBoundingAlphas()
-    print 'upperAlpha=', tr.upperAlpha, ' lowerAlpha=', tr.lowerAlpha
+    print 'upperAlpha=', bag.upperAlpha, ' lowerAlpha=', bag.lowerAlpha
     if(ret != None):
         print 'Alpha=',ret[0],' metric=',ret[1]
         return
@@ -291,8 +301,8 @@ def performThresholdSelection():
     while(diff > bag.epsilon):
         currAlpha = (bag.lowerAlpha[0] + bag.upperAlpha[0])/2
         #debugPath = self.INPUT_PATH+'DEBUG_'+str(pv)+'_'+str(alpha)
-        bag.probMassCutOff = currAlpha
-        summary = bag.outlierDetection(testDic)
+        bag.probMassCutOff = [currAlpha]
+        summary = bag.detectOutliers(testDic)
         results = summary.replace(')','').replace('(','').split(', ')
         tp=float(results[0].split('=')[-1])
         fp=float(results[1].split('=')[-1])

@@ -69,6 +69,7 @@ class DataGenerator(object):
         sampledZ = self.sample(list(range(0,self.nz)), h_z)[0]
         
         z_o = self.Psi_oz[:,sampledZ]
+        print 'zxo', str(z_o.shape)
         firsto = self.sample(list(range(0,self.no)), z_o)[0]
         
         T = self.getTransitionMatrixForEnv(sampledZ)  
@@ -85,7 +86,7 @@ class DataGenerator(object):
         
     def generate(self):                    
         w = open(self.DATA_GEN, 'w')
-        cnt = 1
+        cnt = 0
         for userName in self.hyper2id:
             if(cnt % 10 == 0):
                 print(str(cnt)+' users are finished ...')
@@ -100,6 +101,7 @@ class DataGenerator(object):
                 for g in range(self.true_mem_size+1):
                     w.write('false\t')
                 w.write('\n')               
+                w.flush()
         w.close()
                 
             
@@ -114,10 +116,10 @@ class DataGenerator(object):
 
 
 def main():
-    MODEL_PATH = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/training_tribeflow_burst_4_noop.h5'
+    MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
     #MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/New_Linux/PARSED_pins_repins_win10_noop_NoLeaveOut_pinterest.h5'
-    DATA_GEN = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/simulatedData/simData_perUser_1000'
-    perUserSequences = 1000
+    DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_200'
+    perUserSequences = 200
        
     dg = DataGenerator(MODEL_PATH, DATA_GEN, perUserSequences)
     dg.generate()
