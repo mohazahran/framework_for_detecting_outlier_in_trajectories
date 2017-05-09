@@ -33,8 +33,8 @@ class MyPlot():
         r = open(self.path, 'r')
         for line in r:
             parts = line.split(':')
-            params = parts[0].split(', ')
-            results = parts[-1].replace(')','').replace('(','').split(', ')
+            params = parts[0].split(',')
+            results = parts[-1].replace(')','').replace('(','').split(',')
             
             config = ', '.join(params[1:])
             alpha = float(params[0].split('=')[-1])
@@ -390,7 +390,7 @@ def bagOfAction(pv):
         bag_injSim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
     
-    else:
+    elif(pv == PVALUE.WITH_RANKING):
         title += 'ranking p-value' 
         minAlpha = 0.001
         maxAlpha = 1
@@ -399,6 +399,16 @@ def bagOfAction(pv):
         bag_likes = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
         bag_sim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         bag_injSim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
+    
+    else: #standAlone
+        title += 'Stand Alone'
+        minAlpha = 0
+        maxAlpha = 1
+        useLog = False
+        optAlpha = 0.0494244384766 #currentAlpha= 0.0494244384766  metric= 0.950462015992
+        bag_likes = resultsPath+'bagOfActions/'+'standAlone_bagOfActions_allLikes10'
+        bag_sim = resultsPath+'bagOfActions/'+'standAlone_bagOfActions_simulatedData'
+        bag_injSim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
     
     p1 = MyPlot('bagOfActions_likes', bag_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
@@ -419,7 +429,7 @@ def main():
     #ngram9(PVALUE.WITHOUT_RANKING)
     #rnnlm9(PVALUE.WITHOUT_RANKING)
     
-    bagOfAction(PVALUE.WITHOUT_RANKING)
+    bagOfAction('alone')
     
    
     

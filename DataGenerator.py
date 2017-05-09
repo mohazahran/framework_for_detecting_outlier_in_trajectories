@@ -62,14 +62,44 @@ class DataGenerator(object):
             seq.append(sampledo)
             currento = sampledo
         return seq
+    
+    def generateOneSequence_optimized(self, z, starto):
+        seq = [starto]
+        currento = starto
+        for i in range(self.true_mem_size):
+            currento_o = np.array(self.Psi_oz[:, z])
+            currento_o *= currento_o[currento]
+            currento_o = currento_o / currento_o.sum() #Re-normalize
+            #currento_o = T[:,currento]
+            sampledo = self.sample(list(range(0,self.no)), currento_o)[0]
+            seq.append(sampledo)
+            currento = sampledo
+        return seq
                             
+    
+    def generateSequenceByUser_optimized(self, h):                        
+        h_z = self.Theta_zh[:,h]
+        sampledZ = self.sample(list(range(0,self.nz)), h_z)[0]
+        
+        z_o = self.Psi_oz[:,sampledZ]
+
+        firsto = self.sample(list(range(0,self.no)), z_o)[0]
+        
+        #T = self.getTransitionMatrixForEnv(sampledZ)  
+        
+        seqIds = self.generateOneSequence_optimized(sampledZ, firsto)
+        seq = []
+        for s in seqIds:
+            seq.append(self.id2obj[s])
+            
+        return seq
     
     def generateSequenceByUser(self, h):                        
         h_z = self.Theta_zh[:,h]
         sampledZ = self.sample(list(range(0,self.nz)), h_z)[0]
         
         z_o = self.Psi_oz[:,sampledZ]
-        print 'zxo', str(z_o.shape)
+
         firsto = self.sample(list(range(0,self.no)), z_o)[0]
         
         T = self.getTransitionMatrixForEnv(sampledZ)  
@@ -103,6 +133,29 @@ class DataGenerator(object):
                 w.write('\n')               
                 w.flush()
         w.close()
+        
+    
+    def generate_optimized(self):
+        w = open(self.DATA_GEN, 'w')
+        cnt = 0
+        print '#users', len(self.hyper2id)
+        for userName in self.hyper2id:
+            #if(cnt % 10 == 0):
+            print(str(cnt)+' users are finished ...')
+            cnt+=1
+            h = self.hyper2id[userName]
+            
+            for i in range(self.perUserSequences):
+                #print userName, i
+                w.write(str(userName)+'\t')
+                seq = self.generateSequenceByUser_optimized(h)                
+                for s in seq:
+                    w.write(s + '\t')
+                for g in range(self.true_mem_size+1):
+                    w.write('false\t')
+                w.write('\n')               
+                w.flush()
+        w.close()
                 
             
         
@@ -116,13 +169,14 @@ class DataGenerator(object):
 
 
 def main():
-    MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
+    MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_noob.h5'
     #MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/New_Linux/PARSED_pins_repins_win10_noop_NoLeaveOut_pinterest.h5'
-    DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_200'
+    DATA_GEN = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/simData_perUser_200'
     perUserSequences = 200
        
     dg = DataGenerator(MODEL_PATH, DATA_GEN, perUserSequences)
-    dg.generate()
+    #dg.generate()
+    dg.generate_optimized()
   
     
 
