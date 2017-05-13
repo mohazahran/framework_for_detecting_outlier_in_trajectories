@@ -31,15 +31,15 @@ class OutlierDetection:
         
         #COMMON
         self.CORES = 40
-        self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pvalues_bagOfActions'
-        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10_btt9.RNNLMmodel'
-        self.seq_prob = SEQ_PROB.BAG_OF_ACTIONS
+        self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
+        self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues'
+        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_200'
+        self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
+        self.seq_prob = SEQ_PROB.TRIBEFLOW
         self.useWindow = USE_WINDOW.FALSE
         
         #TRIBEFLOW
-        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
+        self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
         self.STAT_FILE = self.PATH +'Stats_win10'
         self.UNBIAS_CATS_WITH_FREQ = True
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.

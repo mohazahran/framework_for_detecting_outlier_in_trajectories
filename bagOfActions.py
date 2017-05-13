@@ -230,7 +230,7 @@ def performOutLierDetection():
     bag.useWindow = False
     #bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
     bag.probMassCutOff = [0.0494244384766]
-    bag.metricType = METRIC.CHI_SQUARE
+    bag.metricType = METRIC.FISHER
     
     testDic,testSetCount = bag.prepareTestSet()
     for user in testDic:
