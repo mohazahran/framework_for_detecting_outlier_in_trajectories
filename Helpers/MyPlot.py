@@ -201,11 +201,12 @@ def tribflow9(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'Tribeflow: win=9, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'non-ranking pvalue'
+        title += 'cumulative pvalue'
         minAlpha = 0
         maxAlpha = 1
         useLog = True
         optAlpha = 1.93103637695e-14#currentAlpha= 1.93103637695e-14  metric= 0.949128546326
+        #alpha=1.93103637695e-14, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=71, OF=144319, NT=535, NF=1419172, stats=[(1.3050167616092931, 0.041379281249816546)]
         tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
         tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
         tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
@@ -216,6 +217,7 @@ def tribflow9(pv):
         maxAlpha = 1
         useLog = False
         optAlpha = 0.663492063492 #currentAlpha= 0.663492063492  metric= 0.950273711071
+        #alpha=0.663492063492, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=29, OF=39714, NT=577, NF=1523777, stats=[(1.9284126303765161, 0.0016460749449736768)]
         tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
         tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
@@ -231,7 +233,7 @@ def tribflow3(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'Tribeflow: win=3, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'non-ranking pvalue'
+        title += 'cumulative pvalue'
         minAlpha = 0
         maxAlpha = 1
         useLog = True
@@ -260,7 +262,7 @@ def ngram3(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'Ngram LM: win=3, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'non-ranking p-value'
+        title += 'cumulative p-value'
         minAlpha = 0
         maxAlpha = 1
         useLog = True
@@ -289,11 +291,12 @@ def ngram9(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'Ngram LM: win=9, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'non-ranking p-value'
+        title += 'cumulative p-value'
         minAlpha = 0
         maxAlpha = 1
         useLog = True
         optAlpha = 0.0152734375 #currentAlpha= 0.0152734375  metric= 0.94963912974
+        #alpha=0.0152734375, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=195, OF=385700, NT=2781, NF=5823001, stats=[(1.058597461738265, 0.44731697960223149)]
         ngram9_likes = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
         ngram9_sim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
         ngram9_injSim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
@@ -304,6 +307,7 @@ def ngram9(pv):
         maxAlpha = 1
         useLog = False
         optAlpha = 0.725 #currentAlpha= 0.725  metric= 0.949647407388
+        #alpha=0.725, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=102, OF=204304, NT=2874, NF=6004397, stats=[(1.0430519459233127, 0.64389006895189893)]
         ngram9_likes = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
         ngram9_sim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         ngram9_injSim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
@@ -318,7 +322,7 @@ def rnnlm3(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'RNN LM: win=3, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'non-ranking p-value'
+        title += 'cumulative p-value'
         minAlpha = 0
         maxAlpha = 1
         useLog = True
@@ -349,11 +353,12 @@ def rnnlm9(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'RNN LM: win=9, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'non-ranking p-value'
+        title += 'cumulative p-value'
         minAlpha = 0
         maxAlpha = 1
         useLog = True
         optAlpha = 0.051484375 #currentAlpha= 0.051484375  metric= 0.949489375515
+        #alpha=0.051484375, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=194, OF=381470, NT=2782, NF=5827231, stats=[(1.0652375067224999, 0.40078734063955179)]
         rnn9_likes = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
         rnn9_sim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
         rnn9_injSim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
@@ -365,6 +370,7 @@ def rnnlm9(pv):
         maxAlpha = 1
         useLog= False
         optAlpha = 0.84375 #currentAlpha= 0.84375  metric= 0.949382091047
+        #alpha=0.84375, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=190, OF=364882, NT=2786, NF=5843819, stats=[(1.092236801093418, 0.2420666488452653)]
         rnn9_likes = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
         rnn9_sim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         rnn9_injSim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
@@ -380,7 +386,7 @@ def bagOfAction(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'Bag of actions, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'non-ranking p-value'
+        title += 'cumulative p-value'
         minAlpha = 0
         maxAlpha = 1
         useLog = True
@@ -421,11 +427,11 @@ def bagOfAction(pv):
 def main():
     mpl.rcParams.update({'font.size': 10})
     
-    #tribflow3(PVALUE.WITH_RANKING)
-    #ngram3(PVALUE.WITH_RANKING)
-    #rnnlm3(PVALUE.WITH_RANKING)
+    #tribflow3(PVALUE.WITHOUT_RANKING)
+    #ngram3(PVALUE.WITHOUT_RANKING)
+    #rnnlm3(PVALUE.WITHOUT_RANKING)
     
-    #tribflow9(PVALUE.WITH_RANKING)
+    #tribflow9(PVALUE.WITHOUT_RANKING)
     #ngram9(PVALUE.WITHOUT_RANKING)
     #rnnlm9(PVALUE.WITHOUT_RANKING)
     

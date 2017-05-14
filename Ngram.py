@@ -56,7 +56,7 @@ class Ngram():
     
     
 def main():
-    tracePath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/tribeflow_outlierDetection/pins_repins_fixedcat/pins_repins_win10.trace'
+    tracePath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace'
     isDataFormatted = False
     useWindow = USE_WINDOW.FALSE
     true_mem_size = 9

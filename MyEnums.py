@@ -15,6 +15,7 @@ class METRIC (Enum):
     RECALL = 6
     PRECISION = 7
     FSCORE = 8
+    BAYESIAN = 9
 
 class TECHNIQUE(Enum):
     ALL_OR_NOTHING = 1

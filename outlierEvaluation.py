@@ -50,6 +50,8 @@ class OutlierEvaluation:
             self.metricObj = rpf()
         elif(self.metricType == METRIC.FISHER):
             self.metricObj = Fisher()
+        elif(self.metricType == METRIC.BAYESIAN):
+            self.metricObj = Bayesian()
             
                
         
@@ -105,7 +107,50 @@ class OutlierEvaluation:
             return DECISION.OUTLIER
                         
             
-    
+    def evaluate_continousAlpha(self, metricList, files):
+        allPvalues = {}
+        allGoldMarkers = {}
+        cnt = 0
+        for u in self.allData:
+            tests = self.allData[u]
+            for ti, t in enumerate(tests):
+                if(self.pvalueTyp == PVALUE.WITH_RANKING):
+                    pValues = t.PvaluesWithRanks
+                elif(self.pvalueTyp == PVALUE.WITHOUT_RANKING):
+                    pValues = t.PvaluesWithoutRanks
+                golds = t.goldMarkers
+                for p in pValues:
+                    #theKey = '_'.join([str(u),str(ti),str(p)])
+                    theKey = cnt
+                    allPvalues[theKey] = pValues[p]
+                    allGoldMarkers[theKey] = golds[p]
+                    cnt += 1
+        
+        keySortedAllPvalues = sorted(allPvalues, key=lambda k: (-allPvalues[k], k), reverse=True)  #sort ascendingly
+        trueOutlierCount = allGoldMarkers.values().count(GOLDMARKER.TRUE)
+        for rank in keySortedAllPvalues:
+            pv =  allPvalues[rank]
+            gold = allGoldMarkers[rank]
+            #at this pvalue, we set our alpha=pv. which means we flag this action to be OUTLIER
+            for m in metricList:
+                if(gold == GOLDMARKER.TRUE):
+                    m.OT += 1
+                if(gold == GOLDMARKER.FALSE):
+                    m.OF += 1  
+                m.NT = trueOutlierCount-m.OT
+                m.NF = (len(allGoldMarkers)-trueOutlierCount)-m.OF
+                           
+                m.calculateStats()
+                logger = files[m.type]
+                logger.write('alpha='+str(pv))
+                logger.write(', '+str(TECHNIQUE.MAJORITY_VOTING))       
+                logger.write(', '+str(HYP.EMPIRICAL))                                
+                logger.write(', TScountAdj='+str(False))
+                logger.write(': '+m.getSummary()+'\n')
+                logger.flush()
+                
+            
+        
     def evaluate(self):         
         if(self.testSetCountAdjust == False):   
             for u in self.allData:
@@ -239,7 +284,7 @@ def work():
     #ALPHA_RANKING = np.arange(0.000005,0.1,0.005)    
     
     
-    ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/pvalues_3gram/'
+    ANALYSIS_FILES_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/sim_pvalues_small/'
     #ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_9gram/'
     FILE_NAME = 'outlier_analysis_pvalues_'
     
@@ -250,42 +295,62 @@ def work():
     #actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
     
     #metricList = [METRIC.REC_PREC_FSCORE]
-    metricList = [METRIC.FISHER]
+    metricList = [METRIC.FISHER, METRIC.BAYESIAN]
     #techList = [TECHNIQUE.ALL_OR_NOTHING,TECHNIQUE.MAJORITY_VOTING,TECHNIQUE.ONE_IS_ENOUGH]
     techList = [TECHNIQUE.MAJORITY_VOTING]
     #alphaList = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
-    alphaList = [0.01474609375]
+    alphaList = []
     #alphaList= [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
     hypList = [HYP.EMPIRICAL]
     #hypList = [HYP.BONFERRONI, HYP.HOLMS]
     #pvalueList = [PVALUE.WITH_RANKING]
-    pvalueList = [PVALUE.WITHOUT_RANKING]
-    #pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
+    #pvalueList = [PVALUE.WITHOUT_RANKING]
+    pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
     testSetCountAdjustList = [False]
     
     #debugMode = True
-    
-    for metric in metricList:
+    if(len(alphaList) == 0):
+        metrics = []
         for pv in pvalueList:
-            logger = open(ANALYSIS_FILES_PATH+str(metric)+'_'+str(pv),'w')
-            for alpha in alphaList:            
-                for tech in techList:                
-                    for hyp in hypList:                                       
-                        for tadj in testSetCountAdjustList:
-                            
-                            print(metric, pv,alpha,tech,hyp,tadj)
-                            
-                            #ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj, ANALYSIS_FILES_PATH+'DEBUG_MODE_'+str(metric)+'_'+str(pv)+'_'+str(alpha))
-                            ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj)
-                            ev.evaluate()   
-                            
-                            logger.write('alpha='+str(alpha))
-                            logger.write(', '+str(tech))       
-                            logger.write(', '+str(hyp))                                
-                            logger.write(', TScountAdj='+str(tadj))
-                            logger.write(': '+ev.metricObj.getSummary()+'\n')
-                            logger.flush()
-        logger.close()
+            files = {}
+            for metric in metricList:
+                logger = open(ANALYSIS_FILES_PATH+str(metric)+'_'+str(pv),'w')
+                files[metric] = logger
+                if(metric == METRIC.CHI_SQUARE):
+                    metricObj = Chisq()
+                elif(metric == METRIC.REC_PREC_FSCORE):
+                    metricObj = rpf()
+                elif(metric == METRIC.FISHER):
+                    metricObj = Fisher()
+                elif(metric == METRIC.BAYESIAN):
+                    metricObj = Bayesian()
+                metrics.append(metricObj)
+                
+            ev = OutlierEvaluation(allData, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, None, pv, None, None)
+            ev.evaluate_continousAlpha(metrics, files)
+        
+    else:
+        for metric in metricList:
+            for pv in pvalueList:
+                logger = open(ANALYSIS_FILES_PATH+str(metric)+'_'+str(pv),'w')
+                for alpha in alphaList:            
+                    for tech in techList:                
+                        for hyp in hypList:                                       
+                            for tadj in testSetCountAdjustList:
+                                
+                                print(metric, pv,alpha,tech,hyp,tadj)
+                                
+                                #ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj, ANALYSIS_FILES_PATH+'DEBUG_MODE_'+str(metric)+'_'+str(pv)+'_'+str(alpha))
+                                ev = OutlierEvaluation(allData, tech, hyp, metric, pv, alpha, tadj)
+                                ev.evaluate()   
+                                
+                                logger.write('alpha='+str(alpha))
+                                logger.write(', '+str(tech))       
+                                logger.write(', '+str(hyp))                                
+                                logger.write(', TScountAdj='+str(tadj))
+                                logger.write(': '+ev.metricObj.getSummary()+'\n')
+                                logger.flush()
+            logger.close()
         
         
   

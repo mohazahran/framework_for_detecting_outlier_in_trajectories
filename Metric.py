@@ -7,6 +7,7 @@ from MyEnums import *
 from scipy.stats import chisquare, fisher_exact
 from scipy.stats.contingency import expected_freq, chi2_contingency
 import numpy as np
+from Carbon.Aliases import false
 
 class Metric:
     def __init__(self):
@@ -163,8 +164,70 @@ class rpf(Metric): #recall_precision_fscore
         
     
     
+
+class Bayesian(Metric):    
+    def __init__(self):  
+        self.type = METRIC.BAYESIAN          
+        self.OT = 0 #OT: Decision=outlier and friendship=True.
+        self.OF = 0 
+        self.NT = 0
+        self.NF = 0 #NF: Decision=Normal  and friendship=False             
+        self.stats = None
+        self.samplesCount = 100000
     
+    def getSummary(self):
+        myStr = 'OT='+str(self.OT)+', OF='+str(self.OF)+', NT='+str(self.NT)+', NF='+str(self.NF)+', stats='+str(self.stats)
+        return myStr
+        
+    def update(self, decisions, goldMarkers):
+        for i in range(len(decisions)):        
+            if(decisions[i] == DECISION.OUTLIER and goldMarkers[i] == GOLDMARKER.TRUE):
+                self.OT += 1        
+            elif(decisions[i] == DECISION.OUTLIER and goldMarkers[i] == GOLDMARKER.FALSE):
+                self.OF += 1
+            elif(decisions[i] == DECISION.NORMAL and goldMarkers[i] == GOLDMARKER.TRUE):
+                self.NT += 1
+            elif(decisions[i] == DECISION.NORMAL and goldMarkers[i] == GOLDMARKER.FALSE):
+                self.NF += 1
+            
+        
+        #self.stats = [fisher_exact([[self.OT, self.OF], [self.NT, self.NF]])]
     
+    def calculateStats(self):
+        trueCount = 0
+        falseCount = 0
+        for i in range(self.samplesCount):
+            P = np.random.dirichlet((self.OT+1, self.OF+1, self.NT+1, self.NF+1), 1)
+            P_OT = P[0][0]
+            P_OF = P[0][1]
+            P_NT = P[0][2]
+            P_NF = P[0][3]
+            
+            P_O = P_OT + P_OF
+            P_OgT = P_OT / P_O
+            P_T = P_OT + P_NT
+            
+            if(P_OgT > P_T):
+                trueCount += 1
+            else:
+                falseCount += 1
+        
+        self.probTrue = float(trueCount) / float(self.samplesCount)
+        self.probFalse = float(falseCount) / float(self.samplesCount)
+        
+        self.stats = [self.probTrue, self.probFalse]
     
+'''
+def main():
+    b = Bayesian()
+    b.OT = 29
+    b.NF = 1523777
+    b.OF = 39714
+    b.NT = 577
+    b.calculateStats()
+    print(b.getSummary())
+    
+main() 
+'''   
     
         
