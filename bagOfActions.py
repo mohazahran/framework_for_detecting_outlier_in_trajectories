@@ -148,6 +148,8 @@ class BagOfActions (DetectionTechnique):
                 metric = rpf()
 	    elif(self.metricType == METRIC.CHI_SQUARE):
 	        metric = Chisq()
+            elif(self.metricType == METRIC.BAYESIAN):
+                metric = Bayesian()
             self.probMassCutOff = probMassCutOff
             outlierActions = set()
             accum = 0.0
@@ -158,7 +160,7 @@ class BagOfActions (DetectionTechnique):
                 outlierActions.add(key)
                 
             #print 'accumalted_pdf=', accum
-            print 'outlier actions count = ', len(outlierActions)
+            #print 'outlier actions count = ', len(outlierActions)
             for user in testDic:
                 for testSample in testDic[user]:
                     seq = testSample.actions
@@ -177,7 +179,7 @@ class BagOfActions (DetectionTechnique):
             print 'alpha='+str(self.probMassCutOff),
             print ','+str(TECHNIQUE.MAJORITY_VOTING),       
             print ','+str(HYP.EMPIRICAL),                                
-            print ',TScountAdj='+str(False),
+            print ',TScountAdj='+str(False),':',
             print metric.getSummary()
             
         return metric.getSummary()
@@ -229,8 +231,8 @@ def performOutLierDetection():
     bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
     bag.useWindow = False
     #bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
-    bag.probMassCutOff = [0.0494244384766]
-    bag.metricType = METRIC.FISHER
+    bag.probMassCutOff = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
+    bag.metricType = METRIC.BAYESIAN
     
     testDic,testSetCount = bag.prepareTestSet()
     for user in testDic:

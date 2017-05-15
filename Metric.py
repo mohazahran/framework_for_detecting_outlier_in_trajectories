@@ -7,7 +7,6 @@ from MyEnums import *
 from scipy.stats import chisquare, fisher_exact
 from scipy.stats.contingency import expected_freq, chi2_contingency
 import numpy as np
-from Carbon.Aliases import false
 
 class Metric:
     def __init__(self):
@@ -173,7 +172,7 @@ class Bayesian(Metric):
         self.NT = 0
         self.NF = 0 #NF: Decision=Normal  and friendship=False             
         self.stats = None
-        self.samplesCount = 100000
+        self.samplesCount = 10000
     
     def getSummary(self):
         myStr = 'OT='+str(self.OT)+', OF='+str(self.OF)+', NT='+str(self.NT)+', NF='+str(self.NF)+', stats='+str(self.stats)

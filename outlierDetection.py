@@ -33,7 +33,7 @@ class OutlierDetection:
         self.CORES = 40
         self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
         self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues'
-        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_200'
+        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_10'
         self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
         self.seq_prob = SEQ_PROB.TRIBEFLOW
         self.useWindow = USE_WINDOW.FALSE
