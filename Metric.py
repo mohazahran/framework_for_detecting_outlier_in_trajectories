@@ -7,6 +7,7 @@ from MyEnums import *
 from scipy.stats import chisquare, fisher_exact
 from scipy.stats.contingency import expected_freq, chi2_contingency
 import numpy as np
+from Carbon.Aliases import false
 
 class Metric:
     def __init__(self):
@@ -172,7 +173,7 @@ class Bayesian(Metric):
         self.NT = 0
         self.NF = 0 #NF: Decision=Normal  and friendship=False             
         self.stats = None
-        self.samplesCount = 10000
+        self.samplesCount = 5000
     
     def getSummary(self):
         myStr = 'OT='+str(self.OT)+', OF='+str(self.OF)+', NT='+str(self.NT)+', NF='+str(self.NF)+', stats='+str(self.stats)
@@ -193,40 +194,45 @@ class Bayesian(Metric):
         #self.stats = [fisher_exact([[self.OT, self.OF], [self.NT, self.NF]])]
     
     def calculateStats(self):
-        trueCount = 0
-        falseCount = 0
+        trueCount_TgO = 0
+        trueCount_OT = 0
         for i in range(self.samplesCount):
             P = np.random.dirichlet((self.OT+1, self.OF+1, self.NT+1, self.NF+1), 1)
+            #P = np.random.dirichlet((self.OT+1, self.OF+1, self.NT+1), 1)
             P_OT = P[0][0]
             P_OF = P[0][1]
             P_NT = P[0][2]
             P_NF = P[0][3]
             
             P_O = P_OT + P_OF
-            P_OgT = P_OT / P_O
+            P_TgO = P_OT / P_O
             P_T = P_OT + P_NT
             
-            if(P_OgT > P_T):
-                trueCount += 1
-            else:
-                falseCount += 1
+            
+            if(P_TgO > P_T):
+                trueCount_TgO += 1
+            
+            
+            if(P_OT > (P_T*P_O)):
+                trueCount_OT += 1
+            
         
-        self.probTrue = float(trueCount) / float(self.samplesCount)
-        self.probFalse = float(falseCount) / float(self.samplesCount)
+        self.probTrue_TgO = float(trueCount_TgO) / float(self.samplesCount)
+        self.probTrue_OT = float(trueCount_OT) / float(self.samplesCount)
         
-        self.stats = [self.probTrue, self.probFalse]
+        self.stats = ['T|O',self.probTrue_TgO,'OT',self.probTrue_OT]
     
-'''
+
 def main():
     b = Bayesian()
-    b.OT = 29
-    b.NF = 1523777
-    b.OF = 39714
-    b.NT = 577
+    b.OT = 250
+    b.NF = 250
+    b.OF = 250
+    b.NT = 2500
     b.calculateStats()
     print(b.getSummary())
     
 main() 
-'''   
+
     
         

@@ -74,6 +74,9 @@ class MyPlot():
                 fn=float(results[2].split('=')[-1])
                 tn=float(results[3].split('=')[-1])
                 res = tn/(tn+fp)
+                
+            elif(self.metric == METRIC.BAYESIAN):
+                res = float(results[-2].split('=')[-1].replace('[',''))
             
             if(config not in self.mapping):                
                 self.mapping[config] = {alpha:res}
@@ -202,12 +205,13 @@ def tribflow9(pv):
     title = 'Tribeflow: win=9, '
     if(pv == PVALUE.WITHOUT_RANKING):
         title += 'cumulative pvalue'
-        minAlpha = 0
+        minAlpha = 1e-20
         maxAlpha = 1
         useLog = True
         optAlpha = 1.93103637695e-14#currentAlpha= 1.93103637695e-14  metric= 0.949128546326
         #alpha=1.93103637695e-14, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=71, OF=144319, NT=535, NF=1419172, stats=[(1.3050167616092931, 0.041379281249816546)]
         tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITHOUT_RANKING'
+        tr9_likes_bayesian = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.BAYESIAN_PVALUE.WITHOUT_RANKING'
         tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
         tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
@@ -219,14 +223,16 @@ def tribflow9(pv):
         optAlpha = 0.663492063492 #currentAlpha= 0.663492063492  metric= 0.950273711071
         #alpha=0.663492063492, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=29, OF=39714, NT=577, NF=1523777, stats=[(1.9284126303765161, 0.0016460749449736768)]
         tr9_likes = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.FISHER_PVALUE.WITH_RANKING'
+        tr9_likes_bayesian = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_allLikes_METRIC.BAYESIAN_PVALUE.WITH_RANKING'
         tr9_sim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
     
-    p1 = MyPlot('Likes', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Simulation', tr9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Likes_FISHER', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Likes_BAYESIAN', tr9_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p3 = MyPlot('Simulation', tr9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('tr9_injSim', tr9_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'tr9_'+str(pv)+'.pdf')   
+    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'tr9_'+str(pv)+'.pdf')   
 
 
 def tribflow3(pv):
@@ -413,14 +419,16 @@ def bagOfAction(pv):
         useLog = False
         optAlpha = 0.0494244384766 #currentAlpha= 0.0494244384766  metric= 0.950462015992
         bag_likes = resultsPath+'bagOfActions/'+'standAlone_bagOfActions_allLikes10'
+        bag_likes_bayesian = resultsPath+'bagOfActions/'+'standAlone_bagOfActions_allLikes10_bayesian'
         bag_sim = resultsPath+'bagOfActions/'+'standAlone_bagOfActions_simulatedData'
         bag_injSim = resultsPath+'bagOfActions/'+'pins_repins_bag_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
     
-    p1 = MyPlot('bagOfActions_likes', bag_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('bagOfActions_simulation', bag_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('bagOfActions_likes_FISHER', bag_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('bagOfActions_likes_BAYESIAN', bag_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p3 = MyPlot('bagOfActions_simulation', bag_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1,p2 ], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'bagOfActions_'+str(pv)+'.pdf')
+    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Fisher\'s test pvalue / Simulation Accuracy', title=title, savedFigFileName = 'bagOfActions_'+str(pv)+'.pdf')
 
 
 
