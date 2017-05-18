@@ -173,6 +173,10 @@ class Bayesian(Metric):
         self.NF = 0 #NF: Decision=Normal  and friendship=False             
         self.stats = None
         self.samplesCount = 5000
+        self.OT_priorConst = 1.0
+        self.OF_priorConst = 1.0
+        self.NT_priorConst = 1.0
+        self.NF_priorConst = 1.0
     
     def getSummary(self):
         myStr = 'OT='+str(self.OT)+', OF='+str(self.OF)+', NT='+str(self.NT)+', NF='+str(self.NF)+', stats='+str(self.stats)
@@ -195,8 +199,17 @@ class Bayesian(Metric):
     def calculateStats(self):
         trueCount_TgO = 0
         trueCount_OT = 0
+        trueCount_full = 0
+        P_T = float(self.NT+self.OT) / float(self.OF+self.OT+self.NT+self.NF)
+        P_F = float(self.NF+self.OF) / float(self.OF+self.OT+self.NT+self.NF)
+        
+        OT_post = self.OT + self.OT_priorConst * P_T
+        OF_post = self.OF + self.OF_priorConst * P_F
+        NT_post = self.NT + self.NT_priorConst * P_T
+        NF_post = self.NF + self.NF_priorConst * P_F
+        
         for i in range(self.samplesCount):
-            P = np.random.dirichlet((self.OT+1, self.OF+1, self.NT+1, self.NF+1), 1)
+            P = np.random.dirichlet((OT_post, OF_post, NT_post, NF_post), 1)
             #P = np.random.dirichlet((self.OT+1, self.OF+1, self.NT+1), 1)
             P_OT = P[0][0]
             P_OF = P[0][1]
@@ -207,10 +220,11 @@ class Bayesian(Metric):
             P_TgO = P_OT / P_O
             P_T = P_OT + P_NT
             
-            
+            if((P_OT*P_NF) > (P_OF*P_NT)):
+                trueCount_full += 1
+                
             if(P_TgO > P_T):
                 trueCount_TgO += 1
-            
             
             if(P_OT > (P_T*P_O)):
                 trueCount_OT += 1
@@ -218,20 +232,21 @@ class Bayesian(Metric):
         
         self.probTrue_TgO = float(trueCount_TgO) / float(self.samplesCount)
         self.probTrue_OT = float(trueCount_OT) / float(self.samplesCount)
+        self.probTrue_full = float(trueCount_full) / float(self.samplesCount)
         
-        self.stats = ['T|O',self.probTrue_TgO,'OT',self.probTrue_OT]
+        self.stats = ['Full', self.probTrue_full,'T|O', self.probTrue_TgO,'OT', self.probTrue_OT]
     
-'''
+
 def main():
     b = Bayesian()
-    b.OT = 250
+    b.OT = 0
     b.NF = 250
-    b.OF = 250
-    b.NT = 2500
+    b.OF = 0
+    b.NT = 250
     b.calculateStats()
     print(b.getSummary())
     
 main() 
-'''
+
     
         
