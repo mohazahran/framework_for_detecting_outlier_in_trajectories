@@ -173,9 +173,10 @@ class Bayesian(Metric):
         self.NF = 0 #NF: Decision=Normal  and friendship=False             
         self.stats = None
         self.samplesCount = 5000
+        
         self.OT_priorConst = 1.0
         self.OF_priorConst = 1.0
-        self.NT_priorConst = 1.0
+        self.NT_priorConst = 1000.0
         self.NF_priorConst = 1.0
     
     def getSummary(self):
@@ -196,17 +197,61 @@ class Bayesian(Metric):
         
         #self.stats = [fisher_exact([[self.OT, self.OF], [self.NT, self.NF]])]
     
+    def calculateStats_beta(self):
+        trueCount_TgO = 0
+        trueCount_OT = 0
+        trueCount_full = 0
+        P_T = float(self.NT+self.OT) / float(self.OF+self.OT+self.NT+self.NF)
+        P_F = float(self.NF+self.OF) / float(self.OF+self.OT+self.NT+self.NF)
+        print 'P_T:', P_T, 'P_F:', P_F
+        
+        OT_post = self.OT + self.OT_priorConst * P_T  
+        OF_post = self.OF + self.OF_priorConst * P_F 
+        NT_post = self.NT + self.NT_priorConst * P_T 
+        NF_post = self.NF + self.NF_priorConst * P_F
+        
+        P_OT_list = []
+        P_OF_list = []
+        P_NT_list = []
+        P_NF_list = []
+        
+        for i in range(self.samplesCount):
+            
+            P_T = np.random.beta(self.OT+self.NT + 1, self.OF + self.NF + 1)
+            P_F = 1 - P_T
+            
+            P_OgT = np.random.beta(OT_post, NT_post)
+            P_OgF = np.random.beta(OF_post, NF_post)
+            
+            P_OT = P_OgT * P_T
+            P_OF = P_OgF * P_F
+            P_NT = (1 - P_OgT) * P_T
+            P_NF = (1 - P_OgF) * P_F
+            
+            if((P_OT*P_NF) > (P_OF*P_NT)):
+                trueCount_full += 1
+                
+        self.probTrue_full = float(trueCount_full) / float(self.samplesCount)
+        
+        self.stats = ['Full', self.probTrue_full]
+    
     def calculateStats(self):
         trueCount_TgO = 0
         trueCount_OT = 0
         trueCount_full = 0
         P_T = float(self.NT+self.OT) / float(self.OF+self.OT+self.NT+self.NF)
         P_F = float(self.NF+self.OF) / float(self.OF+self.OT+self.NT+self.NF)
+        print 'P_T:', P_T, 'P_F:', P_F
         
-        OT_post = self.OT + self.OT_priorConst * P_T
-        OF_post = self.OF + self.OF_priorConst * P_F
-        NT_post = self.NT + self.NT_priorConst * P_T
+        OT_post = self.OT + self.OT_priorConst * P_T  
+        OF_post = self.OF + self.OF_priorConst * P_F 
+        NT_post = self.NT + self.NT_priorConst * P_T 
         NF_post = self.NF + self.NF_priorConst * P_F
+        
+        P_OT_list = []
+        P_OF_list = []
+        P_NT_list = []
+        P_NF_list = []
         
         for i in range(self.samplesCount):
             P = np.random.dirichlet((OT_post, OF_post, NT_post, NF_post), 1)
@@ -215,6 +260,11 @@ class Bayesian(Metric):
             P_OF = P[0][1]
             P_NT = P[0][2]
             P_NF = P[0][3]
+            
+            P_OT_list.append(P_OT)
+            P_OF_list.append(P_OF)
+            P_NT_list.append(P_NT)
+            P_NF_list.append(P_NF)
             
             P_O = P_OT + P_OF
             P_TgO = P_OT / P_O
@@ -235,14 +285,30 @@ class Bayesian(Metric):
         self.probTrue_full = float(trueCount_full) / float(self.samplesCount)
         
         self.stats = ['Full', self.probTrue_full,'T|O', self.probTrue_TgO,'OT', self.probTrue_OT]
+        
+        print 'P_OT:', sum(P_OT_list)/len(P_OT_list), 'P_OF:', sum(P_OF_list)/len(P_OF_list), 'P_NT:', sum(P_NT_list)/len(P_NT_list), 'P_NF:', sum(P_NF_list)/len(P_NF_list)
     
 
 def main():
     b = Bayesian()
+    
+    #OT=0, OF=0, NT=15289, NF=38983091, stats=['Full', 0.0036, 'T|O', 0.0036, 'OT', 0.0036]
     b.OT = 0
-    b.NF = 250
     b.OF = 0
-    b.NT = 250
+    b.NT = 15289
+    b.NF = 38983091
+    #b.calculateStats_beta()
+    b.calculateStats()
+    print(b.getSummary())
+    
+    print()
+    
+    #OT=15289, OF=38983091, NT=0, NF=0, stats=['Full', 0.9952, 'T|O', 0.9952, 'OT', 0.9952]
+    b.OT = 15289
+    b.OF = 38983091
+    b.NT = 0
+    b.NF = 0
+    #b.calculateStats_beta()
     b.calculateStats()
     print(b.getSummary())
     
