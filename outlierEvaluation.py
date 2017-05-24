@@ -297,6 +297,15 @@ def work():
     
     print('>>> Reading Data ...')
     allData = TestSample.parseAnalysisFiles(FILE_NAME, ANALYSIS_FILES_PATH)
+    
+    NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
+    nonExistingUsers = set()
+    rr = open(NON_EXISTING_USERS_PATH, 'r')
+    for line in rr:
+        nonExistingUsers.add(line.strip())
+    rr.close()
+    for us in nonExistingUsers:
+        allData.pop(us, None)
     print('>>> Evaluating ...')
     
     #actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
