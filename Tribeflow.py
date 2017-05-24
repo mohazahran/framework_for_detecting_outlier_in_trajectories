@@ -194,6 +194,7 @@ class TribeFlow (DetectionTechnique):
                 testDic[u] = [t]
         print 'seqsCountWithNonExistingUsers=',seqsCountWithNonExistingUsers
         print 'number of nonExistingUsers=',len(nonExistingUsers)
+        #print nonExistingUsers
         return testDic, testSetCount    
     
     def getAllPossibleActions(self):

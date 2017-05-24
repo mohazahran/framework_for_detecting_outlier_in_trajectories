@@ -30,16 +30,21 @@ class OutlierDetection:
     def __init__(self):
         
         #COMMON
-        self.CORES = 40
-        self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
-        self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues'
-        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_10'
-        self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
+        self.CORES = 1
+        #self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
+        #self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection'
+        #self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1'
+        #self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
+
+        self.PATH = '/home/mohame11/pins_repins_fixedcat/'
+        self.RESULTS_PATH = self.PATH + 'myTemp'
+        self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
         self.seq_prob = SEQ_PROB.TRIBEFLOW
         self.useWindow = USE_WINDOW.FALSE
         
         #TRIBEFLOW
-        self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
+        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
         self.STAT_FILE = self.PATH +'Stats_win10'
         self.UNBIAS_CATS_WITH_FREQ = True
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
@@ -94,8 +99,10 @@ class OutlierDetection:
                     #currentActionId = myModel.obj2id[newSeq[i]] #current action id
                     currentActionIndex = actions.index(newSeq[i])# the current action index in the action list.
                     #cal scores (an un-normalized sequence prob in tribeflow)
+                    #print 'current action: ',i
                    
                     for j in range(len(actions)): #for all possible actions that can replace the current action
+                        #print 'replacement# ',j
                         del newSeq[i]                
                         newSeq.insert(i, actions[j])    
                         userId = myModel.getUserId(user)     
@@ -117,7 +124,7 @@ class OutlierDetection:
                     pValuesWithoutRanks[i] = currentActionPvalueWithoutRanks
                 if(len(seq) == len(pValuesWithoutRanks)):                    
                     writer.write('user##'+str(user)+'||seq##'+str(seq)+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(goldMarkers)+'\n')        
-                if(myCnt%100 == 0):
+                if(myCnt%1 == 0):
                     writer.flush()
                     print('>>> proc: '+ str(coreId)+' finished '+ str(myCnt)+'/'+str(quota)+' instances ...')                
         writer.close()    

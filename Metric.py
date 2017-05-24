@@ -241,7 +241,7 @@ class Bayesian(Metric):
         trueCount_full = 0
         P_T = float(self.NT+self.OT) / float(self.OF+self.OT+self.NT+self.NF)
         P_F = float(self.NF+self.OF) / float(self.OF+self.OT+self.NT+self.NF)
-        print 'P_T:', P_T, 'P_F:', P_F
+        #print 'P_T:', P_T, 'P_F:', P_F
         
         OT_post = self.OT + self.OT_priorConst * P_T  
         OF_post = self.OF + self.OF_priorConst * P_F 
@@ -286,9 +286,9 @@ class Bayesian(Metric):
         
         self.stats = ['Full', self.probTrue_full,'T|O', self.probTrue_TgO,'OT', self.probTrue_OT]
         
-        print 'P_OT:', sum(P_OT_list)/len(P_OT_list), 'P_OF:', sum(P_OF_list)/len(P_OF_list), 'P_NT:', sum(P_NT_list)/len(P_NT_list), 'P_NF:', sum(P_NF_list)/len(P_NF_list)
+        #print 'P_OT:', sum(P_OT_list)/len(P_OT_list), 'P_OF:', sum(P_OF_list)/len(P_OF_list), 'P_NT:', sum(P_NT_list)/len(P_NT_list), 'P_NF:', sum(P_NF_list)/len(P_NF_list)
     
-
+'''
 def main():
     b = Bayesian()
     
@@ -313,6 +313,6 @@ def main():
     print(b.getSummary())
     
 main() 
-
+'''
     
         

@@ -10,16 +10,16 @@ import random
 class InjectOutliers:
     def __init__(self):
         #common
-        self.INPUT_FILE = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData_injected/pins_repins_bbtt3_simulatedData_fixed_3_injected'
+        self.INPUT_FILE = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection'
         self.OUTPUT_FILE = ''
         self.METHOD = SEQ_PROB.TRIBEFLOW
         self.isTraceFile = False #The input data file is a tracefile: has the same format as tribeflow's training data
         #maxInjections = 1
         self.injectionRatio = 0.1
-        self.samplesCount = 1000
+        self.samplesCount = 1962
         
         #tribeflow
-        self.MODEL_PATH = '/scratch/snyder/m/mohame11/unix_user_data/tribeflow_win4/training_tribeflow_burst_4_noop.h5'
+        self.MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
         
         #ngram
         self.ALL_ACTION_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'

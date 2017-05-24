@@ -171,8 +171,8 @@ class DataGenerator(object):
 def main():
     MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
     #MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/New_Linux/PARSED_pins_repins_win10_noop_NoLeaveOut_pinterest.h5'
-    DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_10'
-    perUserSequences = 10
+    DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection'
+    perUserSequences = 2
        
     dg = DataGenerator(MODEL_PATH, DATA_GEN, perUserSequences)
     #dg.generate()
