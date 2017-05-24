@@ -235,6 +235,16 @@ def performOutLierDetection():
     bag.metricType = METRIC.BAYESIAN
     
     testDic,testSetCount = bag.prepareTestSet()
+    
+    NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
+    nonExistingUsers = set()
+    rr = open(NON_EXISTING_USERS_PATH, 'r')
+    for line in rr:
+        nonExistingUsers.add(line.strip())
+    rr.close()
+    for us in nonExistingUsers:
+        testDic.pop(us, None)
+    
     for user in testDic:
         for testSample in testDic[user]:
             goldMarkers = testSample.goldMarkers
