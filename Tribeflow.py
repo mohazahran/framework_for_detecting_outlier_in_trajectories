@@ -195,6 +195,10 @@ class TribeFlow (DetectionTechnique):
         print 'seqsCountWithNonExistingUsers=',seqsCountWithNonExistingUsers
         print 'number of nonExistingUsers=',len(nonExistingUsers)
         #print nonExistingUsers
+        ww = open(self.SEQ_FILE_PATH+'_nonExistingUsers', 'w')
+        for us in nonExistingUsers:
+            ww.write(str(us)+'\n')
+        ww.close()
         return testDic, testSetCount    
     
     def getAllPossibleActions(self):
