@@ -291,14 +291,15 @@ def work():
     #ALPHA_RANKING = np.arange(0.000005,0.1,0.005)    
     
     
-    ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_noWindow_log/'
-    #ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_9gram/'
+    #ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_noWindow_log/'
+    #ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection/'
+    ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/pvalues_noWin_log'
     FILE_NAME = 'outlier_analysis_pvalues_'
+    NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
     
     print('>>> Reading Data ...')
     allData = TestSample.parseAnalysisFiles(FILE_NAME, ANALYSIS_FILES_PATH)
     
-    NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
     nonExistingUsers = set()
     rr = open(NON_EXISTING_USERS_PATH, 'r')
     for line in rr:

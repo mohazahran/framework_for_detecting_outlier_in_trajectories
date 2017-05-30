@@ -168,11 +168,12 @@ class BagOfActions (DetectionTechnique):
                     decisionVector = []
                     for action in seq:
                         if(action in outlierActions):
+                            #print '>>>>>> asd'
                             decisionVector.append(DECISION.OUTLIER)
                         else:
                             decisionVector.append(DECISION.NORMAL)
                     
-                   
+     
                     metric.update(decisionVector, goldMarkers)
             
             metric.calculateStats() 
@@ -221,11 +222,12 @@ class BagOfActions (DetectionTechnique):
 def performOutLierDetection():
     bag = BagOfActions()
     bag.true_mem_size = 9
-    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    #bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.trace_fpath = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
     bag.smoothingParam = 1.0
-    #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
+    bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1'
     #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
-    bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
+    #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
     bag.DATA_HAS_USER_INFO = True
     bag.VARIABLE_SIZED_DATA = False
     bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
@@ -242,8 +244,12 @@ def performOutLierDetection():
     for line in rr:
         nonExistingUsers.add(line.strip())
     rr.close()
+    badUserCnt = 0
     for us in nonExistingUsers:
-        testDic.pop(us, None)
+        tmp = testDic.pop(us, None)
+        if (tmp != None):
+                badUserCnt += 1
+    print 'badUserCnt=',badUserCnt
     
     for user in testDic:
         for testSample in testDic[user]:
