@@ -315,10 +315,10 @@ def main():
     b = Bayesian()
     
     #OT=0, OF=0, NT=15289, NF=38983091, stats=['Full', 0.0036, 'T|O', 0.0036, 'OT', 0.0036]
-    b.OT = 606
-    b.OF = 20000
-    b.NT = 0
-    b.NF = 0
+    b.OT = 534
+    b.OF = 852289
+    b.NT = 1703
+    b.NF = 2419088
     b.calculateStats()
     #b.calculateStats()
     print(b.getSummary())
@@ -326,15 +326,25 @@ def main():
     print()
     
     #OT=15289, OF=38983091, NT=0, NF=0, stats=['Full', 0.9952, 'T|O', 0.9952, 'OT', 0.9952]
-    b.OT = 0
-    b.OF = 0
-    b.NT = 606
-    b.NF = 20000
+    b.OT = 534
+    b.OF = 852289
+    b.NT = 1703
+    b.NF = 2419088
+    b.calculateStats_dirichelet()
+    #b.calculateStats()
+    print(b.getSummary())
+    
+    #OT=15289, OF=38983091, NT=0, NF=0, stats=['Full', 0.9952, 'T|O', 0.9952, 'OT', 0.9952]
+    b = Fisher()
+    b.OT = 534
+    b.OF = 852289
+    b.NT = 1703
+    b.NF = 2419088
     b.calculateStats()
     #b.calculateStats()
     print(b.getSummary())
     
 main() 
-'''
-    
+#alpha=0.0005, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=534, OF=852289, NT=1703, NF=2419088, stats=['Prob_of_significance', 0.0008]
+''' 
         

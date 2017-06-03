@@ -51,6 +51,8 @@ class OutlierDetection:
         #self.seq_prob = SEQ_PROB.TRIBEFLOW
         #self.useWindow = USE_WINDOW.FALSE
         
+        self.groupActionsByUser = True
+        
         #TRIBEFLOW
         #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
         self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
@@ -143,7 +145,7 @@ class OutlierDetection:
                                                                                                                                     
     def distributeOutlierDetection(self):
         myModel = None
-        
+        myModel.groupActionsByUser = self.groupActionsByUser
         if(self.seq_prob == SEQ_PROB.NGRAM):
             myModel = NgramLM()
             myModel.useWindow = self.useWindow

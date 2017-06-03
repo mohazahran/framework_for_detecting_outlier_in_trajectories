@@ -19,16 +19,27 @@ class DetectionTechnique():
         self.model = None
         
     def formOriginalSeq(self, tests):
-        origSeq = list(tests[0].actions)  
-        origGoldMarkers = list(tests[0].goldMarkers)
-        if(len(tests) <= 1):
+        if(self.groupActionsByUser == True):
+            actions = []
+            golds = []
+            for t in tests:
+                for a in t.actions:
+                    actions.append(a)
+                for g in t.goldMarkers:
+                    golds.append(g)
+            return actions, golds
+         
+        else:
+            origSeq = list(tests[0].actions)  
+            origGoldMarkers = list(tests[0].goldMarkers)
+            if(len(tests) <= 1):
+                return origSeq, origGoldMarkers
+            for i in range(1,len(tests)):
+                a = tests[i].actions[-1]
+                g = tests[i].goldMarkers[-1]
+                origSeq.append(a)
+                origGoldMarkers.append(g)            
             return origSeq, origGoldMarkers
-        for i in range(1,len(tests)):
-            a = tests[i].actions[-1]
-            g = tests[i].goldMarkers[-1]
-            origSeq.append(a)
-            origGoldMarkers.append(g)            
-        return origSeq, origGoldMarkers
     
     
     def getProbability(self, userId, newSeq):
