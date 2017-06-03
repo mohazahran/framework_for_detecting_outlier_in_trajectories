@@ -145,7 +145,7 @@ class OutlierDetection:
                                                                                                                                     
     def distributeOutlierDetection(self):
         myModel = None
-        myModel.groupActionsByUser = self.groupActionsByUser
+
         if(self.seq_prob == SEQ_PROB.NGRAM):
             myModel = NgramLM()
             myModel.useWindow = self.useWindow
@@ -155,6 +155,7 @@ class OutlierDetection:
             myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
             myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
             myModel.ALL_ACTIONS_PATH = self.ALL_ACTIONS_PATH
+            myModel.groupActionsByUser = self.groupActionsByUser
             myModel.loadModel()
         
         elif(self.seq_prob == SEQ_PROB.RNNLM):
@@ -167,6 +168,7 @@ class OutlierDetection:
             myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
             myModel.RESULTS_PATH = self.RESULTS_PATH
             myModel.ALL_ACTIONS_PATH = self.ALL_ACTIONS_PATH
+            myModel.groupActionsByUser = self.groupActionsByUser
             myModel.loadModel()
         
         elif(self.seq_prob == SEQ_PROB.TRIBEFLOW):        
@@ -187,6 +189,7 @@ class OutlierDetection:
             myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
             myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
             myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
+            myModel.groupActionsByUser = self.groupActionsByUser
      
             if(self.UNBIAS_CATS_WITH_FREQ):
                 print('>>> calculating statistics for unbiasing categories ...')
@@ -203,6 +206,7 @@ class OutlierDetection:
             myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
             myModel.RESULTS_PATH = self.RESULTS_PATH
             myModel.useWindow = self.useWindow
+            myModel.groupActionsByUser = self.groupActionsByUser
             myModel.loadModel()
         
         testDic,testSetCount = myModel.prepareTestSet()
