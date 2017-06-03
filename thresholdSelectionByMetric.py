@@ -12,7 +12,7 @@ import math
 class thresholdSelectionByMetric:
     
     def __init__(self):
-        self.INPUT_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/pvalues_bagOfActions'
+        self.INPUT_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues'
         self.resultsFilePath = self.INPUT_PATH + '/METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         self.FILE_NAME = 'outlier_analysis_pvalues_'
         self.requiredLevel = 0.95

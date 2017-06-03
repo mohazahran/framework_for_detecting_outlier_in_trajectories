@@ -30,26 +30,31 @@ class OutlierDetection:
     def __init__(self):
         
         #COMMON
-        self.CORES = 1
-        #self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
-        #self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection'
-        #self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1'
-        #self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
+        self.CORES = 40
+        self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
+        self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection2'
+        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1'
+        self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
+       
+        self.seq_prob = SEQ_PROB.TRIBEFLOW
+        self.useWindow = USE_WINDOW.TRUE
 
         #self.PATH = '/home/mohame11/pins_repins_fixedcat/'
         #self.RESULTS_PATH = self.PATH + 'myTemp'
         #self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
         #self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
 
-        self.PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'myTemp'
-        self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes_withFriendship_win4.trace'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
-        self.seq_prob = SEQ_PROB.TRIBEFLOW
-        self.useWindow = USE_WINDOW.FALSE
+        #self.PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/'
+        #self.RESULTS_PATH = self.PATH + 'myTemp'
+        #self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes_withFriendship_win4.trace'
+        #self.MODEL_PATH = self.PATH + 'pins_repins_win4_noop.h5'
+        #self.seq_prob = SEQ_PROB.TRIBEFLOW
+        #self.useWindow = USE_WINDOW.FALSE
         
         #TRIBEFLOW
-        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
+        #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
+        self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
+        #self.TRACE_PATH = self.PATH + 'pins_repins_win4.trace'
         self.STAT_FILE = self.PATH +'Stats_win10'
         self.UNBIAS_CATS_WITH_FREQ = True
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.

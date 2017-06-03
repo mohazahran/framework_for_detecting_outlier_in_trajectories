@@ -106,7 +106,7 @@ class BagOfActions (DetectionTechnique):
         r = open(self.trace_fpath)
         counts = 0
         for line in r:
-            cats = line.strip().split('\t')[self.true_mem_size+1:]
+            cats = line.strip().split()[self.true_mem_size+1:]
             for c in cats:
                 if(c in freqs):
                     freqs[c] += 1
@@ -137,7 +137,7 @@ class BagOfActions (DetectionTechnique):
     
     
     def detectOutliers(self, testDic): #probMassCutOff = 0.05 to correspond to 5% tail
-       
+        #print '#actions', len(self.smoothedProbs)   
         #sorting ascendingly
         keySortedProbs = sorted(self.smoothedProbs, key=lambda k: (-self.smoothedProbs[k], k), reverse=True)
         
@@ -223,22 +223,31 @@ def performOutLierDetection():
     bag = BagOfActions()
     bag.true_mem_size = 9
     #bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
-    bag.trace_fpath = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
+    bag.trace_fpath = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_trace'
+    #bag.trace_fpath = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace'
     bag.smoothingParam = 1.0
     bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1'
-    #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
+    #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simulatedData_bagOfActions'
+    #bag.SEQ_FILE_PATH =  '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
     #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
+    #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/likes_withFriendship_win4.trace'
     bag.DATA_HAS_USER_INFO = True
     bag.VARIABLE_SIZED_DATA = False
     bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
     bag.useWindow = USE_WINDOW.FALSE
+    bag.probMassCutOff = []
     #bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
-    bag.probMassCutOff = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
-    bag.metricType = METRIC.BAYESIAN
+    #bag.probMassCutOff = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
+    bag.probMassCutOff.append(0.048671875)
     
+    #bag.metricType = METRIC.BAYESIAN
+    bag.metricType = METRIC.FISHER
+    #bag.metricType = METRIC.REC_PREC_FSCORE
     testDic,testSetCount = bag.prepareTestSet()
-    
-    NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
+    #NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
+    #NON_EXISTING_USERS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/likes_withFriendship_win4.trace_nonExistingUsers'
+    NON_EXISTING_USERS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1_nonExistingUsers'
+    '''
     nonExistingUsers = set()
     rr = open(NON_EXISTING_USERS_PATH, 'r')
     for line in rr:
@@ -250,10 +259,13 @@ def performOutLierDetection():
         if (tmp != None):
                 badUserCnt += 1
     print 'badUserCnt=',badUserCnt
-    
+    '''
+    #print '#users', len(testDic)
     for user in testDic:
+        #print user,'#sequences',len(testDic[user])
         for testSample in testDic[user]:
             goldMarkers = testSample.goldMarkers
+            #print '#golds', len(goldMarkers), '#actions', len(testSample.actions)
             for i in range(len(goldMarkers)):
                 if (goldMarkers[i] == 'false'):
                     goldMarkers[i] = GOLDMARKER.FALSE
@@ -268,20 +280,23 @@ def performOutLierDetection():
 
 def performDataSimulation():
     bag = BagOfActions()
-    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.trace_fpath = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace'
     bag.smoothingParam = 1.0
-    bag.true_mem_size = 9
-    bag.simulateData(100000, [3,25], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
+    bag.true_mem_size = 3
+    #bag.simulateData(10000, [10,10], '/scratch/snyder/m/mohame11/lastFm/simulatedData/simulatedData_bagOfActions')
+    bag.simulateData(10000, [2,4], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
+
     
 
 
 
 def performThresholdSelection():
     bag = BagOfActions()
-    bag.true_mem_size = 9
-    bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.true_mem_size = 3
+    bag.trace_fpath = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace'
     bag.smoothingParam = 1.0
     bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
+    #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simulatedData_bagOfActions'
     bag.DATA_HAS_USER_INFO = False
     bag.VARIABLE_SIZED_DATA = True
     bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/standAlone_bagOfActions_simulatedData'

@@ -19,6 +19,7 @@ class DataGenerator(object):
         self.true_mem_size = store['Dts'].values.shape[1]    
         self.hyper2id = dict(store['hyper2id'].values)
         self.obj2id = dict(store['source2id'].values)
+        print len(self.hyper2id), len(self.obj2id)
         
         self.id2obj = dict((v, k) for k, v in self.obj2id.items())
         
@@ -171,8 +172,8 @@ class DataGenerator(object):
 def main():
     MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
     #MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/New_Linux/PARSED_pins_repins_win10_noop_NoLeaveOut_pinterest.h5'
-    DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection'
-    perUserSequences = 2
+    DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/tmp'
+    perUserSequences = 20
        
     dg = DataGenerator(MODEL_PATH, DATA_GEN, perUserSequences)
     #dg.generate()

@@ -10,19 +10,19 @@ import random
 class InjectOutliers:
     def __init__(self):
         #common
-        self.INPUT_FILE = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection'
+        self.INPUT_FILE = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_5_forInjection'
         self.OUTPUT_FILE = ''
         self.METHOD = SEQ_PROB.TRIBEFLOW
         self.isTraceFile = False #The input data file is a tracefile: has the same format as tribeflow's training data
         #maxInjections = 1
         self.injectionRatio = 0.1
-        self.samplesCount = 1962
+        self.samplesCount = 4910
         
         #tribeflow
         self.MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
         
         #ngram
-        self.ALL_ACTION_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'
+        #self.ALL_ACTION_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace_forLM_RNN_train_ALL_ACTIONS'
     
     def inject(self):
         if(self.METHOD == SEQ_PROB.TRIBEFLOW):
@@ -38,7 +38,7 @@ class InjectOutliers:
                 allPossibleActions.append(line.strip())
             alla.close()
               
-    
+        print '#possibleActions', len(allPossibleActions) 
         r = open(self.INPUT_FILE, 'r')  
         inputSequences = r.readlines()
         inputSequences = random.sample(inputSequences, self.samplesCount)
