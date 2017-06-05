@@ -135,6 +135,7 @@ class MyPlot():
     def fusePlots(allPlots, optAlpa='' , useLog=True, my_yaxis_label='', title='', savedFigFileName = 'foo.pdf'):
         plt.rc('legend',**{'fontsize':10})        
         fig = plt.figure(0)
+        #fig = plt.figure(0, figsize=(12, 8))
         plt.ylabel(my_yaxis_label)
         if(useLog):
             plt.xticks([log(x,10) for x in allPlots[0].x], rotation='vertical')
@@ -143,6 +144,7 @@ class MyPlot():
             plt.xticks([x for x in allPlots[0].x], rotation='vertical')
             plt.xlabel('Alpha')  
         
+        #plt.tick_params(axis='both', which='major', labelsize=10)
         for p in allPlots:
             figConfigSet = {}               
             for cf in p.mapping:                
@@ -197,7 +199,7 @@ class MyPlot():
                   
         plt.setp(lines, linewidth=2.0)
           
-        plt.legend(bbox_to_anchor=(0., 1.00, 1.00, .101), loc=3, ncol=2, mode="expand", borderaxespad=0., prop={'size':6}) #legend font size
+        plt.legend(bbox_to_anchor=(0., 1.00, 1.00, .101), loc=3, ncol=2, mode="expand", borderaxespad=0., prop={'size':9}) #legend font size
         
         axes = plt.gca()
         #axes.set_xlim([-10,0.01])
@@ -210,7 +212,7 @@ class MyPlot():
         
         #caption
         if(title != ''):
-            fig.suptitle(title, fontsize=7, fontweight='bold', horizontalalignment='center', y=.935)
+            fig.suptitle(title, fontsize=12, fontweight='bold', horizontalalignment='center', y=.89)
             #fig.text(.3, .9, title, fontsize=10)
             #fig.text(.1, .1, r'an equation: $E=mc^2$', fontsize=15)
 
@@ -224,7 +226,7 @@ def tribflow9(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'Tribeflow: win=9, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'cumulative pvalue'
+        title += 'cumulative p-value'
         minAlpha = 1e-20
         maxAlpha = 1
         useLog = True
@@ -236,7 +238,7 @@ def tribflow9(pv):
         tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
     elif(pv == PVALUE.WITH_RANKING):
-        title += 'ranking pvalue'
+        title += 'ranking p-value'
         minAlpha = 0.001
         maxAlpha = 1
         useLog = False
@@ -248,11 +250,11 @@ def tribflow9(pv):
         tr9_injSim = resultsPath+'tribeflow9/'+'pins_repins_tribeflow9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', tr9_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', tr9_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', tr9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('tr9_injSim', tr9_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'tr9_'+str(pv).replace('.','_')+'.pdf')   
+    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'tr9_'+str(pv).replace('.','_')+'.pdf')   
 
 
 
@@ -260,7 +262,7 @@ def tribflow9_lastfm(pv):
     resultsPath = '/Users/mohame11/Documents/newResults_lastfm/'
     title = 'Tribeflow: win=9, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'cumulative pvalue'
+        title += 'cumulative p-value'
         minAlpha = 1e-20
         maxAlpha = 1
         useLog = True
@@ -271,7 +273,7 @@ def tribflow9_lastfm(pv):
         
     
     elif(pv == PVALUE.WITH_RANKING):
-        title += 'ranking pvalue'
+        title += 'ranking p-value'
         minAlpha = 0.001
         maxAlpha = 1
         useLog = False
@@ -282,18 +284,18 @@ def tribflow9_lastfm(pv):
         
     
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', tr9_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', tr9_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', tr9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', tr9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('tr9_injSim', tr9_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'tr9_lastfm_'+str(pv).replace('.','_')+'.pdf')   
+    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'tr9_lastfm_'+str(pv).replace('.','_')+'.pdf')   
 
 
 def tribflow3(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
     title = 'Tribeflow: win=3, '
     if(pv == PVALUE.WITHOUT_RANKING):
-        title += 'cumulative pvalue'
+        title += 'cumulative p-value'
         minAlpha = 1e-20
         maxAlpha = 1
         useLog = True
@@ -304,7 +306,7 @@ def tribflow3(pv):
         tr3_injSim = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITHOUT_RANKING'
     
     elif(pv == PVALUE.WITH_RANKING):
-        title += 'ranking pvalue'
+        title += 'ranking p-value'
         minAlpha = 0.001
         maxAlpha = 1
         useLog = False
@@ -314,11 +316,11 @@ def tribflow3(pv):
         tr3_sim = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_simData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         tr3_injSim = resultsPath+'tribeflow3/'+'pins_repins_tribeflow3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', tr3_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', tr3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', tr3_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', tr3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', tr3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('tr9_injSim', tr9_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label ='Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'tr3_'+str(pv).replace('.','_')+'.pdf')   
+    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label ='Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'tr3_'+str(pv).replace('.','_')+'.pdf')   
         
 def ngram3(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
@@ -346,11 +348,11 @@ def ngram3(pv):
         ngram3_injSim = resultsPath+'ngram3/'+'pins_repins_ngram3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
 
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', ngram3_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', ngram3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', ngram3_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', ngram3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', ngram3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('ngram3_injSim', ngram3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'ngram3_'+str(pv).replace('.','_')+'.pdf')
+    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'ngram3_'+str(pv).replace('.','_')+'.pdf')
 
 def ngram9(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
@@ -380,11 +382,11 @@ def ngram9(pv):
         ngram9_injSim = resultsPath+'ngram9/'+'pins_repins_ngram9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
 
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', ngram9_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', ngram9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', ngram9_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', ngram9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', ngram9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('ngram3_injSim', ngram3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'ngram9_'+str(pv).replace('.','_')+'.pdf')
+    MyPlot.fusePlots([p1, p2, p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'ngram9_'+str(pv).replace('.','_')+'.pdf')
     
 def rnnlm3(pv):
     resultsPath = '/Users/mohame11/Documents/newResults/'
@@ -413,11 +415,11 @@ def rnnlm3(pv):
         rnn3_injSim = resultsPath+'rnnlm3/'+'pins_repins_rnnlm3_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', rnn3_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', rnn3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', rnn3_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', rnn3_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', rnn3_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'rnn3_'+str(pv).replace('.','_')+'.pdf')
+    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'rnn3_'+str(pv).replace('.','_')+'.pdf')
 
 
 def rnnlm9(pv):
@@ -449,11 +451,11 @@ def rnnlm9(pv):
         rnn9_injSim = resultsPath+'rnnlm9/'+'pins_repins_rnnlm9_noWin_log_simInjectedData_METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
     
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', rnn9_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', rnn9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', rnn9_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', rnn9_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', rnn9_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'rnn9_'+str(pv).replace('.','_')+'.pdf')
+    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'rnn9_'+str(pv).replace('.','_')+'.pdf')
     
     
 def bagOfAction9(pv):
@@ -492,11 +494,11 @@ def bagOfAction9(pv):
         #bag_injSim = resultsPath+'bagOfActions/'+'standAlone_bagOfActions_simulatedData_10'
     
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', bag_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', bag_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', bag_likes_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', bag_likes, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', bag_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'bagOfActions9_'+str(pv).replace('.','_')+'.pdf')
+    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'bagOfActions9_'+str(pv).replace('.','_')+'.pdf')
 
 
 def bagOfAction3(pv):
@@ -513,11 +515,11 @@ def bagOfAction3(pv):
     bag_sim = resultsPath+'bagOfActions/'+'standAlone_bagOfActions_simulatedData_4'
     
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', bag_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', bag_fisher, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', bag_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', bag_fisher, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', bag_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'bagOfActions3_'+str(pv).replace('.','_')+'.pdf')
+    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'bagOfActions3_'+str(pv).replace('.','_')+'.pdf')
 
 
 
@@ -530,22 +532,27 @@ def bagOfAction_lastfm(pv):
     maxAlpha = 1
     useLog = False
     optAlpha = 0.048671875 #currentAlpha= 0.048671875  metric= 0.95047
+    
     bag_fisher = resultsPath+'bagOfActions/'+'bag10_fisher'
     bag_bayesian = resultsPath+'bagOfActions/'+'bag10_bayesian'
+    
+    #bag_fisher = resultsPath+'bagOfActions/'+'bag10_fisher_smallOutliers'
+    #bag_bayesian = resultsPath+'bagOfActions/'+'bag10_bayesian_smallOutliers'
+    
     bag_sim = resultsPath+'bagOfActions/'+'bag10_sim'
     
     
-    p1 = MyPlot('Bayesian\'s test pvalue: likes trajectories', bag_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    p2 = MyPlot('Fisher\'s test pvalue: likes trajectories', bag_fisher, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p1 = MyPlot('Bayesian\'s test p-value: likes trajectories', bag_bayesian, METRIC.BAYESIAN, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
+    p2 = MyPlot('Fisher\'s test p-value: likes trajectories', bag_fisher, METRIC.FISHER, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     p3 = MyPlot('True negative rate: Simulated data', bag_sim, METRIC.TRUE_NEGATIVE_RATE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
     #p3 = MyPlot('rnn3_injSim', rnn3_injSim, METRIC.FSCORE, [str(TECHNIQUE.MAJORITY_VOTING)], minAlpha, maxAlpha)
-    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test pvalue / Fisher\'s test pvalue  / Simulation\'s true negative rate', title=title, savedFigFileName = 'bagOfActions_lastfm_'+str(pv).replace('.','_')+'.pdf')
+    MyPlot.fusePlots([p1,p2,p3], optAlpha, useLog=useLog, my_yaxis_label = 'Bayesian\'s test p-value / Fisher\'s test p-value  / Simulation\'s true negative rate', title=title, savedFigFileName = 'bagOfActions_lastfm_'+str(pv).replace('.','_')+'.pdf')
 
 
 
 def main():
-    mpl.rcParams.update({'font.size': 7})
-    
+    mpl.rcParams.update({'font.size': 11})
+    '''
     tribflow3(PVALUE.WITHOUT_RANKING)
     tribflow3(PVALUE.WITH_RANKING)
     ngram3(PVALUE.WITHOUT_RANKING)
@@ -553,8 +560,9 @@ def main():
     rnnlm3(PVALUE.WITHOUT_RANKING)
     rnnlm3(PVALUE.WITH_RANKING)
     bagOfAction3('alone') #currentAlpha= 0.0483161491527  metric= 0.949222693317
+    '''
     
-    
+    '''
     tribflow9(PVALUE.WITHOUT_RANKING)
     tribflow9(PVALUE.WITH_RANKING)
     ngram9(PVALUE.WITHOUT_RANKING)
@@ -562,7 +570,7 @@ def main():
     rnnlm9(PVALUE.WITHOUT_RANKING)
     rnnlm9(PVALUE.WITH_RANKING)
     bagOfAction9('alone')
-    
+    '''
 
 
     
@@ -570,8 +578,8 @@ def main():
     ####################################
     
     
-    tribflow9_lastfm(PVALUE.WITH_RANKING)
-    tribflow9_lastfm(PVALUE.WITH_RANKING)
+    #tribflow9_lastfm(PVALUE.WITH_RANKING)
+    #tribflow9_lastfm(PVALUE.WITHOUT_RANKING)
     bagOfAction_lastfm('alone')
     
    

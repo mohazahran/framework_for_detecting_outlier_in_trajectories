@@ -311,6 +311,22 @@ def work():
     
     print('>>> Reading Data ...')
     allData = TestSample.parseAnalysisFiles(FILE_NAME, ANALYSIS_FILES_PATH)
+    
+    outlierCountAllowed = 3
+    oc = 0
+    for u in allData:
+        tests = allData[u]
+        for t in tests:
+            c = t.goldMarkers.count(GOLDMARKER.TRUE)
+            if((oc+c) <= outlierCountAllowed):
+                oc += c
+                continue
+            else:
+                tests.remove(t)
+                
+                
+                
+    
     '''
     nonExistingUsers = set()
     rr = open(NON_EXISTING_USERS_PATH, 'r')

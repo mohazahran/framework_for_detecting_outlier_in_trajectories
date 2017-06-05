@@ -310,15 +310,15 @@ class Bayesian(Metric):
         
         #print 'P_OT:', sum(P_OT_list)/len(P_OT_list), 'P_OF:', sum(P_OF_list)/len(P_OF_list), 'P_NT:', sum(P_NT_list)/len(P_NT_list), 'P_NF:', sum(P_NF_list)/len(P_NF_list)
     
-'''
+
 def main():
     b = Bayesian()
     
     #OT=0, OF=0, NT=15289, NF=38983091, stats=['Full', 0.0036, 'T|O', 0.0036, 'OT', 0.0036]
-    b.OT = 534
-    b.OF = 852289
-    b.NT = 1703
-    b.NF = 2419088
+    b.OT = 5
+    b.OF = 1139
+    b.NT = 16
+    b.NF = 195240
     b.calculateStats()
     #b.calculateStats()
     print(b.getSummary())
@@ -326,25 +326,25 @@ def main():
     print()
     
     #OT=15289, OF=38983091, NT=0, NF=0, stats=['Full', 0.9952, 'T|O', 0.9952, 'OT', 0.9952]
-    b.OT = 534
-    b.OF = 852289
-    b.NT = 1703
-    b.NF = 2419088
+    b.OT = 5
+    b.OF = 1139
+    b.NT = 16
+    b.NF = 195240
     b.calculateStats_dirichelet()
     #b.calculateStats()
     print(b.getSummary())
     
     #OT=15289, OF=38983091, NT=0, NF=0, stats=['Full', 0.9952, 'T|O', 0.9952, 'OT', 0.9952]
     b = Fisher()
-    b.OT = 534
-    b.OF = 852289
-    b.NT = 1703
-    b.NF = 2419088
+    b.OT = 5
+    b.OF = 1139
+    b.NT = 16
+    b.NF = 195240
     b.calculateStats()
     #b.calculateStats()
     print(b.getSummary())
     
 main() 
 #alpha=0.0005, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=534, OF=852289, NT=1703, NF=2419088, stats=['Prob_of_significance', 0.0008]
-''' 
+
         
