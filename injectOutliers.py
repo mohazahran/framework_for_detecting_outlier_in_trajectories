@@ -10,13 +10,15 @@ import random
 class InjectOutliers:
     def __init__(self):
         #common
-        self.INPUT_FILE = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_5_forInjection'
+        self.INPUT_FILE = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection'
         self.OUTPUT_FILE = ''
         self.METHOD = SEQ_PROB.TRIBEFLOW
         self.isTraceFile = False #The input data file is a tracefile: has the same format as tribeflow's training data
         #maxInjections = 1
-        self.injectionRatio = 0.1
-        self.samplesCount = 4910
+        self.injectionRatio = 0.0009
+        #self.samplesCount = 4910
+        self.samplesCount = 1962
+        #self.samplesCount = 19640
         
         #tribeflow
         self.MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
@@ -70,6 +72,14 @@ class InjectOutliers:
             markers = ['false']*(len(cats))
             
             maxInjections = int(len(cats) * self.injectionRatio)
+            
+            rn = random.random()
+            if(rn < self.injectionRatio):
+                maxInjections = 1
+                print 'Outlier injected!'
+            else:
+                maxInjections = int(len(cats) * self.injectionRatio)
+            
 
             injectedIdx = random.sample(list(range(len(cats))), maxInjections)
             
