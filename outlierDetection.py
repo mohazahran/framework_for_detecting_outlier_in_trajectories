@@ -31,31 +31,29 @@ class OutlierDetection:
         
         #COMMON
         self.CORES = 20
-        self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
-        self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection_smallOutliers'
-        self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.0005'
-        self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
+
+
+        #self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
+        #self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection_smallOutliers'
+        #self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.0005'
+        #self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
        
-        self.seq_prob = SEQ_PROB.TRIBEFLOW
-        self.useWindow = USE_WINDOW.FALSE
-
-        #self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        #self.RESULTS_PATH = self.PATH + 'myTemp'
-        #self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
-        #self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
-
-        #self.PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/'
-        #self.RESULTS_PATH = self.PATH + 'myTemp'
-        #self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes_withFriendship_win4.trace'
-        #self.MODEL_PATH = self.PATH + 'pins_repins_win4_noop.h5'
         #self.seq_prob = SEQ_PROB.TRIBEFLOW
         #self.useWindow = USE_WINDOW.FALSE
-        
+####################################
+        self.PATH = '/home/mohame11/pins_repins_fixedcat/'
+        self.RESULTS_PATH = self.PATH + 'allLikes/tmp'
+        self.SEQ_FILE_PATH = self.PATH + 'allLikes/sampled_1000likes.trace'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
+
+        self.seq_prob = SEQ_PROB.TRIBEFLOW
+        self.useWindow = USE_WINDOW.FALSE
+#####################################        
         self.groupActionsByUser = True
         
         #TRIBEFLOW
-        #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
-        self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
+        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
+        #self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
         #self.TRACE_PATH = self.PATH + 'pins_repins_win4.trace'
         self.STAT_FILE = self.PATH +'Stats_win10'
         self.UNBIAS_CATS_WITH_FREQ = True

@@ -162,13 +162,15 @@ class BagOfActions (DetectionTechnique):
                     break
                 accum += self.smoothedProbs[key]
                 outlierActions.add(key)
-                
+            
+            outlierCountAllowed = 3
+            where = 0
             #print 'accumalted_pdf=', accum
             #print 'outlier actions count = ', len(outlierActions)
             for user in testDic:
                 for testSample in testDic[user]:
                     seq = testSample.actions
-                    goldMarkers = testSample.goldMarkers
+                    goldMarkers = list(testSample.goldMarkers)
                     decisionVector = []
                     for action in seq:
                         if(action in outlierActions):
@@ -176,8 +178,19 @@ class BagOfActions (DetectionTechnique):
                             decisionVector.append(DECISION.OUTLIER)
                         else:
                             decisionVector.append(DECISION.NORMAL)
+                    #print (len(decisionVector), len(goldMarkers))
+
                     
-     
+                    c = goldMarkers.count(GOLDMARKER.TRUE)
+                    outlierCountAllowed -= c
+                    if(outlierCountAllowed <= 0):
+                        
+                        while GOLDMARKER.TRUE in goldMarkers:
+                            idx = goldMarkers.index(GOLDMARKER.TRUE)
+                            #print 'idx=', idx
+                            del goldMarkers[idx]
+                            del decisionVector[idx]
+                    #print len(decisionVector), len(goldMarkers)
                     metric.update(decisionVector, goldMarkers)
             
             metric.calculateStats() 
@@ -231,7 +244,7 @@ def performOutLierDetection():
     #bag.trace_fpath = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace'
     bag.smoothingParam = 1.0
     #bag.SEQ_FILE_PATH = '/Users/mohame11/Documents/newResults_lastfm/simData_perUser_2_forInjection_injected_0.1'
-    bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.0005'
+    bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1'
     #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simulatedData_bagOfActions'
     #bag.SEQ_FILE_PATH =  '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
     #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
@@ -246,8 +259,8 @@ def performOutLierDetection():
     bag.probMassCutOff = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
     bag.probMassCutOff.append(0.048671875)
     
-    bag.metricType = METRIC.BAYESIAN
-    #bag.metricType = METRIC.FISHER
+    #bag.metricType = METRIC.BAYESIAN
+    bag.metricType = METRIC.FISHER
     #bag.metricType = METRIC.REC_PREC_FSCORE
     testDic,testSetCount = bag.prepareTestSet()
     #NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'

@@ -302,7 +302,7 @@ def work():
     
     
     #ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/pvalues_9gram/'
-    ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection2/'
+    ANALYSIS_FILES_PATH = '/home/mohame11/pins_repins_fixedcat/simulatedData/pvalues/'
     #ANALYSIS_FILES_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/pvalues_3gram/'
     FILE_NAME = 'outlier_analysis_pvalues_'
     #NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
@@ -311,22 +311,25 @@ def work():
     
     print('>>> Reading Data ...')
     allData = TestSample.parseAnalysisFiles(FILE_NAME, ANALYSIS_FILES_PATH)
-    
+    ''' 
     outlierCountAllowed = 3
     oc = 0
     for u in allData:
         tests = allData[u]
         for t in tests:
             c = t.goldMarkers.count(GOLDMARKER.TRUE)
+            #print 'u:',str(u),'c=',c
             if((oc+c) <= outlierCountAllowed):
                 oc += c
                 continue
             else:
-                tests.remove(t)
+                allData[u] = []
+                #tests.remove(t)
+                #print 'del u:', str(u), 'oc=', oc, 'len(tests)', len(tests)
                 
                 
                 
-    
+    '''
     '''
     nonExistingUsers = set()
     rr = open(NON_EXISTING_USERS_PATH, 'r')
@@ -339,8 +342,8 @@ def work():
     '''
     #actionAtBoundary = BOUNDARY.INCLUDE #NEED to BE ADDED
     
-    #metricList = [METRIC.REC_PREC_FSCORE]
-    metricList = [METRIC.BAYESIAN, METRIC.FISHER]
+    metricList = [METRIC.REC_PREC_FSCORE]
+    #metricList = [METRIC.BAYESIAN, METRIC.FISHER]
     #metricList = [METRIC.BAYESIAN]
     #techList = [TECHNIQUE.ALL_OR_NOTHING,TECHNIQUE.MAJORITY_VOTING,TECHNIQUE.ONE_IS_ENOUGH]
     techList = [TECHNIQUE.MAJORITY_VOTING]
@@ -349,14 +352,14 @@ def work():
     alphaList = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
   
     groupActionsByUser = True
-    alphaList.append(1.1828125e-17)
-    alphaList.append(0.95015625)
+    #alphaList.append(1.1828125e-17)
+    #alphaList.append(0.95015625)
     #alphaList= [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0]
     hypList = [HYP.EMPIRICAL]
     #hypList = [HYP.BONFERRONI, HYP.HOLMS]
-    #pvalueList = [PVALUE.WITH_RANKING]
+    pvalueList = [PVALUE.WITH_RANKING]
     #pvalueList = [PVALUE.WITHOUT_RANKING]
-    pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
+    #pvalueList = [PVALUE.WITHOUT_RANKING, PVALUE.WITH_RANKING]
     testSetCountAdjustList = [False]
     
     #debugMode = True
@@ -408,5 +411,5 @@ def work():
   
     
 if __name__ == "__main__":
-    work()
-    print('DONE!')
+    #work()
+    #print('DONE!')
