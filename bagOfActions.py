@@ -377,8 +377,8 @@ def performThresholdSelection():
 
 def main():
     #performDataSimulation()
-    performOutLierDetection()
-    #performThresholdSelection()
+    #performOutLierDetection()
+    performThresholdSelection()
         
         
             
@@ -387,4 +387,5 @@ def main():
     
     
 if __name__ == "__main__":
+    #print('In bag of actions')
     main() 

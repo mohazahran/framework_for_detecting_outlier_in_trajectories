@@ -344,7 +344,8 @@ def main():
     #b.calculateStats()
     print(b.getSummary())
     
-main() 
-#alpha=0.0005, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=534, OF=852289, NT=1703, NF=2419088, stats=['Prob_of_significance', 0.0008]
+if __name__ == "__main__":
+    main() 
+    #alpha=0.0005, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=534, OF=852289, NT=1703, NF=2419088, stats=['Prob_of_significance', 0.0008]
 
         

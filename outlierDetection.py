@@ -42,8 +42,8 @@ class OutlierDetection:
         #self.useWindow = USE_WINDOW.FALSE
 ####################################
         self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/tmp'
-        self.SEQ_FILE_PATH = self.PATH + 'allLikes/sampled_1000likes.trace'
+        self.RESULTS_PATH = self.PATH + 'onlyTrueLikes/pvalues_tmp'
+        self.SEQ_FILE_PATH = self.PATH + 'onlyTrueLikes/sampled1000'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
 
         self.seq_prob = SEQ_PROB.TRIBEFLOW
