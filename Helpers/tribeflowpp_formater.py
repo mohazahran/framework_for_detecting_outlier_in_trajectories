@@ -3,14 +3,17 @@ Created on Sep 12, 2017
 
 @author: mohame11
 '''
+import sys
+sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/')
 from TestSample import *
 
-PATH = '/Users/mohame11/Downloads/traceTmp'
+PATH = '/homes/mohame11/scratch/pins_repins_fixedcat/pins_repins_win10.trace'
 FILE_TYPE = 'trace'
 ACTION_COUNT = 10
 
 testDic = {}
 actions = {}
+users = {}
 
 
 def formOriginalSeq(tests):
@@ -24,6 +27,7 @@ def formOriginalSeq(tests):
 
 def doFormating():
     currentActionCount = 0
+    currentUserCount = 0
     if(FILE_TYPE == 'trace'):
         r = open(PATH, 'r')   
         w = open(PATH+'_tribeflowpp', 'w') 
@@ -45,6 +49,10 @@ def doFormating():
        
         
         for u in testDic:
+            if(u not in users):
+               users[u] = currentUserCount
+               currentUserCount += 1
+
             tests = testDic[u]
             originalSeq = formOriginalSeq(tests)
             t = TestSample()  
@@ -57,17 +65,28 @@ def doFormating():
                 if(action not in actions):
                     actions[action] = currentActionCount
                     currentActionCount += 1
-                st = str(ac)+'\t'+str(u)+'\t'+str(actions[action])
+                st = str(ac)+'\t'+str(users[u])+'\t'+str(actions[action])
                 ac += 1
                 w.write(st+'\n')
             
             
-    w.close()        
-            
+    w.close()
+
+    w = open(PATH+'_tribeflowpp_actionMappings', 'w')
+    for a in actions:
+        w.write(str(a)+'\t'+str(actions[a])+'\n') 
+    w.close()       
+
+    w = open(PATH+'_tribeflowpp_userMappings', 'w')
+    for u in users:
+        w.write(str(u)+'\t'+str(users[u])+'\n')
+    w.close()
+    
             
             
 if __name__ == "__main__":
     doFormating()
+    print('DONE!')
     
     
 
