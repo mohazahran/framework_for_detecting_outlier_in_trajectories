@@ -9,7 +9,7 @@ import math
 import numpy as np
 import os.path
 sys.path.append('Cython/')
-import cythonOptimize
+#import cythonOptimize
 import MyEnums
 
 class TribeFlow (DetectionTechnique):

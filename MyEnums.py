@@ -16,6 +16,8 @@ class METRIC (Enum):
     PRECISION = 7
     FSCORE = 8
     BAYESIAN = 9
+    FALSE_POSITIVE_RATE = 10
+    AUC = 11
 
 class TECHNIQUE(Enum):
     ALL_OR_NOTHING = 1
@@ -46,6 +48,7 @@ class SEQ_PROB(Enum):
     NGRAM = 2
     RNNLM = 3
     BAG_OF_ACTIONS = 4
+    WORD2VEC = 5
 
 class USE_WINDOW (Enum):
     TRUE = 1
