@@ -145,19 +145,18 @@ class Word2vec (DetectionTechnique):
         '''
         negBuff = self.model.negative
         self.model.negative = 5
-        
         nextAction = self.model.predict_output_word(seq.split(),topn=1)
-        
         self.model.negative = negBuff
+        return nextAction
         
         
         
 
 
 
-def experiments():
-    w2v = Word2vec()
-    w2v.train('')
+#def experiments():
+#    w2v = Word2vec()
+#    w2v.train('')
     
     
     

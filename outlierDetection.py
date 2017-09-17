@@ -21,6 +21,7 @@ from DetectionTechnique import *
 from Tribeflow import *
 from NgramLM import *
 from RNNLM import *
+from word2vec import *
 import sys
 from bagOfActions import BagOfActions
 sys.path.append('Cython/')
@@ -41,12 +42,12 @@ class OutlierDetection:
         #self.seq_prob = SEQ_PROB.TRIBEFLOW
         #self.useWindow = USE_WINDOW.FALSE
 ####################################
-        self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'onlyTrueLikes/pvalues_tmp'
-        self.SEQ_FILE_PATH = self.PATH + 'onlyTrueLikes/sampled1000'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
+        self.PATH = '/homes/mohame11/scratch/pins_repins_fixedcat/'
+        self.RESULTS_PATH = self.PATH + 'pvalues_word2vec'
+        self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_CBOW'
 
-        self.seq_prob = SEQ_PROB.TRIBEFLOW
+        self.seq_prob = SEQ_PROB.WORD2VEC
         self.useWindow = USE_WINDOW.FALSE
 #####################################        
         self.groupActionsByUser = True
@@ -59,9 +60,9 @@ class OutlierDetection:
         self.UNBIAS_CATS_WITH_FREQ = True
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
         
-        #NGRM/RNNLM
+        #NGRM/RNNLM/WORD2VEC
         self.HISTORY_SIZE = 9
-        self.DATA_HAS_USER_INFO = False #has no effect on tribeflow
+        self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
         self.VARIABLE_SIZED_DATA = True #has no effect on tribeflow
         self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_forLM_RNNLM_shuffledTrain_ALL_ACTIONS'
 
@@ -158,6 +159,20 @@ class OutlierDetection:
         
         elif(self.seq_prob == SEQ_PROB.RNNLM):
             myModel = RNNLM()
+            myModel.useWindow = self.useWindow
+            myModel.model_path = self.MODEL_PATH
+            myModel.true_mem_size = self.HISTORY_SIZE
+            myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
+            myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
+            myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
+            myModel.RESULTS_PATH = self.RESULTS_PATH
+            myModel.ALL_ACTIONS_PATH = self.ALL_ACTIONS_PATH
+            myModel.groupActionsByUser = self.groupActionsByUser
+            myModel.loadModel()
+            
+        
+        elif(self.seq_prob == SEQ_PROB.WORD2VEC):
+            myModel = Word2vec()
             myModel.useWindow = self.useWindow
             myModel.model_path = self.MODEL_PATH
             myModel.true_mem_size = self.HISTORY_SIZE
