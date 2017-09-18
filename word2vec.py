@@ -100,9 +100,17 @@ class Word2vec (DetectionTechnique):
     def getUserId(self, uid):
         return uid
 
+    def dumpAllActions(self):
+        if(self.model == None):
+            self.model = gensim.models.Word2Vec.load(self.model_path)
+        
+        w = open(self.model_path+'_ALL_ACTIONS','w')
+        for a in self.model.wv.vocab:
+            w.write(a+'\n')
+        w.close()
     
     def train(self, dataSetPath):
-        #gensim.models.word2vec.LineSentence(source, max_sentence_length=10000, limit=None)¶
+        #gensim.models.word2vec.LineSentence(source, max_sentence_length=10000, limit=None)
         sentences = gensim.models.word2vec.LineSentence(dataSetPath)
         
         '''
@@ -153,11 +161,12 @@ class Word2vec (DetectionTechnique):
         
 
 
-
-#def experiments():
-#    w2v = Word2vec()
+def experiments():
+    w2v = Word2vec()
+    w2v.model_path = '/homes/mohame11/scratch/pins_repins_fixedcat/pins_repins_win10.trace_word2vec_CBOW'
+    w2v.dumpAllActions()
 #    w2v.train('')
     
     
     
-#experiments()
+experiments()

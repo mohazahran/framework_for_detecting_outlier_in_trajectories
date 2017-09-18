@@ -19,13 +19,17 @@ from MyEnums import *
 from TestSample import *
 from DetectionTechnique import *
 from Tribeflow import *
-from NgramLM import *
-from RNNLM import *
+#from NgramLM import *
+#from RNNLM import *
 from word2vec import *
 import sys
 from bagOfActions import BagOfActions
-sys.path.append('Cython/')
+#sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython')
+sys.path.append('myCython')
+#sys.path.insert(0,'/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython/')
+import pyximport; pyximport.install()
 import cythonOptimize
+#from myCython import cythonOptimize
 
 class OutlierDetection:
     def __init__(self):
@@ -43,7 +47,7 @@ class OutlierDetection:
         #self.useWindow = USE_WINDOW.FALSE
 ####################################
         self.PATH = '/homes/mohame11/scratch/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'pvalues_word2vec'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_word2vec'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_CBOW'
 
@@ -63,8 +67,8 @@ class OutlierDetection:
         #NGRM/RNNLM/WORD2VEC
         self.HISTORY_SIZE = 9
         self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
-        self.VARIABLE_SIZED_DATA = True #has no effect on tribeflow
-        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_forLM_RNNLM_shuffledTrain_ALL_ACTIONS'
+        self.VARIABLE_SIZED_DATA = False #has no effect on tribeflow
+        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_CBOW_ALL_ACTIONS'
 
 
                            

@@ -7,7 +7,7 @@ import sys
 sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/')
 from TestSample import *
 
-PATH = '/Users/mohame11/Downloads/traceTmp'
+PATH = '/homes/mohame11/scratch/pins_repins_fixedcat/pins_repins_win10.trace'
 FILE_TYPE = 'trace'
 ACTION_COUNT = 10
 
