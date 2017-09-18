@@ -18,6 +18,8 @@ class Word2vec (DetectionTechnique):
         
     def loadModel(self):
         self.model = gensim.models.Word2Vec.load(self.model_path)  # you can continue training with the loaded model!
+        self.model.workers = 1
+        
         r = open(self.ALL_ACTIONS_PATH, 'r')
         for line in r:
             line = line.strip()
@@ -28,8 +30,9 @@ class Word2vec (DetectionTechnique):
     
     def getProbability(self, userId, newSeq):
         #model.score(["The fox jumped over a lazy dog".split()])
-        line = ' '.join(newSeq)
-        logprob = self.model.score([line.split()])
+        #line = ' '.join(newSeq)
+        #logprob = self.model.score([line.split()])
+        logprob = self.model.score(sentences = [newSeq], total_sentences = 1)
         return logprob[0]
         
         
@@ -169,4 +172,4 @@ def experiments():
     
     
     
-experiments()
+#experiments()
