@@ -47,11 +47,11 @@ class OutlierDetection:
         #self.useWindow = USE_WINDOW.FALSE
 ####################################
         self.PATH = '/homes/mohame11/scratch/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_word2vec'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_tribeflowpp'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_CBOW'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_model/'  + 'pins_repins_win10_tribeflowpp.h5.mcmc'
 
-        self.seq_prob = SEQ_PROB.WORD2VEC
+        self.seq_prob = SEQ_PROB.TRIBEFLOW
         self.useWindow = USE_WINDOW.FALSE
 #####################################        
         self.groupActionsByUser = True
