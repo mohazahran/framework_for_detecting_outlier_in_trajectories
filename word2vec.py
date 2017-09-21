@@ -166,10 +166,15 @@ class Word2vec (DetectionTechnique):
 
 def experiments():
     w2v = Word2vec()
-    w2v.model_path = '/homes/mohame11/scratch/pins_repins_fixedcat/pins_repins_win10.trace_word2vec_CBOW'
-    w2v.dumpAllActions()
+    w2v.model_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/word2vec/pins_repins_win10.trace_word2vec_CBOW'
+    model = gensim.models.Word2Vec.load(w2v.model_path)  # you can continue training with the loaded model!
+    model.workers = 1
+    lst = model.wv.similar_by_vector(model.wv['sports'])
+    for x in lst:
+        print x
+    #w2v.dumpAllActions()
 #    w2v.train('')
     
     
-    
-#experiments()
+if __name__ == "__main__":    
+    experiments()

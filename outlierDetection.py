@@ -19,6 +19,7 @@ from MyEnums import *
 from TestSample import *
 from DetectionTechnique import *
 from Tribeflow import *
+from Tribeflowpp import *
 #from NgramLM import *
 #from RNNLM import *
 from word2vec import *
@@ -35,24 +36,27 @@ class OutlierDetection:
     def __init__(self):
         
         #COMMON
-        self.CORES = 20
+        self.CORES = 1
 
+        '''
+        self.PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/'
+        self.RESULTS_PATH = self.PATH + 'tmp_pvalues'
+        self.SEQ_FILE_PATH = self.PATH + 'sampled10_likes.trace'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
 
-        #self.PATH = '/scratch/snyder/m/mohame11/lastFm/'
-        #self.RESULTS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues_tribeflow_injection_smallOutliers'
-        #self.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.0005'
-        #self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
-       
-        #self.seq_prob = SEQ_PROB.TRIBEFLOW
-        #self.useWindow = USE_WINDOW.FALSE
+        self.seq_prob = SEQ_PROB.TRIBEFLOW
+        self.useWindow = USE_WINDOW.FALSE
+        '''
 ####################################
+        
         self.PATH = '/homes/mohame11/scratch/pins_repins_fixedcat/'
         self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_tribeflowpp'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_model/'  + 'pins_repins_win10_tribeflowpp.h5.mcmc'
 
-        self.seq_prob = SEQ_PROB.TRIBEFLOW
+        self.seq_prob = SEQ_PROB.TRIBEFLOWPP
         self.useWindow = USE_WINDOW.FALSE
+        
 #####################################        
         self.groupActionsByUser = True
         
@@ -61,10 +65,10 @@ class OutlierDetection:
         #self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
         #self.TRACE_PATH = self.PATH + 'pins_repins_win4.trace'
         self.STAT_FILE = self.PATH +'Stats_win10'
-        self.UNBIAS_CATS_WITH_FREQ = True
+        self.UNBIAS_CATS_WITH_FREQ = False
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
         
-        #NGRM/RNNLM/WORD2VEC
+        #NGRM/RNNLM/WORD2VEC/TRIBEFLOWPP
         self.HISTORY_SIZE = 9
         self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
         self.VARIABLE_SIZED_DATA = False #has no effect on tribeflow
@@ -188,6 +192,27 @@ class OutlierDetection:
             myModel.groupActionsByUser = self.groupActionsByUser
             myModel.loadModel()
         
+        elif(self.seq_prob == SEQ_PROB.TRIBEFLOWPP):        
+            myModel = TribeFlowpp()
+            myModel.useWindow = self.useWindow
+            myModel.model_path = self.MODEL_PATH
+            myModel.store = pd.HDFStore(self.MODEL_PATH)
+            myModel.true_mem_size = self.HISTORY_SIZE    
+            myModel.trace_fpath = self.TRACE_PATH
+            myModel.UNBIAS_CATS_WITH_FREQ = self.UNBIAS_CATS_WITH_FREQ
+            myModel.STAT_FILE = self.STAT_FILE
+            myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
+            myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
+            myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
+            myModel.groupActionsByUser = self.groupActionsByUser
+            myModel.userMappingsPath = self.PATH + 'pins_repins_win10.trace_tribeflowpp_userMappings'
+            myModel.actionMappingsPath = self.PATH + 'pins_repins_win10.trace_tribeflowpp_actionMappings'
+     
+            if(self.UNBIAS_CATS_WITH_FREQ):
+                print('>>> calculating statistics for unbiasing categories ...')
+                myModel.calculatingItemsFreq(self.smoothingParam)
+            myModel.loadModel()
+        
         elif(self.seq_prob == SEQ_PROB.TRIBEFLOW):        
             myModel = TribeFlow()
             myModel.useWindow = self.useWindow
@@ -212,6 +237,7 @@ class OutlierDetection:
                 print('>>> calculating statistics for unbiasing categories ...')
                 myModel.calculatingItemsFreq(self.smoothingParam)
         
+        
         elif(self.seq_prob == SEQ_PROB.BAG_OF_ACTIONS):
             myModel = BagOfActions()  
             myModel.trace_fpath = self.TRACE_PATH
@@ -225,6 +251,26 @@ class OutlierDetection:
             myModel.useWindow = self.useWindow
             myModel.groupActionsByUser = self.groupActionsByUser
             myModel.loadModel()
+        
+        elif(self.seq_prob == SEQ_PROB.TRIBEFLOW_PP):        
+            myModel = TribeFlowpp()
+            myModel.useWindow = self.useWindow
+            
+            myModel.model_path = self.MODEL_PATH
+            myModel.store = pd.HDFStore(self.MODEL_PATH)
+            myModel.Theta_zh = myModel.store['Theta_zh'].values
+            myModel.Psi_sz = myModel.store['Psi_sz'].values    
+            myModel.true_mem_size = myModel.store['Dts'].values.shape[1]    
+            myModel.hyper2id = dict(myModel.store['hyper2id'].values)
+            myModel.obj2id = dict(myModel.store['source2id'].values)    
+            #myModel.trace_fpath = myModel.store['trace_fpath'][0][0]
+            myModel.trace_fpath = self.TRACE_PATH
+            myModel.UNBIAS_CATS_WITH_FREQ = self.UNBIAS_CATS_WITH_FREQ
+            myModel.STAT_FILE = self.STAT_FILE
+            myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
+            myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
+            myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
+            myModel.groupActionsByUser = self.groupActionsByUser
         
         testDic,testSetCount = myModel.prepareTestSet()
         print('Number of test samples: '+str(testSetCount))   
@@ -241,24 +287,24 @@ class OutlierDetection:
                 coreTestDic[userList[uid]] = testDic[userList[uid]]
                 uid += 1
                 if(coreShare >= idealCoreQuota):
-                    p = Process(target = self.outlierDetection, args=(coreTestDic, coreShare, i, q, myModel))
-                    #outlierDetection(coreTestDic, coreShare, i, q, myModel)
-                    myProcs.append(p)         
+                    #p = Process(target = self.outlierDetection, args=(coreTestDic, coreShare, i, q, myModel))
+                    self.outlierDetection(coreTestDic, coreShare, i, q, myModel)
+                    #myProcs.append(p)         
                     testSetCount -= coreShare
                     leftCores = (self.CORES-(i+1))
                     if(leftCores >0):
                         idealCoreQuota = testSetCount // leftCores 
                     print('>>> Starting process: '+str(i)+' on '+str(coreShare)+' samples.')
-                    p.start()       
+                    #p.start()       
                     break
                                         
-            myProcs.append(p)        
+            #myProcs.append(p)        
             
             
             
-        for i in range(self.CORES):
-            myProcs[i].join()
-            print('>>> process: '+str(i)+' finished')
+        #for i in range(self.CORES):
+        #    myProcs[i].join()
+        #    print('>>> process: '+str(i)+' finished')
         
         
         #results = []

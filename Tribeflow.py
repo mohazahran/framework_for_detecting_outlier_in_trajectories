@@ -16,10 +16,10 @@ class TribeFlow (DetectionTechnique):
     def __init__(self):
         DetectionTechnique.__init__(self)
         self.type = SEQ_PROB.TRIBEFLOW
-        self.hyper2id = None
-        self.obj2id = None
-        self.Theta_zh = None
-        self.Psi_sz = None
+        self.hyper2id = None #mapping users to ids
+        self.obj2id = None #mapping objects to ids
+        self.Theta_zh = None #per user preference over envs
+        self.Psi_sz = None 
         self.smoothedProbs = None
         self.trace_fpath = None
         self.STAT_FILE = None
