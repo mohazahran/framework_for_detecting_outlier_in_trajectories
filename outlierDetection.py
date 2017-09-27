@@ -28,7 +28,7 @@ from bagOfActions import BagOfActions
 #sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython')
 sys.path.append('myCython')
 #sys.path.insert(0,'/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython/')
-import pyximport; pyximport.install()
+#import pyximport; pyximport.install()
 import cythonOptimize
 #from myCython import cythonOptimize
 
@@ -36,7 +36,7 @@ class OutlierDetection:
     def __init__(self):
         
         #COMMON
-        self.CORES = 1
+        self.CORES = 40
 
         '''
         self.PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/'
@@ -49,12 +49,12 @@ class OutlierDetection:
         '''
 ####################################
         
-        self.PATH = '/homes/mohame11/scratch/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_tribeflowpp'
+        self.PATH = '/home/mohame11/pins_repins_fixedcat/'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_SKIPG'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_model/'  + 'pins_repins_win10_tribeflowpp.h5.mcmc'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_SKIPG'
 
-        self.seq_prob = SEQ_PROB.TRIBEFLOWPP
+        self.seq_prob = SEQ_PROB.WORD2VEC
         self.useWindow = USE_WINDOW.FALSE
         
 #####################################        
@@ -72,7 +72,7 @@ class OutlierDetection:
         self.HISTORY_SIZE = 9
         self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
         self.VARIABLE_SIZED_DATA = False #has no effect on tribeflow
-        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_CBOW_ALL_ACTIONS'
+        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_SKIPG_ALL_ACTIONS'
 
 
                            
@@ -99,7 +99,7 @@ class OutlierDetection:
     def outlierDetection(self, coreTestDic, quota, coreId, q, myModel):
         myCnt = 0    
         writer = open(self.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId),'w')
-        
+        resultsList = []
         for user in coreTestDic:
             for testSample in coreTestDic[user]:
                 myCnt += 1
@@ -141,12 +141,18 @@ class OutlierDetection:
                     currentActionPvalueWithRanks = float(currentActionRank+1)/float(len(actions))
                     pValuesWithRanks[i] = currentActionPvalueWithRanks
                     pValuesWithoutRanks[i] = currentActionPvalueWithoutRanks
-                if(len(seq) == len(pValuesWithoutRanks)):                    
-                    writer.write('user##'+str(user)+'||seq##'+str(seq)+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(goldMarkers)+'\n')        
-                if(myCnt%1 == 0):
+                if(len(seq) == len(pValuesWithoutRanks)):    
+                    res = 'user##'+str(user)+'||seq##'+str(seq)+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(goldMarkers)+'\n'
+                    resultsList.append(res)                
+                if(myCnt % 5 == 0):
+                    for res in resultsList:
+                        writer.write(res)
                     writer.flush()
+                    resultsList = []
                     print('>>> proc: '+ str(coreId)+' finished '+ str(myCnt)+'/'+str(quota)+' instances ...')                
-        writer.close()    
+        for res in resultsList:
+            writer.write(res)
+        writer.close()                   
         #ret = [chiSqs, chiSqs_expected]
         #q.put(ret)                                          
                                                                                                                                     
@@ -287,24 +293,24 @@ class OutlierDetection:
                 coreTestDic[userList[uid]] = testDic[userList[uid]]
                 uid += 1
                 if(coreShare >= idealCoreQuota):
-                    #p = Process(target = self.outlierDetection, args=(coreTestDic, coreShare, i, q, myModel))
-                    self.outlierDetection(coreTestDic, coreShare, i, q, myModel)
-                    #myProcs.append(p)         
+                    p = Process(target = self.outlierDetection, args=(coreTestDic, coreShare, i, q, myModel))
+                    #self.outlierDetection(coreTestDic, coreShare, i, q, myModel)
+                    myProcs.append(p)         
                     testSetCount -= coreShare
                     leftCores = (self.CORES-(i+1))
                     if(leftCores >0):
                         idealCoreQuota = testSetCount // leftCores 
                     print('>>> Starting process: '+str(i)+' on '+str(coreShare)+' samples.')
-                    #p.start()       
+                    p.start()       
                     break
                                         
-            #myProcs.append(p)        
+            myProcs.append(p)        
             
             
             
-        #for i in range(self.CORES):
-        #    myProcs[i].join()
-        #    print('>>> process: '+str(i)+' finished')
+        for i in range(self.CORES):
+            myProcs[i].join()
+            print('>>> process: '+str(i)+' finished')
         
         
         #results = []
