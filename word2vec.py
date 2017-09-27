@@ -126,9 +126,9 @@ class Word2vec (DetectionTechnique):
     
 
         '''
-        model = gensim.models.Word2Vec(sentences, size=200, window=9, min_count=2, workers=40, hs=1, negative=0)
+        model = gensim.models.Word2Vec(sentences, size=200, window=9, min_count=2, workers=40, hs=1, negative=0, sg=1)
         
-        model.save(dataSetPath+'_Word2vec')
+        model.save(dataSetPath+'_SKIPG')
         
         if(self.model == None):
             self.model = model
@@ -166,14 +166,14 @@ class Word2vec (DetectionTechnique):
 
 def experiments():
     w2v = Word2vec()
-    w2v.model_path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/word2vec/pins_repins_win10.trace_word2vec_CBOW'
-    model = gensim.models.Word2Vec.load(w2v.model_path)  # you can continue training with the loaded model!
-    model.workers = 1
-    lst = model.wv.similar_by_vector(model.wv['sports'])
-    for x in lst:
-        print x
-    #w2v.dumpAllActions()
-#    w2v.train('')
+    w2v.model_path = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace_word2vec_SKIPG'
+   # model = gensim.models.Word2Vec.load(w2v.model_path)  # you can continue training with the loaded model!
+   # model.workers = 1
+   # lst = model.wv.similar_by_vector(model.wv['sports'])
+   # for x in lst:
+   #     print x
+    w2v.dumpAllActions()
+    #w2v.train(w2v.model_path)
     
     
 if __name__ == "__main__":    
