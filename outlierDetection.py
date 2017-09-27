@@ -197,6 +197,7 @@ class OutlierDetection:
             myModel.RESULTS_PATH = self.RESULTS_PATH
             myModel.ALL_ACTIONS_PATH = self.ALL_ACTIONS_PATH
             myModel.groupActionsByUser = self.groupActionsByUser
+            myModel.nonExistingUserFile = self.nonExistingUserFile
             myModel.loadModel()
         
         elif(self.seq_prob == SEQ_PROB.TRIBEFLOWPP):        
