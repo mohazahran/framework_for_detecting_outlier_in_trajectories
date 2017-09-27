@@ -89,6 +89,16 @@ class Word2vec (DetectionTechnique):
                 t.actions = list(originalSeq)
                 t.goldMarkers = list(originalGoldMarkers)   
                 testDic[u] = [t]
+            
+            #remove users not in training data
+            if (self.DATA_HAS_USER_INFO == True):
+                nonExistingUsers = set()
+                rr = open(self.nonExistingUserFile, 'r')
+                for line in rr:
+                    nonExistingUsers.add(line.strip())
+                rr.close()
+                for us in nonExistingUsers:
+                    testDic.pop(us, None)
         return testDic, testSetCount         
         
         
