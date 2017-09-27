@@ -73,6 +73,7 @@ class OutlierDetection:
         self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
         self.VARIABLE_SIZED_DATA = False #has no effect on tribeflow
         self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_SKIPG_ALL_ACTIONS'
+        self.nonExistingUserFile = self.PATH +'allLikes/likes.trace_nonExistingUsers'
 
 
                            
