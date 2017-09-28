@@ -76,4 +76,30 @@ cpdef double calculateSequenceProb(int[:] theSequence, int theSequenceLen, doubl
         logSeqProbZ[z] = seqProbZ             
         #seqProb += seqProbZ
     #return logSeqProbZ  
-    return getLogProb(logSeqProbZ, Psi_sz.shape[1])    
+    return getLogProb(logSeqProbZ, Psi_sz.shape[1])   
+
+
+@boundscheck(False)
+cpdef double calculateSequenceProb_trpp(int[:] theSequence, int theSequenceLen, double[:] logSeqProbZ, int userId, double[:, ::1] Theta_zh, double[:, :, :] Psi_zss) nogil:
+    cdef int envCount = Theta_zh.shape[0]  
+    cdef double seqProbZ = 0.0   
+    cdef int src = -1
+    cdef int dest = -1
+    cdef double prob = 0.0
+    cdef int nexti = 0
+    cdef int oneLessSeqLen = theSequenceLen - 1
+    cdef int i,z = 0
+    for z in xrange(envCount):  
+        seqProbZ = log10(Theta_zh[z, userId])      
+        for i in range(0, oneLessSeqLen):
+            nexti = i+1
+            src = theSequence[i]
+            dest = theSequence[nexti]
+            prob = Psi_zss[z, src, dest]
+            seqProbZ += log10(prob)
+        logSeqProbZ[z] = seqProbZ
+    return getLogProb(logSeqProbZ, envCount) 
+    
+    
+
+ 
