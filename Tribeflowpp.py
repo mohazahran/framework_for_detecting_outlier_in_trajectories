@@ -17,9 +17,9 @@ import tables
 class TribeFlowpp (DetectionTechnique):
     def __init__(self):
         DetectionTechnique.__init__(self)
-        self.type = SEQ_PROB.TRIBEFLOW_PP
-        self.hyper2id = None #mapping users to ids
-        self.obj2id = None #mapping objects to ids
+        self.type = SEQ_PROB.TRIBEFLOWPP
+        self.hyper2id = {} #mapping users to ids
+        self.obj2id = {} #mapping objects to ids
         self.Theta_zh = None #per user preference over envs
         self.Psi_zss = None #transition between objects for each env
         self.smoothedProbs = None
@@ -31,6 +31,7 @@ class TribeFlowpp (DetectionTechnique):
         self.actionMappingsPath = None
     
     def loadModel(self):
+        '''
         self.obj2id = {}
         r = open(self.actionMappingsPath, 'r')
         for line in r:
@@ -44,7 +45,7 @@ class TribeFlowpp (DetectionTechnique):
             parts = line.split()
             self.hyper2id[parts[0]] = parts[1]
         r.close()
-        
+        '''
         trace, num_obj = self.load_trace(self.trace_fpath)
         model = self.load_model(self.model_path)
         
@@ -57,25 +58,6 @@ class TribeFlowpp (DetectionTechnique):
             P = counts[env] + a #  Add the Dirichlet hyperparameter
             P = (P.T / P.sum(axis=1)).T  #  Normalize rows
             self.Psi_zss[env] = P
-
-
-
-    def calculateSequenceProb(self, theSequence, true_mem_size, userId, obj2id, Theta_zh, Psi_sz):                     
-        seqProb = 0.0
-        window = min(true_mem_size, len(theSequence))
-        envCount = len(self.Psi_zss)
-        logSeqProbZ = np.zeros(envCount, dtype='d').copy()
-        for z in xrange(envCount): #for envs
-            seqProbZ = 0.0        
-            for i in range(0,len(theSequence)-1): 
-                src = theSequence[i]
-                dest = theSequence[i+1]
-                prob_s_d_in_z = self.Psi_zss[z][src][dest]                                                          
-                seqProbZ += math.log10(prob_s_d_in_z)
-            logSeqProbZ[z] = seqProbZ
-        
-        seqProb = cythonOptimize.getLogProb(logSeqProbZ,envCount)
-        return seqProb   
     
     def createTestingSeqFile(self, store):
         from_ = store['from_'][0][0]
@@ -135,22 +117,28 @@ class TribeFlowpp (DetectionTechnique):
         #return self.smoothedProb                            
 
     def getProbability(self, userId, newSeq):
+        '''
         newSeqIds = [self.obj2id[s] for s in newSeq]  
         seqProb = 0.0
         #window = min(self.true_mem_size, len(newSeq))
         envCount = len(self.Psi_zss)
         logSeqProbZ = np.zeros(envCount, dtype='d').copy()
         for z in xrange(envCount): #for envs
-            seqProbZ = 0.0        
+            seqProbZ = math.log10(self.Theta_zh[z, userId])    
             for i in range(0,len(newSeqIds)-1): 
                 src = newSeqIds[i]
                 dest = newSeqIds[i+1]
                 prob_s_d_in_z = self.Psi_zss[z][src][dest]                                                          
                 seqProbZ += math.log10(prob_s_d_in_z)
             logSeqProbZ[z] = seqProbZ
+        logSeqScore = cythonOptimize.getLogProb(logSeqProbZ, envCount)
+        '''   
         
-        logSeqScore = cythonOptimize.getLogProb(logSeqProbZ, envCount)   
-        print(newSeq, logSeqScore)
+        newSeqIds = [self.obj2id[s] for s in newSeq]       
+        newSeqIds_np = np.array(newSeqIds, dtype = 'i4').copy()
+        logSeqProbZ = np.zeros(self.Psi_sz.shape[1], dtype='d').copy()
+        logSeqScore = cythonOptimize.calculateSequenceProb_trpp(newSeqIds_np, len(newSeqIds_np), logSeqProbZ, userId, self.Theta_zh, self.Psi_zss)
+        
     
         if(self.UNBIAS_CATS_WITH_FREQ):
             #unbiasingProb = 1.0
@@ -284,7 +272,7 @@ class TribeFlowpp (DetectionTechnique):
         M = model["param"]["M"]
         S = model["param"]["S"]
     
-        counts = {e: np.empty((S, S)) for e in range(M)}
+        counts = {e: np.zeros((S, S)) for e in range(M)}
     
         for u in range(N):
             Z = trace[u]
@@ -434,7 +422,17 @@ def experiments():
     for env in counts:
         P = counts[env] + a #  Add the Dirichlet hyperparameter
         P = (P.T / P.sum(axis=1)).T  #  Normalize rows
+        #la place smoothing
+        alpha = 1.0
+        P = ( (P.T+alpha) / (P.sum(axis=1)+S) ).T  #  Normalize rows
         tr_matrices[env] = P
+    
+    for i in range(P.shape[0]):
+        for j in range(P.shape[1]):
+            print P[i][j],',',
+        print 'row sum=', sum(P[i:])
+        
+                
 
     print("Getting environment of last observation of each user (in the last MCMC sample)")
     # The first [-1] is to pick the last MCMC sample, the second [-1] is to pick
