@@ -80,7 +80,7 @@ cpdef double calculateSequenceProb(int[:] theSequence, int theSequenceLen, doubl
 
 
 @boundscheck(False)
-cpdef double calculateSequenceProb_trpp(int[:] theSequence, int theSequenceLen, double[:] logSeqProbZ, int userId, double[:, ::1] Theta_zh, double[:, :, :] Psi_zss) nogil:
+cpdef double calculateSequenceProb_trpp(int[:] theSequence, int theSequenceLen, double[:] logSeqProbZ, int userId, double[:, :] Theta_zh, double[:, :, :] Psi_zss) nogil:
     cdef int envCount = Theta_zh.shape[0]  
     cdef double seqProbZ = 0.0   
     cdef int src = -1
