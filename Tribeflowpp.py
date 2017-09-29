@@ -8,8 +8,9 @@ import sys
 import math
 import numpy as np
 import os.path
-sys.path.append('Cython/')
-#import cythonOptimize
+sys.path.append('myCython/')
+import pyximport; pyximport.install()
+import cythonOptimize
 import MyEnums
 import gzip
 import tables
@@ -31,33 +32,47 @@ class TribeFlowpp (DetectionTechnique):
         self.actionMappingsPath = None
     
     def loadModel(self):
-        '''
+        
         self.obj2id = {}
         r = open(self.actionMappingsPath, 'r')
         for line in r:
             parts = line.split()
-            self.obj2id[parts[0]] = parts[1]
+            self.obj2id[parts[0]] = int(parts[1])
         r.close()
         
         self.hyper2id = {}
         r = open(self.userMappingsPath, 'r')
         for line in r:
             parts = line.split()
-            self.hyper2id[parts[0]] = parts[1]
+            self.hyper2id[parts[0]] = int(parts[1])
         r.close()
-        '''
+        
+        print('loading trace and model ...')
         trace, num_obj = self.load_trace(self.trace_fpath)
         model = self.load_model(self.model_path)
         
-        self.Theta_zh = model['P'][-1]
-        
+        #self.Theta_zh = np.zeros((10,1000)) 
+        self.Theta_zh = model['P'][-1].T
+        self.Theta_zh = np.array(self.Theta_zh, dtype = 'd').copy()
+        print('Building transition matrix ...')
+         
         counts = self.get_counts_numpy_array(model, trace)
+
+        #counts = {e: np.zeros((315, 315)) for e in range(10)}
+
         a = model['param']['a']
+        #a = 1.0
         self.Psi_zss = {}
         for env in counts:
             P = counts[env] + a #  Add the Dirichlet hyperparameter
             P = (P.T / P.sum(axis=1)).T  #  Normalize rows
             self.Psi_zss[env] = P
+
+        lst = [None]*len(self.Psi_zss)
+        for e in self.Psi_zss:
+            lst[e] = self.Psi_zss[e]
+        self.Psi_zss = np.array(lst, dtype = 'd').copy()
+    
     
     def createTestingSeqFile(self, store):
         from_ = store['from_'][0][0]
@@ -93,6 +108,8 @@ class TribeFlowpp (DetectionTechnique):
                 #print(parts, parts[1]) 
                 #self.smoothedProbs[parts[0]] = math.log10(float(parts[1]))                    
                 self.smoothedProbs[parts[0]] = float(parts[1]) 
+            r.close()
+            return
             
         
         freqs = {}            
@@ -117,13 +134,16 @@ class TribeFlowpp (DetectionTechnique):
         #return self.smoothedProb                            
 
     def getProbability(self, userId, newSeq):
-        '''
+        ''' 
         newSeqIds = [self.obj2id[s] for s in newSeq]  
         seqProb = 0.0
         #window = min(self.true_mem_size, len(newSeq))
         envCount = len(self.Psi_zss)
         logSeqProbZ = np.zeros(envCount, dtype='d').copy()
         for z in xrange(envCount): #for envs
+            print('self.Theta_zh', self.Theta_zh.shape)
+            print('envcount', envCount)
+            print('z',z,'userid',userId)
             seqProbZ = math.log10(self.Theta_zh[z, userId])    
             for i in range(0,len(newSeqIds)-1): 
                 src = newSeqIds[i]
@@ -134,9 +154,16 @@ class TribeFlowpp (DetectionTechnique):
         logSeqScore = cythonOptimize.getLogProb(logSeqProbZ, envCount)
         '''   
         
+        
         newSeqIds = [self.obj2id[s] for s in newSeq]       
         newSeqIds_np = np.array(newSeqIds, dtype = 'i4').copy()
-        logSeqProbZ = np.zeros(self.Psi_sz.shape[1], dtype='d').copy()
+        logSeqProbZ = np.zeros(self.Theta_zh.shape[0], dtype='d').copy()
+        #print('newSeqIds_np',newSeqIds_np, type(newSeqIds_np))
+        #print('len(newSeqIds_np)', len(newSeqIds_np), type(len(newSeqIds_np)))
+        #print('logSeqProbZ', logSeqProbZ, type(logSeqProbZ))
+        #print('userId',userId,type(userId))
+        #print('self.Theta_zh',self.Theta_zh,type(self.Theta_zh))
+        #print('self.Psi_zss',self.Psi_zss,type(self.Psi_zss))
         logSeqScore = cythonOptimize.calculateSequenceProb_trpp(newSeqIds_np, len(newSeqIds_np), logSeqProbZ, userId, self.Theta_zh, self.Psi_zss)
         
     
@@ -183,9 +210,12 @@ class TribeFlowpp (DetectionTechnique):
                 testDic[user].append(t)                                                    
             else:
                 testDic[user]=[t]
+            #print(testSetCount)
         r.close()
+        #print(testDic, len(testDic))
         if(self.useWindow == USE_WINDOW.FALSE): # we need to use the original sequence instead of overlapping windows
             testSetCount = len(testDic)
+            #print('testSetCount=',testSetCount)
             for u in testDic:
                 tests = testDic[u]
                 originalSeq, originalGoldMarkers = self.formOriginalSeq(tests)
@@ -392,9 +422,9 @@ def experiments():
     S is the #objects, so the transition matrix should be SxS matrix
     a is the dirichelet param
     counts is M matrices of size S x S (M=10, S=1000). I.e. counts[0].shape = 1000x1000
-    tr_matrices is a dic. key is an env, value is a 1000x1000 trans matrix of that env
-    
+    tr_matrices is a dic. key is an env, value is a 1000x1000 trans matrix of that env    
     '''
+    #cythonOptimize.getLogProb([1,2,3],3)
     trpp = TribeFlowpp()
     # Read training trace file and MCMC output
     trace, num_obj = trpp.load_trace("/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/tribeflowpp/example/traces.tsv.gz")
