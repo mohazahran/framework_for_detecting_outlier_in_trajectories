@@ -4,7 +4,9 @@ Created on Oct 5, 2017
 @author: mohame11
 '''
 import TestSample
+from multiprocessing import Process, Queue
 from MyEnums import *
+import time
 #from Tribeflowpp import *
 from Tribeflow import *
 import pandas as pd
@@ -21,6 +23,7 @@ class OutputChecker():
         self.modelType = modelType
         self.nonExistingUsers = nonExistingUsers
         self.model = None
+        self.CORES = 20
     
     def getMissingTestSamples(self):
         if(self.modelType == SEQ_PROB.TRIBEFLOW):
@@ -46,15 +49,15 @@ class OutputChecker():
                 self.model.calculatingItemsFreq(1.0)
 
         elif(self.modelType == SEQ_PROB.TRIBEFLOWPP):
-             self.model = TribeFlowpp()
-             self.model.true_mem_size = 9
-             self.hyper2id = {}
-             self.model.userMappingsPath = '/homes/mohame11/scratch/pins_repins_fixedcat/pins_repins_win10.trace_tribeflowpp_userMappings'
-             r = open(self.model.userMappingsPath, 'r')
-             for line in r:
-                 parts = line.split()
-                 self.model.hyper2id[parts[0]] = int(parts[1])
-             r.close()
+            self.model = TribeFlowpp()
+            self.model.true_mem_size = 9
+            self.hyper2id = {}
+            self.model.userMappingsPath = '/homes/mohame11/scratch/pins_repins_fixedcat/pins_repins_win10.trace_tribeflowpp_userMappings'
+            r = open(self.model.userMappingsPath, 'r')
+            for line in r:
+                parts = line.split()
+                self.model.hyper2id[parts[0]] = int(parts[1])
+            r.close()
             
             
         self.model.SEQ_FILE_PATH =  self.SEQ_FILE_PATH
@@ -68,6 +71,7 @@ class OutputChecker():
             nonExistingUsers.add(line.strip())
         rr.close()
         
+        ############################################
         print('Reading the output data ...')
         outputData = TestSample.parseAnalysisFiles('outlier_analysis_pvalues_', self.RESULTS_PATH)
 
@@ -86,20 +90,60 @@ class OutputChecker():
         leftovers = {}
         
         if(len(testUsers) == len(outputUsers)):
-             print('equal !')
+            print('equal !')
        
         elif(len(testUsers) > len(outputUsers)):
-             print('The diff between the two sets:', len(testUsers) - len(outputUsers))
-             for u in testData:
-                 if(u not in outputData):
-                     leftovers[u] = testData[u]
-             print('number of leftovers=',len(leftovers))
+            print('The diff between the two sets:', len(testUsers) - len(outputUsers))
+            for u in testData:
+                if(u not in outputData):
+                    leftovers[u] = testData[u]
+            print('number of leftovers=',len(leftovers))
         else:
-             print 'MORE OUTPUT than the DATA !!!!!!'
-
+            print 'MORE OUTPUT than the DATA !!!!!!'
+            
+            
+        #########################################################3
         
         od = outlierDetection.OutlierDetection()
-        od.outlierDetection(leftovers, len(leftovers), '999', None, self.model)
+        #od.outlierDetection(leftovers, len(leftovers), '999', None, self.model)
+        
+        testSetCount = len(leftovers)
+        start_time = time.time()
+        myProcs = []
+        workTot = 0
+        idealCoreQuota = testSetCount // self.CORES
+        userList = leftovers.keys()    
+        uid = 0
+        for i in range(self.CORES):  
+            coreTestDic = {}
+            coreShare = 0
+            while uid < len(userList):
+                coreShare += len(leftovers[userList[uid]])
+                coreTestDic[userList[uid]] = leftovers[userList[uid]]
+                uid += 1
+                if(coreShare >= idealCoreQuota):
+                    p = Process(target = od.outlierDetection, args=(coreTestDic, coreShare, i+1000, None, self.model))
+                    #self.outlierDetection(coreTestDic, coreShare, i, q, myModel)
+                    myProcs.append(p)         
+                    testSetCount -= coreShare
+                    leftCores = (self.CORES-(i+1))
+                    if(leftCores >0):
+                        idealCoreQuota = testSetCount // leftCores 
+                    print('>>> Starting process: '+str(i)+' on '+str(coreShare)+' samples.')
+                    workTot += coreShare
+                    p.start()       
+                    break
+                                       
+            #myProcs.append(p)        
+        print('Total workload', workTot)
+            
+            
+        for i in range(self.CORES):
+            myProcs[i].join()
+            print('>>> process: '+str(i)+' finished')
+        
+        elapsed_time = time.time() - start_time
+        print 'Elapsed Time=', elapsed_time
         
         
   
