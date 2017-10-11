@@ -10,6 +10,7 @@ from scipy.stats import chisquare
 from collections import OrderedDict
 from multiprocessing import Process, Queue
 
+import time
 import pandas as pd
 #import plac
 import numpy as np
@@ -18,18 +19,20 @@ import os.path
 from MyEnums import *
 from TestSample import *
 from DetectionTechnique import *
-from Tribeflow import *
-from Tribeflowpp import *
+#from Tribeflow import *
+#from Tribeflowpp import *
+from MyWord2vec import *
 #from NgramLM import *
 #from RNNLM import *
-from word2vec import *
 import sys
-from bagOfActions import BagOfActions
+#from bagOfActions import BagOfActions
 #sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython')
 sys.path.append('myCython')
 #sys.path.insert(0,'/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython/')
-#import pyximport; pyximport.install()
+#import cythonOptimize
+import pyximport; pyximport.install()
 import cythonOptimize
+#from cythonOptimize import *
 #from myCython import cythonOptimize
 
 class OutlierDetection:
@@ -37,33 +40,43 @@ class OutlierDetection:
         
         #COMMON
         self.CORES = 40
+        #cythonOptimize.getLogProb([],0)
+        
+                
+	self.PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/'
+	self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_SKIPG'
+	self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
+	self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_SKIPG'
+	self.seq_prob = SEQ_PROB.WORD2VEC
+	self.useWindow = USE_WINDOW.FALSE
+        
 
-        '''
-        self.PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/'
-        self.RESULTS_PATH = self.PATH + 'tmp_pvalues'
-        self.SEQ_FILE_PATH = self.PATH + 'sampled10_likes.trace'
+        ''' 
+        self.PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_tr_leftovers'
+        self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
-
         self.seq_prob = SEQ_PROB.TRIBEFLOW
         self.useWindow = USE_WINDOW.FALSE
         '''
 ####################################
-        
-        self.PATH = '/home/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_SKIPG'
+        '''
+        self.PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/'
+        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_tribeflowpp'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_SKIPG'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_model/pins_repins_win10_tribeflowpp.h5.mcmc'
 
-        self.seq_prob = SEQ_PROB.WORD2VEC
+        self.seq_prob = SEQ_PROB.TRIBEFLOWPP
         self.useWindow = USE_WINDOW.FALSE
+        '''
         
 #####################################        
-        self.groupActionsByUser = True
+        self.groupActionsByUser = False   # True will just append all sequences for a user into a long sequence
         
         #TRIBEFLOW
-        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
+        #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp.tsv.gz'
         #self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
-        #self.TRACE_PATH = self.PATH + 'pins_repins_win4.trace'
+        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
         self.STAT_FILE = self.PATH +'Stats_win10'
         self.UNBIAS_CATS_WITH_FREQ = False
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
@@ -99,12 +112,15 @@ class OutlierDetection:
 
     def outlierDetection(self, coreTestDic, quota, coreId, q, myModel):
         myCnt = 0    
-        writer = open(self.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId),'w')
-        resultsList = []
+        writer = open(myModel.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId),'w')
+	print('writing to: ',myModel.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId))
+        #print('Inside: coreId',coreId,' len(coreTestDic)', len(coreTestDic))
+        #print('10keys', coreTestDic.keys()[0:10])
         for user in coreTestDic:
+            #print('user',user)
             for testSample in coreTestDic[user]:
                 myCnt += 1
-                #print(myCnt)
+                #print('myCnt=', myCnt)
                 seq = testSample.actions
                 goldMarkers = testSample.goldMarkers
                 actions = myModel.getAllPossibleActions()              
@@ -135,25 +151,21 @@ class OutlierDetection:
                         logProb = float(scores[j]) - float(logNormalizingConst)
                         probabilities[j] = math.pow(10, logProb)
                         #probabilities[j] = float(scores[j])/float(normalizingConst)
-                    #sorting ascendingly
+                    #sorting ascendingy
                     keySortedProbs = sorted(probabilities, key=lambda k: (-probabilities[k], k), reverse=True)
                     currentActionRank = keySortedProbs.index(currentActionIndex)
                     currentActionPvalueWithoutRanks = self.getPvalueWithoutRanking(currentActionRank, keySortedProbs, probabilities)
                     currentActionPvalueWithRanks = float(currentActionRank+1)/float(len(actions))
                     pValuesWithRanks[i] = currentActionPvalueWithRanks
                     pValuesWithoutRanks[i] = currentActionPvalueWithoutRanks
-                if(len(seq) == len(pValuesWithoutRanks)):    
-                    res = 'user##'+str(user)+'||seq##'+str(seq)+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(goldMarkers)+'\n'
-                    resultsList.append(res)                
+                if(len(seq) == len(pValuesWithoutRanks)):                    
+                    writer.write('user##'+str(user)+'||seq##'+str(seq)+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(goldMarkers)+'\n')        
+                else:
+                    print('seq len not equal to the number of pvalues !')
                 if(myCnt % 5 == 0):
-                    for res in resultsList:
-                        writer.write(res)
                     writer.flush()
-                    resultsList = []
                     print('>>> proc: '+ str(coreId)+' finished '+ str(myCnt)+'/'+str(quota)+' instances ...')                
-        for res in resultsList:
-            writer.write(res)
-        writer.close()                   
+        writer.close()    
         #ret = [chiSqs, chiSqs_expected]
         #q.put(ret)                                          
                                                                                                                                     
@@ -187,7 +199,12 @@ class OutlierDetection:
             
         
         elif(self.seq_prob == SEQ_PROB.WORD2VEC):
-            myModel = Word2vec()
+            #w2v = MyWord2vec()
+            #w2v.model_path = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10.trace_word2vec_SKIPG'
+            #model = gensim.models.Word2Vec.load(w2v.model_path)  # you can continue training with the loaded model!
+            #print('Fast word2vec =', gensim.models.word2vec.FAST_VERSION)
+            #print('Fast word2vec_inner=', gensim.models.word2vec_inner.FAST_VERSION)
+            myModel = MyWord2vec()
             myModel.useWindow = self.useWindow
             myModel.model_path = self.MODEL_PATH
             myModel.true_mem_size = self.HISTORY_SIZE
@@ -204,7 +221,6 @@ class OutlierDetection:
             myModel = TribeFlowpp()
             myModel.useWindow = self.useWindow
             myModel.model_path = self.MODEL_PATH
-            myModel.store = pd.HDFStore(self.MODEL_PATH)
             myModel.true_mem_size = self.HISTORY_SIZE    
             myModel.trace_fpath = self.TRACE_PATH
             myModel.UNBIAS_CATS_WITH_FREQ = self.UNBIAS_CATS_WITH_FREQ
@@ -260,29 +276,12 @@ class OutlierDetection:
             myModel.groupActionsByUser = self.groupActionsByUser
             myModel.loadModel()
         
-        elif(self.seq_prob == SEQ_PROB.TRIBEFLOW_PP):        
-            myModel = TribeFlowpp()
-            myModel.useWindow = self.useWindow
-            
-            myModel.model_path = self.MODEL_PATH
-            myModel.store = pd.HDFStore(self.MODEL_PATH)
-            myModel.Theta_zh = myModel.store['Theta_zh'].values
-            myModel.Psi_sz = myModel.store['Psi_sz'].values    
-            myModel.true_mem_size = myModel.store['Dts'].values.shape[1]    
-            myModel.hyper2id = dict(myModel.store['hyper2id'].values)
-            myModel.obj2id = dict(myModel.store['source2id'].values)    
-            #myModel.trace_fpath = myModel.store['trace_fpath'][0][0]
-            myModel.trace_fpath = self.TRACE_PATH
-            myModel.UNBIAS_CATS_WITH_FREQ = self.UNBIAS_CATS_WITH_FREQ
-            myModel.STAT_FILE = self.STAT_FILE
-            myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
-            myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
-            myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
-            myModel.groupActionsByUser = self.groupActionsByUser
         
         testDic,testSetCount = myModel.prepareTestSet()
         print('Number of test samples: '+str(testSetCount))   
+        start_time = time.time()
         myProcs = []
+        workTot = 0
         idealCoreQuota = testSetCount // self.CORES
         userList = testDic.keys()    
         uid = 0
@@ -303,18 +302,20 @@ class OutlierDetection:
                     if(leftCores >0):
                         idealCoreQuota = testSetCount // leftCores 
                     print('>>> Starting process: '+str(i)+' on '+str(coreShare)+' samples.')
+                    workTot += coreShare
                     p.start()       
                     break
-                                        
-            myProcs.append(p)        
-            
+                                       
+            #myProcs.append(p)        
+        print('Total workload', workTot)
             
             
         for i in range(self.CORES):
             myProcs[i].join()
             print('>>> process: '+str(i)+' finished')
         
-        
+        elapsed_time = time.time() - start_time
+        print 'Elapsed Time=', elapsed_time
         #results = []
         #for i in range(CORES):
         #    results.append(q.get(True))
@@ -323,7 +324,7 @@ class OutlierDetection:
         print('\n>>> All DONE!')
         #store.close()
 
-                                       
+                                    
 def work():  
     detect = OutlierDetection() 
     detect.distributeOutlierDetection() 
