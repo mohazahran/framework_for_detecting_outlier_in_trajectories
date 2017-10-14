@@ -6,6 +6,7 @@ Created on Nov 30, 2016
 import pandas as pd
 import numpy as np
 import random
+import TestSample
 
 class DataGenerator(object):    
     def __init__(self, MODEL_PATH, DATA_GEN, perUserSequences):
@@ -64,10 +65,10 @@ class DataGenerator(object):
             currento = sampledo
         return seq
     
-    def generateOneSequence_optimized(self, z, starto):
+    def generateOneSequence_optimized(self, z, starto, actionCount):
         seq = [starto]
         currento = starto
-        for i in range(self.true_mem_size):
+        for i in range(actionCount-1):
             currento_o = np.array(self.Psi_oz[:, z])
             currento_o *= currento_o[currento]
             currento_o = currento_o / currento_o.sum() #Re-normalize
@@ -78,7 +79,7 @@ class DataGenerator(object):
         return seq
                             
     
-    def generateSequenceByUser_optimized(self, h):                        
+    def generateSequenceByUser_optimized(self, h, actionCount):                        
         h_z = self.Theta_zh[:,h]
         sampledZ = self.sample(list(range(0,self.nz)), h_z)[0]
         
@@ -88,7 +89,7 @@ class DataGenerator(object):
         
         #T = self.getTransitionMatrixForEnv(sampledZ)  
         
-        seqIds = self.generateOneSequence_optimized(sampledZ, firsto)
+        seqIds = self.generateOneSequence_optimized(sampledZ, firsto, actionCount)
         seq = []
         for s in seqIds:
             seq.append(self.id2obj[s])
@@ -115,7 +116,7 @@ class DataGenerator(object):
         
                
         
-    def generate(self):                    
+    def generate(self, userTrajLen):                    
         w = open(self.DATA_GEN, 'w')
         cnt = 0
         for userName in self.hyper2id:
@@ -136,7 +137,7 @@ class DataGenerator(object):
         w.close()
         
     
-    def generate_optimized(self):
+    def generate_optimized(self, userTrajLen):
         w = open(self.DATA_GEN, 'w')
         cnt = 0
         print '#users', len(self.hyper2id)
@@ -145,25 +146,77 @@ class DataGenerator(object):
             print(str(cnt)+' users are finished ...')
             cnt+=1
             h = self.hyper2id[userName]
+            seqLen = userTrajLen[userName]
+            bursts = seqLen // (self.true_mem_size+1)
+            leftovers = seqLen % (self.true_mem_size+1)
             
-            for i in range(self.perUserSequences):
+            print('user:',userName, seqLen)
+            w.write(str(userName)+'\t')
+            for i in range(bursts):
                 #print userName, i
-                w.write(str(userName)+'\t')
-                seq = self.generateSequenceByUser_optimized(h)                
+                seq = self.generateSequenceByUser_optimized(h, self.true_mem_size+1)                
                 for s in seq:
                     w.write(s + '\t')
                 for g in range(self.true_mem_size+1):
                     w.write('false\t')
-                w.write('\n')               
-                w.flush()
+            
+            
+            if(leftovers > 0):
+                seq = self.generateSequenceByUser_optimized(h, leftovers)                
+                for s in seq:
+                    w.write(s + '\t')
+                for g in range(leftovers):
+                    w.write('false\t')
+            
+            w.write('\n')               
+            w.flush()
         w.close()
                 
             
         
     
+    def formOriginalSeq(self, tests):
+        origSeq = list(tests[0].actions)  
+        if(len(tests) <= 1):
+            return origSeq
+        for i in range(1,len(tests)):
+            a = tests[i].actions[-1]
+            origSeq.append(a)           
+        return origSeq
+
+    def getUserTrajectoryLengths(self, trainPath):
+        userTrajLen = {}
+        testDic = {}
+        print(">> Reading training set ...")
+        testSetCount = 0
+        r = open(trainPath, 'r')    
+        for line in r:
+            line = line.strip() 
+            tmp = line.split()  
+            actionStartIndex = 10
+            
+            user = tmp[9]   
+            
+            seq = tmp[actionStartIndex :]
+    
+            t = TestSample()  
+            t.user = user
+            t.actions = list(seq)  
+            
+            testSetCount += 1
+            if(user in testDic):
+                testDic[user].append(t)                                                    
+            else:
+                testDic[user]=[t]
+        r.close()
+    
+        testSetCount = len(testDic)
+        for u in testDic:
+            tests = testDic[u]
+            originalSeq = self.formOriginalSeq(tests)
+            userTrajLen[u] = len(originalSeq)
         
-
-
+        return userTrajLen  
 
 
 
@@ -173,11 +226,13 @@ def main():
     MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
     #MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/New_Linux/PARSED_pins_repins_win10_noop_NoLeaveOut_pinterest.h5'
     DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/tmp'
+    TRAIN_APTH = ''
     perUserSequences = 20
-       
+    
     dg = DataGenerator(MODEL_PATH, DATA_GEN, perUserSequences)
-    #dg.generate()
-    dg.generate_optimized()
+    userTrajLen = dg.getUserTrajectoryLengths(TRAIN_APTH)
+    #dg.generate(userTrajLen)
+    dg.generate_optimized(userTrajLen)
   
     
 
