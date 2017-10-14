@@ -6,7 +6,7 @@ Created on Nov 30, 2016
 import pandas as pd
 import numpy as np
 import random
-import TestSample
+from TestSample import *
 
 class DataGenerator(object):    
     def __init__(self, MODEL_PATH, DATA_GEN, perUserSequences):
@@ -142,31 +142,32 @@ class DataGenerator(object):
         cnt = 0
         print '#users', len(self.hyper2id)
         for userName in self.hyper2id:
-            #if(cnt % 10 == 0):
-            print(str(cnt)+' users are finished ...')
+            if(cnt % 1000 == 0):
+                print(str(cnt)+' users are finished ...')
             cnt+=1
             h = self.hyper2id[userName]
             seqLen = userTrajLen[userName]
             bursts = seqLen // (self.true_mem_size+1)
             leftovers = seqLen % (self.true_mem_size+1)
             
-            print('user:',userName, seqLen)
+            #print('user:',userName, seqLen)
             w.write(str(userName)+'\t')
             for i in range(bursts):
                 #print userName, i
                 seq = self.generateSequenceByUser_optimized(h, self.true_mem_size+1)                
                 for s in seq:
                     w.write(s + '\t')
-                for g in range(self.true_mem_size+1):
-                    w.write('false\t')
+             
             
             
             if(leftovers > 0):
                 seq = self.generateSequenceByUser_optimized(h, leftovers)                
                 for s in seq:
                     w.write(s + '\t')
-                for g in range(leftovers):
-                    w.write('false\t')
+
+           
+            #for g in range(seqLen):
+            #    w.write('false\t')
             
             w.write('\n')               
             w.flush()
@@ -223,14 +224,16 @@ class DataGenerator(object):
 
 
 def main():
-    MODEL_PATH = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_noob.h5'
+    MODEL_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10_noop_NoLeaveOut.h5'
     #MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/New_Linux/PARSED_pins_repins_win10_noop_NoLeaveOut_pinterest.h5'
-    DATA_GEN = '/scratch/snyder/m/mohame11/lastFm/simulatedData/tmp'
-    TRAIN_APTH = ''
-    perUserSequences = 20
+    DATA_GEN = '/u/scratch1/mohame11/pins_repins_fixedcat/simulatedData/tr9_simData_matchTraining'
+    TRAIN_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    perUserSequences = -1
     
     dg = DataGenerator(MODEL_PATH, DATA_GEN, perUserSequences)
-    userTrajLen = dg.getUserTrajectoryLengths(TRAIN_APTH)
+    print('Getting user trajectory lengths from training data ...')
+    userTrajLen = dg.getUserTrajectoryLengths(TRAIN_PATH)
+    print('userTrajLen', len(userTrajLen))
     #dg.generate(userTrajLen)
     dg.generate_optimized(userTrajLen)
   
