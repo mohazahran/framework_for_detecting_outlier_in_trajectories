@@ -24,6 +24,7 @@ from Tribeflow import *
 #from MyWord2vec import *
 #from NgramLM import *
 #from RNNLM import *
+from HMM import *
 import sys
 #from bagOfActions import BagOfActions
 #sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython')
@@ -39,26 +40,26 @@ class OutlierDetection:
     def __init__(self):
         
         #COMMON
-        self.CORES = 40
+        self.CORES = 2
         #cythonOptimize.getLogProb([],0)
         
-                               
-	self.PATH = '/u/scratch1/mohame11/lastFm/'
-	self.RESULTS_PATH = self.PATH + 'simulatedData/pvalues_tr9_www_simData_perUser20'
-	self.SEQ_FILE_PATH = self.PATH + 'simulatedData/tr9_www_simData_perUser20'
-	self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
-	self.seq_prob = SEQ_PROB.TRIBEFLOW
-	self.useWindow = USE_WINDOW.FALSE
-        
-
-        ''' 
-        self.PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'asd'
-        self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
+        '''          
+        self.PATH = '/u/scratch1/mohame11/lastFm/'
+        self.RESULTS_PATH = self.PATH + 'simulatedData/pvalues_tr9_www_simData_perUser20'
+        self.SEQ_FILE_PATH = self.PATH + 'simulatedData/tr9_www_simData_perUser20'
+        self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
         self.seq_prob = SEQ_PROB.TRIBEFLOW
         self.useWindow = USE_WINDOW.FALSE
         '''
+
+        
+        self.PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/HMM/'
+        self.RESULTS_PATH = self.PATH + 'pvalues'
+        self.SEQ_FILE_PATH = self.PATH + 'likes.trace'
+        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_HMM_MODEL.pkl'
+        self.seq_prob = SEQ_PROB.HMM
+        self.useWindow = USE_WINDOW.FALSE
+        
         
 ####################################
         '''
@@ -72,9 +73,9 @@ class OutlierDetection:
         '''
         
 #####################################        
-        self.groupActionsByUser = True   # True will just append all sequences for a user into a long sequence
+        self.groupActionsByUser = False   # True will just append all sequences for a user into a long sequence
         self.DATA_HAS_USER_INFO = True
-        self.VARIABLE_SIZED_DATA = True
+        self.VARIABLE_SIZED_DATA = False
 
         
         #TRIBEFLOW
@@ -82,13 +83,13 @@ class OutlierDetection:
         self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
         #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp.tsv.gz'
         self.STAT_FILE = self.PATH +'Stats_win10'
-        self.UNBIAS_CATS_WITH_FREQ = True
+        self.UNBIAS_CATS_WITH_FREQ = False
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
         
         #NGRM/RNNLM/WORD2VEC/TRIBEFLOWPP
         self.HISTORY_SIZE = 9
-        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_actionMappings'
-        #self.nonExistingUserFile = self.PATH +'allLikes/likes.trace_nonExistingUsers'
+        #self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_actionMappings'
+        self.nonExistingUserFile = self.PATH +'likes.trace_nonExistingUsers'
 
 
                            
@@ -112,7 +113,7 @@ class OutlierDetection:
         pw = (-1)*logScores[0] + self.get_norm_from_logScores(logScores[1:])
 
         try:
-            res = logProbs[0] + math.log10(1+(math.pow(10,pw)))
+            res = logScores[0] + math.log10(1+(math.pow(10,pw)))
         except:
             res = logScores[0] + pw
  
@@ -245,6 +246,22 @@ class OutlierDetection:
             myModel.groupActionsByUser = self.groupActionsByUser
             myModel.nonExistingUserFile = self.nonExistingUserFile
             myModel.loadModel()
+            
+        elif(self.seq_prob == SEQ_PROB.HMM):
+            
+            myModel = HMM()
+            myModel.useWindow = self.useWindow
+            myModel.model_path = self.MODEL_PATH
+            myModel.true_mem_size = self.HISTORY_SIZE
+            myModel.SEQ_FILE_PATH = self.SEQ_FILE_PATH
+            myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
+            myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
+            myModel.RESULTS_PATH = self.RESULTS_PATH
+            #myModel.ALL_ACTIONS_PATH = self.ALL_ACTIONS_PATH
+            myModel.groupActionsByUser = self.groupActionsByUser
+            myModel.nonExistingUserFile = self.nonExistingUserFile
+            myModel.actionMappingsPath = self.PATH + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
+            myModel.loadModel()
         
         elif(self.seq_prob == SEQ_PROB.TRIBEFLOWPP):        
             myModel = TribeFlowpp()
@@ -355,7 +372,7 @@ class OutlierDetection:
                                 
         print('\n>>> All DONE!')
         #store.close()
-	
+
                                     
 def work():  
     detect = OutlierDetection() 
