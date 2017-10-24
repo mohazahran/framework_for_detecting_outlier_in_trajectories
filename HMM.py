@@ -9,6 +9,7 @@ import numpy as np
 from hmmlearn import hmm
 from sklearn.externals import joblib
 from Metric import *
+import random
 
 class HMM(DetectionTechnique):
     def __init__(self):
@@ -29,7 +30,8 @@ class HMM(DetectionTechnique):
         return origSeq
     
     def doFormating(self):
-        PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/pins_repins_win10.trace'
+        #PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/pins_repins_win10.trace'
+        PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace'
         FILE_TYPE = 'trace'
         ACTION_COUNT = 10
         ACTION_MAPPINGS_PATH = PATH+'_HMM_ACTION_MAPPINGS'
@@ -83,6 +85,19 @@ class HMM(DetectionTechnique):
         for a in actionDic:
             wr.write(a+'\t'+str(actionDic[a])+'\n')
         wr.close()
+        
+    def getAllPossibleActions(self):
+        return self.obj2id.keys()
+    
+    def getUserId(self, uid):
+        return uid
+    
+    def getProbability(self, userId, newSeq):
+        import warnings
+        warnings.filterwarnings('ignore')
+        actionIds = [self.obj2id[a] for a in newSeq]
+        score = self.model.score(actionIds)
+        return score
     
     def trainHmm(self, trainPath):
         r = open(trainPath, 'r')
@@ -106,12 +121,14 @@ class HMM(DetectionTechnique):
         
     
     def loadModel(self):
-        self.model = joblib.load(self.MODEL_PATH) 
+        self.model = joblib.load(self.model_path) 
         self.obj2id = {}
+        self.id2Obj = {}
         r = open(self.actionMappingsPath, 'r')
         for line in r:
             parts = line.split()
             self.obj2id[parts[0]] = int(parts[1])
+            self.id2Obj[int(parts[1])] = parts[0]
         r.close()
         
     
@@ -192,20 +209,40 @@ class HMM(DetectionTechnique):
         
         for m in metricList:
             if(m == METRIC.BAYESIAN):
-                metric = Bayesian()
                 w = open(path+'METRIC_BAYESIAN', 'w')
             elif(m == METRIC.FISHER):
-                metric = Fisher()
                 w = open(path+'METRIC_FISHER', 'w')
+            elif(m == METRIC.REC_PREC_FSCORE):
+                w = open(path+'METRIC_REC_PREC_FSCORE', 'w')
+            
+            
+            predictionsBuffer = {}
+            
             for alpha in alphaList:
+                if(m == METRIC.BAYESIAN):
+                    metric = Bayesian()
+                elif(m == METRIC.FISHER):
+                    metric = Fisher()
+                elif(m == METRIC.REC_PREC_FSCORE):
+                    metric = rpf()
+                
                 cnt = 0
+                print alpha
                 for user in testDic:
                     cnt += 1
-                    print(cnt,'/',len(testDic))
+                    if(cnt % 10 == 0):
+                        print(cnt,'/',len(testDic))
                     for testSample in testDic[user]:
                         decisionVector = []
                         actionIds = [self.obj2id[a] for a in testSample.actions]
-                        prediction = self.model.predict(actionIds)
+                        #print(testSample.actions)
+                        key = str(user)+':'+str(actionIds)
+                        if(key in predictionsBuffer):
+                            prediction = predictionsBuffer[key]
+                        else:
+                            prediction = self.model.predict(actionIds)
+                            predictionsBuffer[key] = prediction
+                            
                         for i in range(len(actionIds)):
                             hiddenStat = prediction[i]
                             stateEmission = self.model._get_emissionprob()[hiddenStat]
@@ -217,16 +254,48 @@ class HMM(DetectionTechnique):
                         
                         metric.update(decisionVector, testSample.goldMarkers)
                 
-                
+                print(metric.getSummary())
                 metric.calculateStats() 
-                w.write('alpha='+str(self.alpha))
+                w.write('alpha='+str(alpha))
                 w.write(','+str(TECHNIQUE.MAJORITY_VOTING))       
                 w.write(','+str(HYP.EMPIRICAL),)                                
-                w.write(',TScountAdj='+str(False),':')
+                w.write(',TScountAdj='+str(False)+':')
                 w.write(metric.getSummary()+'\n')
+                w.flush()
             w.close()  
             
+    
+    def simulatedSeq(self, size):
+        currState = random.choice(list(range(self.model.n_components)))
+        seq = []
+        for i in range(size):
+            stateEmission = self.model._get_emissionprob()[currState]
+            actionId = np.random.choice(list(range(self.model.n_symbols)), 1, replace =True, p=stateEmission)[0]
+            action = self.id2Obj[actionId]
+            seq.append(action)
+            
+            trans = self.model._get_transmat()[currState]
+            currState = np.random.choice(list(range(self.model.n_components)), 1, replace =True, p=trans)[0]
+        return seq
+            
+            
         
+    def simulateData(self, mu, sigma, sampleCount, filepath):
+        w = open(filepath, 'w')
+        sizes = np.random.normal(mu, sigma, sampleCount)
+        cnt = 0
+        for i in sizes:
+            if(i<=8):
+                continue
+            seq = self.simulatedSeq(int(i))
+            if(len(seq) <= 1):
+                print seq
+            w.write(' '.join(seq)+'\n')
+            if(cnt % 10 == 0):
+                w.flush()
+                print cnt
+            cnt += 1
+        w.close()
         
         
 def expirements():
@@ -264,31 +333,67 @@ def expirements():
             print('outlier')
     
          
-            
-if __name__ == "__main__":
-    #expirements()
-    #h = HMM()
-    #h.doFormating()
+
+def trainTheHMM():
+    h = HMM()
+    print('Formating ...')
+    h.doFormating()
     #trainPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/pins_repins_win10.trace_HMM'
-    #h.trainHmm(trainPath)
+    trainPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace_HMM'
+    print('Training HMM ...')
     
+    h.trainHmm(trainPath)
+    
+def doTheOutlierDetection():
     myModel = HMM()
-    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/HMM/'
+    #path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/HMM/'
+    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastfm/HMM/'
     #myModel.SEQ_FILE_PATH = path+'sampleLikes'
-    myModel.SEQ_FILE_PATH = path+'likes.trace'
-    myModel.MODEL_PATH = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
-    myModel.nonExistingUserFile = path + 'likes.trace_nonExistingUsers'
-    myModel.actionMappingsPath = path + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
+    #myModel.SEQ_FILE_PATH = path+'likes.trace'
+    myModel.SEQ_FILE_PATH = path+'HMM_simData_5k'
+    #myModel.MODEL_PATH = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
+    myModel.MODEL_PATH = path + 'lastfm_win10_trace_HMM_MODEL.pkl'
+    #myModel.nonExistingUserFile = path + 'likes.trace_nonExistingUsers'
+    myModel.nonExistingUserFile = ''
+    #myModel.actionMappingsPath = path + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
+    myModel.actionMappingsPath = path + 'lastfm_win10_trace_HMM_ACTION_MAPPINGS'
     myModel.useWindow = USE_WINDOW.FALSE
-    myModel.groupActionsByUser = False
-    myModel.DATA_HAS_USER_INFO = True
-    myModel.VARIABLE_SIZED_DATA = False
+    myModel.groupActionsByUser = True
+    myModel.DATA_HAS_USER_INFO = False
+    myModel.VARIABLE_SIZED_DATA = True
     myModel.true_mem_size = 9
     alphaList = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
-    metricList = [METRIC.BAYESIAN, METRIC.FISHER]
+    #metricList = [METRIC.BAYESIAN, METRIC.FISHER]
+    metricList = [METRIC.REC_PREC_FSCORE]
     
     myModel.loadModel()
     myModel.outlierDections(path, alphaList, metricList)
+    
+def doDataGeneration():
+    #path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/HMM/'
+    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/'
+    h = HMM()
+    #h.MODEL_PATH = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
+    h.MODEL_PATH = path + 'lastfm_win10_trace_HMM_MODEL.pkl'
+    #h.actionMappingsPath = path + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
+    h.actionMappingsPath = path + 'lastfm_win10_trace_HMM_ACTION_MAPPINGS'
+    
+    h.loadModel()
+    
+    #h.simulateData(19, 9, 5000,path+'simData')
+    #h.simulateData(9912, 1000, 5000, path+'HMM_simData') #Avg. Trace Length: 9912
+    h.simulateData(20, 0, 5000, path+'HMM_simData') #Avg. Trace Length: 9912
+    
+    
+if __name__ == "__main__":
+    #expirements()
+    #doDataGeneration()
+    #doTheOutlierDetection()
+    #trainTheHMM()
+    
+    
+    
+    
     
     
     
