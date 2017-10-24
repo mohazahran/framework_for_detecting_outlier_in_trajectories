@@ -19,9 +19,9 @@ import os.path
 from MyEnums import *
 from TestSample import *
 from DetectionTechnique import *
-#from Tribeflow import *
+from Tribeflow import *
 #from Tribeflowpp import *
-from MyWord2vec import *
+#from MyWord2vec import *
 #from NgramLM import *
 #from RNNLM import *
 import sys
@@ -42,23 +42,24 @@ class OutlierDetection:
         self.CORES = 40
         #cythonOptimize.getLogProb([],0)
         
-                
-	self.PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/'
-	self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_SKIPG'
-	self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
-	self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_SKIPG'
-	self.seq_prob = SEQ_PROB.WORD2VEC
+                               
+	self.PATH = '/u/scratch1/mohame11/lastFm/'
+	self.RESULTS_PATH = self.PATH + 'simulatedData/pvalues_tr9_www_simData_perUser20'
+	self.SEQ_FILE_PATH = self.PATH + 'simulatedData/tr9_www_simData_perUser20'
+	self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
+	self.seq_prob = SEQ_PROB.TRIBEFLOW
 	self.useWindow = USE_WINDOW.FALSE
         
 
         ''' 
         self.PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/'
-        self.RESULTS_PATH = self.PATH + 'allLikes/pvalues_tr_leftovers'
+        self.RESULTS_PATH = self.PATH + 'asd'
         self.SEQ_FILE_PATH = self.PATH + 'allLikes/likes.trace'
         self.MODEL_PATH = self.PATH + 'pins_repins_win10_noop_NoLeaveOut.h5'
         self.seq_prob = SEQ_PROB.TRIBEFLOW
         self.useWindow = USE_WINDOW.FALSE
         '''
+        
 ####################################
         '''
         self.PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/'
@@ -71,22 +72,23 @@ class OutlierDetection:
         '''
         
 #####################################        
-        self.groupActionsByUser = False   # True will just append all sequences for a user into a long sequence
+        self.groupActionsByUser = True   # True will just append all sequences for a user into a long sequence
+        self.DATA_HAS_USER_INFO = True
+        self.VARIABLE_SIZED_DATA = True
+
         
         #TRIBEFLOW
+        #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
+        self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
         #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp.tsv.gz'
-        #self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
-        self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
         self.STAT_FILE = self.PATH +'Stats_win10'
-        self.UNBIAS_CATS_WITH_FREQ = False
+        self.UNBIAS_CATS_WITH_FREQ = True
         self.smoothingParam = 1.0   #smoothing parameter for unbiasing item counts.
         
         #NGRM/RNNLM/WORD2VEC/TRIBEFLOWPP
         self.HISTORY_SIZE = 9
-        self.DATA_HAS_USER_INFO = True #has no effect on tribeflow
-        self.VARIABLE_SIZED_DATA = False #has no effect on tribeflow
-        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_word2vec_SKIPG_ALL_ACTIONS'
-        self.nonExistingUserFile = self.PATH +'allLikes/likes.trace_nonExistingUsers'
+        self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_actionMappings'
+        #self.nonExistingUserFile = self.PATH +'allLikes/likes.trace_nonExistingUsers'
 
 
                            
@@ -106,14 +108,21 @@ class OutlierDetection:
     def get_norm_from_logScores(self,logScores):
         if(len(logScores) == 1):
             return logScores[0]
+ 
         pw = (-1)*logScores[0] + self.get_norm_from_logScores(logScores[1:])
-        return logScores[0]+math.log10(1+math.pow(10,pw))
+
+        try:
+            res = logProbs[0] + math.log10(1+(math.pow(10,pw)))
+        except:
+            res = logScores[0] + pw
+ 
+        return res
 
 
     def outlierDetection(self, coreTestDic, quota, coreId, q, myModel):
         myCnt = 0    
+        print('writing to: ',myModel.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId))
         writer = open(myModel.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId),'w')
-	print('writing to: ',myModel.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId))
         #print('Inside: coreId',coreId,' len(coreTestDic)', len(coreTestDic))
         #print('10keys', coreTestDic.keys()[0:10])
         for user in coreTestDic:
@@ -124,7 +133,7 @@ class OutlierDetection:
                 seq = testSample.actions
                 goldMarkers = testSample.goldMarkers
                 actions = myModel.getAllPossibleActions()              
-                #print len(actions), actions[0:20]
+                #print 'len(actions)=', len(actions)
                 pValuesWithRanks = {}
                 pValuesWithoutRanks = {}
                 for i in range(len(seq)): #for all actions in the sequence.
@@ -144,13 +153,32 @@ class OutlierDetection:
                         userId = myModel.getUserId(user)     
                         seqScore = myModel.getProbability(userId, newSeq)  
                         scores[j] = seqScore
-            
-                    allScores = np.array(scores.values(), dtype = 'd').copy()
-                    logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
-                    for j in range(len(actions)): #for all possible actions that can replace the current action
-                        logProb = float(scores[j]) - float(logNormalizingConst)
-                        probabilities[j] = math.pow(10, logProb)
-                        #probabilities[j] = float(scores[j])/float(normalizingConst)
+                    
+                    #print 'finished all replacements'
+                    
+                    #print 'calculating normalizing constant'
+                    try:
+                        #allScores = np.array(scores.values(), dtype = 'd').copy()
+                        #logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
+                        logNormalizingConst = self.get_norm_from_logScores(scores.values())
+                        for j in range(len(actions)): #for all possible actions that can replace the current action
+                            logProb = float(scores[j]) - float(logNormalizingConst)
+                            probabilities[j] = math.pow(10, logProb)
+
+                    except:
+                        normConst = 0.0
+                        for j in range(len(actions)):
+                            scores[j] = math.pow(scores[j], 10)
+                            normConst += scores[j]
+                        for j in range(len(actions)): 
+                            prob = float(scores[j]) / float(normConst)
+                            probabilities[j] = prob
+                            #print 'prob[action j]', prob
+
+                        
+                        
+
+                    #print 'normalizing sequence scores'
                     #sorting ascendingy
                     keySortedProbs = sorted(probabilities, key=lambda k: (-probabilities[k], k), reverse=True)
                     currentActionRank = keySortedProbs.index(currentActionIndex)
@@ -159,7 +187,8 @@ class OutlierDetection:
                     pValuesWithRanks[i] = currentActionPvalueWithRanks
                     pValuesWithoutRanks[i] = currentActionPvalueWithoutRanks
                 if(len(seq) == len(pValuesWithoutRanks)):                    
-                    writer.write('user##'+str(user)+'||seq##'+str(seq)+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(goldMarkers)+'\n')        
+                    writer.write('user##'+str(user)+'||seq##'+str(seq)+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(goldMarkers)+'\n')
+                    #print 'writing sm'
                 else:
                     print('seq len not equal to the number of pvalues !')
                 if(myCnt % 5 == 0):
@@ -171,7 +200,7 @@ class OutlierDetection:
                                                                                                                                     
     def distributeOutlierDetection(self):
         myModel = None
-
+  
         if(self.seq_prob == SEQ_PROB.NGRAM):
             myModel = NgramLM()
             myModel.useWindow = self.useWindow
@@ -277,8 +306,11 @@ class OutlierDetection:
             myModel.loadModel()
         
         
+        myModel.RESULTS_PATH = self.RESULTS_PATH      
         testDic,testSetCount = myModel.prepareTestSet()
         print('Number of test samples: '+str(testSetCount))   
+
+        
         start_time = time.time()
         myProcs = []
         workTot = 0
@@ -323,7 +355,7 @@ class OutlierDetection:
                                 
         print('\n>>> All DONE!')
         #store.close()
-
+	
                                     
 def work():  
     detect = OutlierDetection() 
