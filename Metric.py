@@ -196,12 +196,14 @@ class Bayesian(Metric):
         #trueCount_TgO = 0
         #trueCount_OT = 0
         #trueCount_full = 0
+        
         P_Tprior = float(self.NT+self.OT) / float(self.OF+self.OT+self.NT+self.NF)
         P_Fprior = float(self.NF+self.OF) / float(self.OF+self.OT+self.NT+self.NF)
         
-        #prior_scale = 0.00001
-        #P_Tprior = float(self.NT+self.OT+1) *prior_scale
-        #P_Fprior = float(self.NF+self.OF+1) *prior_scale
+        #PT_prior_scale = 0.00001
+        #PF_prior_scale = 0.00001
+        #P_Tprior = float(self.NT+self.OT+1) *PT_prior_scale
+        #P_Fprior = float(self.NF+self.OF+1) *PF_prior_scale
         
         #P_Tprior = float(self.NT+self.OT+1)
         #P_Fprior = float(self.NF+self.OF+1)
@@ -214,9 +216,14 @@ class Bayesian(Metric):
         NF_post = self.NF + P_Fprior
         
         count_truePandN = 0
+        
+        P_T = np.random.beta(self.OT+self.NT+P_Tprior, self.OF+self.NF+P_Fprior, self.samplesCount)
+        P_TgO = np.random.beta(OT_post, OF_post, self.samplesCount)
+        P_TgN = np.random.beta(NT_post, NF_post, self.samplesCount)
+        
         for i in range(self.samplesCount):
             
-            P_T = np.random.beta(self.OT+self.NT+P_Tprior, self.OF+self.NF+P_Fprior)
+            #P_T = np.random.beta(self.OT+self.NT+P_Tprior, self.OF+self.NF+P_Fprior)
             #P_F = 1 - P_T
             
             #P_OgT = np.random.beta(OT_post, NT_post)
@@ -227,11 +234,11 @@ class Bayesian(Metric):
             #P_NT = (1 - P_OgT) * P_T
             #P_NF = (1 - P_OgF) * P_F
             
-            P_TgO = np.random.beta(OT_post, OF_post)
-            P_TgN = np.random.beta(NT_post, NF_post)
+            #P_TgO = np.random.beta(OT_post, OF_post)
+            #P_TgN = np.random.beta(NT_post, NF_post)
             
-            TruePos = (P_TgO > P_T) + 0
-            TrueNeg = (P_TgN < P_T) + 0
+            TruePos = (P_TgO[i] > P_T[i]) + 0
+            TrueNeg = (P_TgN[i] < P_T[i]) + 0
             #count_truePandN += (TruePos * TrueNeg)
             count_truePandN += (TruePos * TrueNeg)
             
@@ -253,10 +260,10 @@ class Bayesian(Metric):
         P_Fprior = float(self.NF+self.OF) / float(self.OF+self.OT+self.NT+self.NF)
         #print 'P_T:', P_T, 'P_F:', P_F
         
-        self.OT_priorConst = 1.0
-        self.OF_priorConst = 1.0
-        self.NT_priorConst = 606.0
-        self.NF_priorConst = 1.0
+        self.OF_priorConst = 0.0001
+        self.NT_priorConst = 0.0001
+        self.NT_priorConst = 0.0001
+        self.NF_priorConst = 0.0001
         
         P_OT_list = []
         P_OF_list = []
@@ -278,6 +285,8 @@ class Bayesian(Metric):
             P_OF = P[0][1]
             P_NT = P[0][2]
             P_NF = P[0][3]
+            
+            #print(P_OT, P_OF, P_NT, P_NF)
             
             P_OT_list.append(P_OT)
             P_OF_list.append(P_OF)
@@ -309,43 +318,79 @@ class Bayesian(Metric):
         self.stats = ['Full', self.probTrue_full,'T|O', self.probTrue_TgO,'OT', self.probTrue_OT]
         
         #print 'P_OT:', sum(P_OT_list)/len(P_OT_list), 'P_OF:', sum(P_OF_list)/len(P_OF_list), 'P_NT:', sum(P_NT_list)/len(P_NT_list), 'P_NF:', sum(P_NF_list)/len(P_NF_list)
+
+def experiments():
+    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/Results/newResults/'
+    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/Results/newResults_lastfm/'
+    name = 'tribeflow9'
+    myfile = 'lastfm_tribeflow9_noWin_log_simInj_METRIC.BAYESIAN_PVALUE.WITH_RANKING'
+    #myfile = 'pins_repins_'+name+'_noWin_log_allLikes_METRIC.BAYESIAN_PVALUE.WITH_RANKING'
+    #myfile = 'pins_repins_'+name+'_noWin_log_allLikes_METRIC.BAYESIAN_'
+    outfile = path + name +'/' + myfile.replace('BAYESIAN', 'REC_PREC_FSCORE')
+    w = open(outfile, 'w')
+    r = open(path + name + '/' +myfile, 'r')
+    for line in r:
+        parts = line.split(':')
+        params = parts[0].split(',')
+        alpha = float(params[0].split('=')[-1])
+        results = parts[-1].replace(')','').replace('(','').split(',')
+        config = ', '.join(params[1:]).replace(' ','')
+        tp=float(results[0].split('=')[-1])
+        fp=float(results[1].split('=')[-1])
+        fn=float(results[2].split('=')[-1])
+        tn=float(results[3].split('=')[-1])
+        #m = Bayesian()
+        m = rpf()
+        m.OT = tp
+        m.OF = fp
+        m.NT = fn
+        m.NF = tn
+        #m.calculateStats_dirichelet()
+        m.calculateStats()
+        res = m.getSummary()
+        
+        #print(res)
+
+        w.write('alpha='+str(alpha))
+        w.write(','+str(TECHNIQUE.MAJORITY_VOTING))       
+        w.write(','+str(HYP.EMPIRICAL),)                                
+        w.write(',TScountAdj='+str(False)+':')
+        w.write(res+'\n')
+        
+    r.close()
+    w.close()
+    print('DONE!')
     
 
 def main():
+    #Decision = O/N, Friendship=T/F
+    #O = 5, N = 495
+    OT = 0
+    OF = 5
+    NT = 495
+    NF = 0
+    
     b = Bayesian()
+    b.OT = OT
+    b.OF = OF
+    b.NT = NT
+    b.NF = NF
+    b.calculateStats_dirichelet() 
+    print('dirch', b.getSummary())
     
-    #OT=0, OF=0, NT=15289, NF=38983091, stats=['Full', 0.0036, 'T|O', 0.0036, 'OT', 0.0036]
-    b.OT = 5
-    b.OF = 1139
-    b.NT = 16
-    b.NF = 195240
-    b.calculateStats()
-    #b.calculateStats()
-    print(b.getSummary())
+    f = Fisher()
+    f.OT = OT
+    f.OF = OF
+    f.NT = NT
+    f.NF = NF
+    f.calculateStats()
+    print('fisher', f.getSummary())
     
-    print()
     
-    #OT=15289, OF=38983091, NT=0, NF=0, stats=['Full', 0.9952, 'T|O', 0.9952, 'OT', 0.9952]
-    b.OT = 5
-    b.OF = 1139
-    b.NT = 16
-    b.NF = 195240
-    b.calculateStats_dirichelet()
-    #b.calculateStats()
-    print(b.getSummary())
-    
-    #OT=15289, OF=38983091, NT=0, NF=0, stats=['Full', 0.9952, 'T|O', 0.9952, 'OT', 0.9952]
-    b = Fisher()
-    b.OT = 5
-    b.OF = 1139
-    b.NT = 16
-    b.NF = 195240
-    b.calculateStats()
-    #b.calculateStats()
-    print(b.getSummary())
-    
+   
 if __name__ == "__main__":
-    main() 
+    #main()
+    #experiments() 
     #alpha=0.0005, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=534, OF=852289, NT=1703, NF=2419088, stats=['Prob_of_significance', 0.0008]
 
         
