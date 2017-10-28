@@ -19,7 +19,7 @@ class LastFm(object):
         counts = 0        
         for u in d:
             t = d[u]
-            actions = t.actions
+            actions = t[0].actions
             for a in actions:
                 if(a in freqs):
                     freqs[a] += 1
@@ -97,33 +97,45 @@ class LastFm(object):
         w = open(self.PATH_TO_TRACE+'_top'+str(k), 'w')
         for u in userDic:
             test = userDic[u]
-            actions = test.actions
+            actions = test[0].actions
             filteredActions = [a for a in actions if a in topk]
             if(len(filteredActions) < self.true_mem_size+1):
                 continue
         
             
-            limit = len(actions) - (self.true_mem_size+1) + 1
+            limit = len(filteredActions) - (self.true_mem_size+1) + 1
             times = '0\t'*self.true_mem_size
             for i in range(limit):
                 w.write(times)
                 w.write(u+'\t')
-                seq = actions[i : i+self.true_mem_size+1]
+                seq = filteredActions[i : i+self.true_mem_size+1]
                 toWrite = '\t'.join(seq)
-                w.write(toWrite)
+                w.write(toWrite+'\n')
             w.flush()
         w.close()
         
-        
+    
+    def sample(self, k):
+        r = open(self.PATH_TO_TRACE, 'r')
+        w = open(self.PATH_TO_TRACE+'_sample'+str(k), 'w')
+        c = 0
+        for line in r:
+            w.write(line)
+            c += 1
+            if(c > k):
+                break
+        w.close()
+            
+            
         
         
 if __name__ == "__main__":
-    lf = LastFm('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace', 9)
-    #f = lastf.cal_and_write_probs()
-    d = lf.readTrace()
-    f = lf.cal_and_write_probs(d)
-    #probs = lf.read_probs(FILE = lf.PATH_TO_TRACE+'_Artist_probs')
-    #lf.restrict_to_top_k_trace(k=5000, probs=probs)
+    lf = LastFm('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace_sample5000', 9)
+    #lf.sample(5000)
+    #d = lf.readTrace()
+    #f = lf.cal_and_write_probs(d)
+    probs = lf.read_probs(FILE = lf.PATH_TO_TRACE+'_Artist_probs')
+    lf.restrict_to_top_k_trace(k=100, probs=probs)
     print('DONE!')
             
                 
