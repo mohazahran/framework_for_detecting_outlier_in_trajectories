@@ -4,6 +4,7 @@ Created on Oct 28, 2017
 @author: mohame11
 '''
 from TestSample import *
+from sklearn.cluster import KMeans
 
 class LastFm(object):
     
@@ -114,6 +115,51 @@ class LastFm(object):
             w.flush()
         w.close()
         
+        
+    
+    def clusterUsersByTop_k_artists(self, k=200, probsPath = '', clustersCount = 3):
+        d = self.readTrace()
+        probs = lf.read_probs(FILE = probsPath)
+        artistsDesc = sorted(probs, key=lambda k: (-probs[k], k), reverse=False)
+        topk = set(artistsDesc[:k])
+        
+        data = []
+        idToUsers = {}
+        count = 0
+        for u in d:
+            idToUsers[count] = u 
+            features = [0]*len(topk)
+            actions = d[u][0].actions
+            actionsSet = set(actions)
+            for i, art in enumerate(topk):
+                if(art in actionsSet):
+                    features[i] = 1
+            data.append(features)
+            count += 1
+            
+        km = KMeans(n_clusters = clustersCount, verbose=1)
+        km.fit(data)
+        labels = list(km.labels_)
+        clusters = {}
+        for i in range(len(labels)):
+            c = labels[i]
+            u = idToUsers[i]
+            if(c in clusters):
+                clusters[c].append(u)
+            else:
+                clusters[c] = [u]
+        
+        w = open(self.PATH_TO_TRACE+'_userClusters_kmeans'+str(clustersCount), 'w')
+        for c in clusters:
+            users = clusters[c]
+            for u in users:
+                w.write(u + '\t' + str(c) + '\n')
+        w.close()
+                    
+                    
+        
+        
+        
     
     def sample(self, k):
         r = open(self.PATH_TO_TRACE, 'r')
@@ -130,12 +176,17 @@ class LastFm(object):
         
         
 if __name__ == "__main__":
-    lf = LastFm('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace_sample5000', 9)
+    #lf = LastFm('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace_sample5000', 9)
     #lf.sample(5000)
     #d = lf.readTrace()
     #f = lf.cal_and_write_probs(d)
-    probs = lf.read_probs(FILE = lf.PATH_TO_TRACE+'_Artist_probs')
-    lf.restrict_to_top_k_trace(k=100, probs=probs)
+    #probs = lf.read_probs(FILE = lf.PATH_TO_TRACE+'_Artist_probs')
+    #lf.restrict_to_top_k_trace(k=100, probs=probs)
+    
+    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/'
+    lf = LastFm(path+'lastfm_win10_trace_sample5000_top100', 9)
+    lf.clusterUsersByTop_k_artists(k=10, probsPath = path+'lastfm_win10_trace_sample5000_Artist_probs', clustersCount = 3)
+    
     print('DONE!')
             
                 
