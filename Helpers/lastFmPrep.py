@@ -3,6 +3,8 @@ Created on Oct 28, 2017
 
 @author: mohame11
 '''
+#import sys
+#sys.path.append('/home/ribeirob/framework_for_detecting_outlier_in_trajectories/')
 from TestSample import *
 from sklearn.cluster import KMeans
 
@@ -157,7 +159,38 @@ class LastFm(object):
         w.close()
                     
                     
+    def divideTraceByCluster(self, clusterPath = ''):
+        u2c = {}
+        clusters = set()
+        r = open(clusterPath, 'r')
+        for line in r:
+            parts = line.strip().split()
+            u = parts[0]
+            c = parts[1]
+            u2c[u] = c
+            clusters.add(c)
+        r.close()
+        c2file = {}
+        for c in clusters:
+            c2file[c] = open(self.PATH_TO_TRACE+'_cluster'+str(c),'w')
+            
+        r = open(self.PATH_TO_TRACE, 'r')
+        for line in r:
+            line = line.strip() 
+            tmp = line.split()  
+            user = tmp[self.true_mem_size]
+            c = u2c[user]
+            f = c2file[c]
+            f.write(line)
         
+        for c in c2file:
+            c2file[c].close()
+            
+            
+            
+        
+        
+            
         
         
     
@@ -185,7 +218,9 @@ if __name__ == "__main__":
     
     path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/'
     lf = LastFm(path+'lastfm_win10_trace_sample5000_top100', 9)
-    lf.clusterUsersByTop_k_artists(k=10, probsPath = path+'lastfm_win10_trace_sample5000_Artist_probs', clustersCount = 3)
+    #lf.clusterUsersByTop_k_artists(k=10, probsPath = path+'lastfm_win10_trace_sample5000_Artist_probs', clustersCount = 3)
+    lf.divideTraceByCluster(path + 'lastfm_win10_trace_sample5000_top100_userClusters_kmeans3')
+    
     
     print('DONE!')
             
