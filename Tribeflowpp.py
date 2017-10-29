@@ -14,7 +14,7 @@ import cythonOptimize
 import MyEnums
 import gzip
 import tables
-
+import scipy
 class TribeFlowpp (DetectionTechnique):
     def __init__(self):
         DetectionTechnique.__init__(self)
@@ -34,10 +34,12 @@ class TribeFlowpp (DetectionTechnique):
     def loadModel(self):
         
         self.obj2id = {}
+        self.id2obj = {}
         r = open(self.actionMappingsPath, 'r')
         for line in r:
             parts = line.split()
             self.obj2id[parts[0]] = int(parts[1])
+            self.id2obj[int(parts[1])] =  parts[0]
         r.close()
         
         self.hyper2id = {}
@@ -49,22 +51,24 @@ class TribeFlowpp (DetectionTechnique):
         
         print('loading trace and model ...')
         trace, num_obj = self.load_trace(self.trace_fpath)
-        model = self.load_model(self.model_path)
+        self.model = self.load_model(self.model_path)
         
         #self.Theta_zh = np.zeros((10,1000)) 
-        self.Theta_zh = model['P'][-1].T
+        self.Theta_zh = self.model['P'][-1].T
         self.Theta_zh = np.array(self.Theta_zh, dtype = 'd').copy()
         print('Building transition matrix ...')
          
-        counts = self.get_counts_numpy_array(model, trace)
+        #counts = self.get_counts_numpy_array(self.model, trace)}
 
-        #counts = {e: np.zeros((315, 315)) for e in range(10)}
+        self.Psi_zss = self.get_counts_numpy_array(self.model, trace)
 
-        a = model['param']['a']
+        a = self.model['param']['a']
         #a = 1.0
+        '''
         self.Psi_zss = {}
         for env in counts:
             P = counts[env] + a #  Add the Dirichlet hyperparameter
+            #print 'THIS LINE IS REMOVED FROM MEM ISSUES: P = (P.T / P.sum(axis=1)).T'
             P = (P.T / P.sum(axis=1)).T  #  Normalize rows
             self.Psi_zss[env] = P
 
@@ -72,7 +76,25 @@ class TribeFlowpp (DetectionTechnique):
         for e in self.Psi_zss:
             lst[e] = self.Psi_zss[e]
         self.Psi_zss = np.array(lst, dtype = 'd').copy()
-    
+        '''
+        #for optimization
+        #envs = counts.keys()
+        #lst = [None]*len(envs)
+        #for env in envs:
+            #print 'add dirch'
+        #    P = counts[env]
+           # print 'normalize'
+           # P = (P.T / P.sum(axis=1)).T
+        #    del counts[env]
+        #    print 'deleted',env
+            
+            #P = (P.T / P.sum(axis=1)).T  #  Normalize rows
+        #    print 'save'
+        #    lst[env] = P
+        #print 'finished all envs'
+        #self.Psi_zss = np.array(lst, dtype = 'd').copy()
+        print 'finished loading model ...'
+            
     
     def createTestingSeqFile(self, store):
         from_ = store['from_'][0][0]
@@ -134,37 +156,39 @@ class TribeFlowpp (DetectionTechnique):
         #return self.smoothedProb                            
 
     def getProbability(self, userId, newSeq):
-        ''' 
+         
+        '''
+        a = self.model['param']['a'] #Dirch prior
         newSeqIds = [self.obj2id[s] for s in newSeq]  
         seqProb = 0.0
         #window = min(self.true_mem_size, len(newSeq))
         envCount = len(self.Psi_zss)
         logSeqProbZ = np.zeros(envCount, dtype='d').copy()
         for z in xrange(envCount): #for envs
-            print('self.Theta_zh', self.Theta_zh.shape)
-            print('envcount', envCount)
-            print('z',z,'userid',userId)
+            #print('self.Theta_zh', self.Theta_zh.shape)
+            #print('envcount', envCount)
+            #print('z',z,'userid',userId)
             seqProbZ = math.log10(self.Theta_zh[z, userId])    
             for i in range(0,len(newSeqIds)-1): 
                 src = newSeqIds[i]
                 dest = newSeqIds[i+1]
-                prob_s_d_in_z = self.Psi_zss[z][src][dest]                                                          
+                norm = sum(self.Psi_zss[z][src])
+                #print 'self.Psi_zss[z][src]=', self.Psi_zss[z][src].shape
+                #print 'sum=',norm
+                prob_s_d_in_z = float(self.Psi_zss[z][src][dest]+a) / float(norm + (len(self.Psi_zss[z][src])*a))
                 seqProbZ += math.log10(prob_s_d_in_z)
             logSeqProbZ[z] = seqProbZ
         logSeqScore = cythonOptimize.getLogProb(logSeqProbZ, envCount)
-        '''   
+        '''
         
         
+        #cython
+        a = self.model['param']['a']
+        S = self.model["param"]["S"]
         newSeqIds = [self.obj2id[s] for s in newSeq]       
         newSeqIds_np = np.array(newSeqIds, dtype = 'i4').copy()
         logSeqProbZ = np.zeros(self.Theta_zh.shape[0], dtype='d').copy()
-        #print('newSeqIds_np',newSeqIds_np, type(newSeqIds_np))
-        #print('len(newSeqIds_np)', len(newSeqIds_np), type(len(newSeqIds_np)))
-        #print('logSeqProbZ', logSeqProbZ, type(logSeqProbZ))
-        #print('userId',userId,type(userId))
-        #print('self.Theta_zh',self.Theta_zh,type(self.Theta_zh))
-        #print('self.Psi_zss',self.Psi_zss,type(self.Psi_zss))
-        logSeqScore = cythonOptimize.calculateSequenceProb_trpp(newSeqIds_np, len(newSeqIds_np), logSeqProbZ, userId, self.Theta_zh, self.Psi_zss)
+        logSeqScore = cythonOptimize.calculateSequenceProb_trpp(newSeqIds_np, len(newSeqIds_np), logSeqProbZ, userId, self.Theta_zh, self.Psi_zss, float(a), float(S))
         
     
         if(self.UNBIAS_CATS_WITH_FREQ):
@@ -183,8 +207,10 @@ class TribeFlowpp (DetectionTechnique):
         seqsCountWithNonExistingUsers = 0
         nonExistingUsers = set()
         testDic = {}
-        print(">>> Preparing testset ...")
+        print(">>> Tribeflowpp Preparing testset ...")
+        print('window', self.useWindow)
         testSetCount = 0
+        print(self.SEQ_FILE_PATH)
         r = open(self.SEQ_FILE_PATH, 'r')    
         for line in r:
             line = line.strip() 
@@ -196,10 +222,21 @@ class TribeFlowpp (DetectionTechnique):
                 seqsCountWithNonExistingUsers += 1
                 nonExistingUsers.add(user)
                 continue
-            seq = tmp[actionStartIndex:self.true_mem_size+2]
-            goldMarkers = tmp[self.true_mem_size+2:]
-            if(len(goldMarkers) != len(seq)):
-                goldMarkers = ['false']*len(seq)
+            if(self.VARIABLE_SIZED_DATA == True):
+                if('###' not in tmp):
+                    seq = tmp[actionStartIndex:]
+                    goldMarkers = ['false']*len(seq)
+                else:
+                    indx = tmp.index('###')
+                    seq = tmp[:indx]
+                    goldMarkers = tmp[indx+1:]
+            #print(seq,goldMarkers)
+            else:
+                seq = tmp[actionStartIndex:self.true_mem_size+2]
+                goldMarkers = tmp[self.true_mem_size+2:]
+                if(len(goldMarkers) != len(seq)):
+                    goldMarkers = ['false']*len(seq)
+
             t = TestSample()  
             t.user = user
             t.actions = list(seq)
@@ -215,7 +252,8 @@ class TribeFlowpp (DetectionTechnique):
         #print(testDic, len(testDic))
         if(self.useWindow == USE_WINDOW.FALSE): # we need to use the original sequence instead of overlapping windows
             testSetCount = len(testDic)
-            #print('testSetCount=',testSetCount)
+            print('No overlapping window ... ')
+            print('testDic len before fixing window', testSetCount)
             for u in testDic:
                 tests = testDic[u]
                 originalSeq, originalGoldMarkers = self.formOriginalSeq(tests)
@@ -231,7 +269,8 @@ class TribeFlowpp (DetectionTechnique):
         for us in nonExistingUsers:
             ww.write(str(us)+'\n')
         ww.close()
-        return testDic, testSetCount    
+        print('#users', len(testDic))
+        return testDic, len(testDic)
     
     def getAllPossibleActions(self):
         return self.obj2id.keys()  
@@ -301,9 +340,13 @@ class TribeFlowpp (DetectionTechnique):
         N = model["param"]["N"]
         M = model["param"]["M"]
         S = model["param"]["S"]
-    
+        print 'Dirich: a=', self.model['param']['a']   
+        #counts = {e: np.full((S, S), self.model['param']['a']) for e in range(M)}
+        print 'Init counts'
         counts = {e: np.zeros((S, S)) for e in range(M)}
-    
+        #counts = {e: np.ones((S, S)) for e in range(M)}
+        #counts = {e: scipy.sparse.csr_matrix((S, S)) for e in range(M)}
+        print 'counts inited'
         for u in range(N):
             Z = trace[u]
             T = len(Z)
@@ -409,6 +452,121 @@ class TribeFlowpp (DetectionTechnique):
     
         return counts
 
+    def simulatedSeq(self, uid, size):
+        seq = []
+        candidates = []
+        for i in range(size):
+            cand = np.random.binomial(1, p=self.model['param']['q'])
+            if(cand == 1):
+                candidates.append(i)
+                
+        u_z = self.Theta_zh[:,uid]
+        u_z = u_z / sum(u_z)
+        #numpy.random.choice(a, size=None, replace=True, p=None)
+        #replace =True. i.e. put back the sampled item to the space
+        #replace =False. i.e. once picked, it's removed and thus affecting the probability of the remainging items
+        currEnv = np.random.choice(list(range(0,self.Theta_zh.shape[0])), 1, replace =True, p=u_z)[0]
+        currAction = np.random.choice(list(range(0,self.model['param']['S'] )))     #self.model['param']['S']
+        seq.append(self.id2obj[currAction])
+        newAction = currAction
+        newEnv = currEnv
+        for i in range(1, size):
+            if(i in candidates):
+                pz = np.random.beta(self.model['param']['r'], self.model['param']['s']) #pz: Beta(r,s)
+                rd = np.random.random()
+                if(rd <= pz):
+                    
+                    while(newEnv == currEnv):
+                        newEnv = np.random.choice(list(range(0,self.Theta_zh.shape[0])), 1, replace =True, p=u_z)[0]
+                    currEnv = newEnv
+                        
+            
+            ss = self.Psi_zss[currEnv]
+            #s = ss[currAction] 
+            s = ss[currAction] + self.model['param']['a']
+            s = s / sum(s) 
+            while(newAction == currAction):
+                newAction = np.random.choice(list(range(0,self.model['param']['S'] )), 1, replace =True, p=s)[0]
+            
+            seq.append(self.id2obj[newAction])
+            currAction = newAction
+            
+                
+        return seq
+
+def formOriginalSeq(tests):
+    origSeq = list(tests[0].actions)  
+    if(len(tests) <= 1):
+        return origSeq
+    for i in range(1,len(tests)):
+        a = tests[i].actions[-1]
+        origSeq.append(a)           
+    return origSeq
+
+def getUserTrajectoryLengths(trainPath):
+    userTrajLen = {}
+    testDic = {}
+    print(">> Reading training set ...")
+    testSetCount = 0
+    r = open(trainPath, 'r')    
+    for line in r:
+        line = line.strip() 
+        tmp = line.split()  
+        actionStartIndex = 10
+        
+        user = tmp[9]   
+        
+        seq = tmp[actionStartIndex :]
+
+        t = TestSample()  
+        t.user = user
+        t.actions = list(seq)  
+        
+        testSetCount += 1
+        if(user in testDic):
+            testDic[user].append(t)                                                    
+        else:
+            testDic[user]=[t]
+    r.close()
+
+    testSetCount = len(testDic)
+    for u in testDic:
+        tests = testDic[u]
+        originalSeq = formOriginalSeq(tests)
+        userTrajLen[u] = len(originalSeq)
+    
+    return userTrajLen  
+
+def simulateData():
+    THE_PATH = '/u/scratch1/mohame11/lastFm/'
+    trpp = TribeFlowpp()
+    trpp.actionMappingsPath = THE_PATH + 'lastfm_win10_trace_tribeflowpp_actionMappings'
+    trpp.userMappingsPath = THE_PATH + 'lastfm_win10_trace_tribeflowpp_userMappings'
+    trpp.model_path = THE_PATH + 'lastfm_win10_trace_tribeflowpp_model/lastfm_win10_trace_tribeflowpp_model.mcmc'
+    trpp.trace_fpath = THE_PATH + 'lastfm_win10_trace_tribeflowpp.tsv.gz'
+
+    outputFile = THE_PATH + 'simulatedData/trpp9_www_simData_perUser20'
+    #print(outputFile)
+    w = open(outputFile, 'w')
+    trpp.loadModel()
+    
+    TRAIN_PATH = THE_PATH + 'lastfm_win10_trace'
+    userTrajLen = getUserTrajectoryLengths(TRAIN_PATH)
+    for u in userTrajLen:
+        userTrajLen[u] = 20
+    
+    print('Simulated data ...')
+    cnt = 0
+    for u in trpp.hyper2id:
+        print(cnt, len(trpp.hyper2id))
+        seq = trpp.simulatedSeq(trpp.hyper2id[u], userTrajLen[u])
+        w.write(str(u)+' '+' '.join(seq) + '\n')
+        w.flush()
+        cnt += 1
+    w.close()   
+    
+            
+        
     
 
 def experiments():
@@ -476,8 +634,8 @@ def experiments():
     
     
 if __name__ == "__main__": 
-    experiments()
-
+    #experiments()
+    simulateData()
     
     
     
