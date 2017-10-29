@@ -49,7 +49,8 @@ class SEQ_PROB(Enum):
     RNNLM = 3
     BAG_OF_ACTIONS = 4
     WORD2VEC = 5
-    TRIBEFLOW_PP = 6
+    TRIBEFLOWPP = 6
+    HMM = 7
 
 class USE_WINDOW (Enum):
     TRUE = 1
