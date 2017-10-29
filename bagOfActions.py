@@ -129,14 +129,17 @@ class BagOfActions (DetectionTechnique):
         print '>> Calculating probabilities ...'
         self.calculatingItemsFreq(self.smoothingParam, useLog = False)
         print '>> Number of actions: ', len(self.smoothedProbs)
+        actions = []
+        probs = []
+        for a in self.smoothedProbs:
+            actions.append(a)
+            probs.append(self.smoothedProbs[a])
+        
         w = open(outfile, 'w')
         for i in range(numberOfSequences):
             num = random.randint(seqLenRange[0], seqLenRange[1])
-            for j in range(num):
-                action = np.random.choice(self.smoothedProbs.keys(), 1, replace=True, p=self.smoothedProbs.values())
-                #print action[0], '##'
-                w.write(action[0] + ' ')
-            w.write('\n')
+            simActions = np.random.choice(actions, num, replace=True, p=probs)
+            w.write(' '.join(simActions) + '\n')
         w.close()
     
     
@@ -156,15 +159,17 @@ class BagOfActions (DetectionTechnique):
                 metric = Bayesian()
             self.probMassCutOff = probMassCutOff
             outlierActions = set()
-            accum = 0.0
+            #accum = 0.0
             for key in keySortedProbs:
-                if(accum >= self.probMassCutOff):
-                    break
-                accum += self.smoothedProbs[key]
-                outlierActions.add(key)
+                #if(accum >= self.probMassCutOff):
+                #    break
+                #accum += self.smoothedProbs[key]
+                #outlierActions.add(key)
+                if(self.smoothedProbs[key] < self.probMassCutOff):
+		    outlierActions.add(key)
             
-            outlierCountAllowed = 3
-            where = 0
+            #outlierCountAllowed = 3
+            #where = 0
             #print 'accumalted_pdf=', accum
             #print 'outlier actions count = ', len(outlierActions)
             for user in testDic:
@@ -180,18 +185,17 @@ class BagOfActions (DetectionTechnique):
                             decisionVector.append(DECISION.NORMAL)
                     #print (len(decisionVector), len(goldMarkers))
 
-                    
-                    c = goldMarkers.count(GOLDMARKER.TRUE)
-                    outlierCountAllowed -= c
-                    if(outlierCountAllowed <= 0):
-                        
-                        while GOLDMARKER.TRUE in goldMarkers:
-                            idx = goldMarkers.index(GOLDMARKER.TRUE)
-                            #print 'idx=', idx
-                            del goldMarkers[idx]
-                            del decisionVector[idx]
-                    #print len(decisionVector), len(goldMarkers)
                     metric.update(decisionVector, goldMarkers)
+                    #c = goldMarkers.count(GOLDMARKER.TRUE)
+                    #outlierCountAllowed -= c
+                    #if(outlierCountAllowed <= 0):   
+                        #while GOLDMARKER.TRUE in goldMarkers:
+                            #idx = goldMarkers.index(GOLDMARKER.TRUE)
+                            #print 'idx=', idx
+                            #del goldMarkers[idx]
+                            #del decisionVector[idx]
+                    #print len(decisionVector), len(goldMarkers)
+                    #metric.update(decisionVector, goldMarkers)
             
             metric.calculateStats() 
             print 'alpha='+str(self.probMassCutOff),
@@ -239,33 +243,34 @@ class BagOfActions (DetectionTechnique):
 def performOutLierDetection():
     bag = BagOfActions()
     bag.true_mem_size = 9
-    #bag.trace_fpath = '/home/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
-    bag.trace_fpath = '/scratch/snyder/m/mohame11/lastFm/lastfm_win10_trace'
+    #bag.trace_fpath = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.trace_fpath = '/u/scratch1/mohame11/lastFm/lastfm_win10_trace'
     #bag.trace_fpath = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace'
     bag.smoothingParam = 1.0
     #bag.SEQ_FILE_PATH = '/Users/mohame11/Documents/newResults_lastfm/simData_perUser_2_forInjection_injected_0.1'
-    bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1'
+    bag.SEQ_FILE_PATH = '/u/scratch1/mohame11/lastFm/simulatedData/bag9_simDataForInj_u982_perUser20_injected_0.1'
+    #bag.SEQ_FILE_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
     #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simulatedData_bagOfActions'
     #bag.SEQ_FILE_PATH =  '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions'
     #bag.SEQ_FILE_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace'
     #bag.SEQ_FILE_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/likes_withFriendship_win4.trace'
-    bag.DATA_HAS_USER_INFO = True
-    bag.VARIABLE_SIZED_DATA = False
-    bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
+    bag.DATA_HAS_USER_INFO = False
+    bag.VARIABLE_SIZED_DATA = True
+    #bag.RESULTS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/bagOfActions_noPvalue_win10/'
     bag.useWindow = USE_WINDOW.FALSE
     bag.groupActionsByUser = True
     bag.probMassCutOff = []
     #bag.probMassCutOff = [1e-20, 1e-15, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
     bag.probMassCutOff = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
-    bag.probMassCutOff.append(0.048671875)
+    #bag.probMassCutOff.append(0.048671875)
     
     #bag.metricType = METRIC.BAYESIAN
-    bag.metricType = METRIC.FISHER
-    #bag.metricType = METRIC.REC_PREC_FSCORE
+    #bag.metricType = METRIC.FISHER
+    bag.metricType = METRIC.REC_PREC_FSCORE
     testDic,testSetCount = bag.prepareTestSet()
-    #NON_EXISTING_USERS_PATH = '/home/mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
+    #NON_EXISTING_USERS_PATH = '/u/scratch1//mohame11/pins_repins_fixedcat/allLikes/likes.trace_nonExistingUsers'
     #NON_EXISTING_USERS_PATH = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/allLikes/likes_withFriendship_win4.trace_nonExistingUsers'
-    NON_EXISTING_USERS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1_nonExistingUsers'
+    #NON_EXISTING_USERS_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/simData_perUser_2_forInjection_injected_0.1_nonExistingUsers'
     '''
     nonExistingUsers = set()
     rr = open(NON_EXISTING_USERS_PATH, 'r')
@@ -299,13 +304,24 @@ def performOutLierDetection():
 
 def performDataSimulation():
     bag = BagOfActions()
+    #bag.trace_fpath = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    bag.trace_fpath = '/u/scratch1/mohame11/lastFm/lastfm_win10_trace'
     #bag.trace_fpath = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace'
-    bag.trace_fpath = '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/pins_repins_win4.trace'
     bag.smoothingParam = 1.0
-    bag.true_mem_size = 3
-    bag.simulateData(10000, [10,10], '/scratch/snyder/m/mohame11/lastFm/simulatedData/simulatedData_bagOfActions2')
-    #bag.simulateData(10000, [2,4], '/scratch/snyder/m/mohame11/pins_repins_win4_fixedcat/simulatedData/simulatedData_bagOfActions')
-
+    bag.true_mem_size = 9
+    #bag.simulateData(10000, [10,10], '/scratch/snyder/m/mohame11/lastFm/simulatedData/simulatedData_bagOfActions2')
+    #bag.simulateData(10000, [9,19], '/u/scratch1/mohame11/pins_repins_fixedcat/simulatedData/bag9_simData') #simulateData(numberOfSequences, seqLenRange, outfile):
+    bag.simulateData(982, [20,20], '/u/scratch1/mohame11/lastFm/simulatedData/bag9_simDataForInj_u982_perUser20') #simulateData(numberOfSequences, seqLenRange, outfile):
+  
+    '''
+    print '>> Calculating probabilities ...'
+    bag.calculatingItemsFreq(bag.smoothingParam, useLog = False)
+    print '>> Number of actions: ', len(bag.smoothedProbs)
+    w = open(bag.trace_fpath+'_ALL_ACTIONS', 'w')
+    for a in bag.smoothedProbs:
+        w.write(a+'\n')
+    w.close()
+    '''
     
 
 
@@ -376,9 +392,9 @@ def performThresholdSelection():
 
 
 def main():
-    #performDataSimulation()
+    performDataSimulation()
     #performOutLierDetection()
-    performThresholdSelection()
+    #performThresholdSelection()
         
         
             
