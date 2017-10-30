@@ -23,7 +23,58 @@ class OutputChecker():
         self.modelType = modelType
         self.nonExistingUsers = nonExistingUsers
         self.model = None
-        self.CORES = 20
+        self.CORES = 40
+        
+    def seqScoring(self, u, seq, golds, start, end, coreId):
+        myCnt = 0    
+        print('writing to: ',self.model.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId))
+        writer = open(self.model.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId),'w')
+        actions = self.model.getAllPossibleActions()              
+        pValuesWithRanks = {}
+        pValuesWithoutRanks = {}
+        for i in range(start, end):       
+            probabilities = {}
+            scores = {}        
+            newSeq = list(seq)
+            currentActionIndex = actions.index(newSeq[i])
+            for j in range(len(actions)): #for all possible actions that can replace the current action
+                #print 'replacement# ',j
+                del newSeq[i]                
+                newSeq.insert(i, actions[j])    
+                userId = self.model.getUserId(u)     
+                seqScore = self.model.getProbability(userId, newSeq)  
+                scores[j] = seqScore
+            try:
+                allScores = np.array(scores.values(), dtype = 'd').copy()
+                logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
+                #logNormalizingConst = self.get_norm_from_logScores(scores.values())
+                for j in range(len(actions)): #for all possible actions that can replace the current action
+                    logProb = float(scores[j]) - float(logNormalizingConst)
+                    probabilities[j] = math.pow(10, logProb)
+
+            except:
+                normConst = 0.0
+                for j in range(len(actions)):
+                    scores[j] = math.pow(scores[j], 10)
+                    normConst += scores[j]
+                for j in range(len(actions)): 
+                    prob = float(scores[j]) / float(normConst)
+                    probabilities[j] = prob
+                    #print 'prob[action j]', prob
+
+            keySortedProbs = sorted(probabilities, key=lambda k: (-probabilities[k], k), reverse=True)
+            currentActionRank = keySortedProbs.index(currentActionIndex)
+            currentActionPvalueWithoutRanks = self.getPvalueWithoutRanking(currentActionRank, keySortedProbs, probabilities)
+            currentActionPvalueWithRanks = float(currentActionRank+1)/float(len(actions))
+            pValuesWithRanks[i] = currentActionPvalueWithRanks
+            pValuesWithoutRanks[i] = currentActionPvalueWithoutRanks
+                            
+        writer.write('user##'+str(u)+'||seq##'+str(seq[start:end])+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(golds[start:end])+'\n')
+        
+        writer.flush()
+        print('>>> proc: '+ str(coreId)+' finished '+ str(myCnt)+'/'+str(end-start)+' instances ...')                
+        writer.close()    
+        
     
     def getMissingTestSamples(self):
         if(self.modelType == SEQ_PROB.TRIBEFLOW):
@@ -107,7 +158,38 @@ class OutputChecker():
         #od = outlierDetection.OutlierDetection()
         #od.outlierDetection(leftovers, len(leftovers), '999', None, self.model)
         
-        testSetCount = len(leftovers)
+        user = None
+        seqLen = 0
+        seq = None
+        golds = None
+        for u in leftovers:
+            user = u
+            test = leftovers[u]
+            golds = test.goldMarkers
+            seq = test.seq
+            seqLen = len(seq)
+            
+        
+        s = 0
+        myProcs = []
+        idealCoreQuota = seqLen // self.CORES
+        for id in range(self.CORES):
+            #seqScoring(self, u, seq, golds, start, end, coreId):
+            e = s + idealCoreQuota
+            
+            if(id == self.CORES-1):
+                p = Process(target = self.seqScoring, args=(user, seq, golds, s, seqLen, id))
+            else:
+                p = Process(target = self.seqScoring, args=(user, seq, golds, s, e, id))
+            s = e
+            myProcs.append(p)  
+            p.start() 
+        
+        for i in range(self.CORES):
+            myProcs[i].join()
+            print('>>> process: '+str(i)+' finished')
+            
+        
         
         elapsed_time = time.time() - start_time
         print 'Elapsed Time=', elapsed_time
