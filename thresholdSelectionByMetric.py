@@ -12,10 +12,10 @@ import math
 class thresholdSelectionByMetric:
     
     def __init__(self):
-        self.INPUT_PATH = '/scratch/snyder/m/mohame11/lastFm/simulatedData/pvalues'
+        self.INPUT_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/simulatedData/pvalues_rnnlm9'
         self.resultsFilePath = self.INPUT_PATH + '/METRIC.REC_PREC_FSCORE_PVALUE.WITH_RANKING'
         self.FILE_NAME = 'outlier_analysis_pvalues_'
-        self.requiredLevel = 0.95
+        self.requiredLevel = 0.9
         self.epsilon = 1e-4
         self.metric = METRIC.REC_PREC_FSCORE
         self.PVALUE = PVALUE.WITH_RANKING
@@ -39,7 +39,8 @@ class thresholdSelectionByMetric:
             fp=float(results[1].split('=')[-1])
             fn=float(results[2].split('=')[-1])
             tn=float(results[3].split('=')[-1])
-            res = (tp+tn)/(tp+tn+fp+fn)
+            #res = (tp+tn)/(tp+tn+fp+fn)
+            res = fp/(tn+fp)
             #print res
           
                 
@@ -88,7 +89,8 @@ class thresholdSelectionByMetric:
             fp=float(results[1].split('=')[-1])
             fn=float(results[2].split('=')[-1])
             tn=float(results[3].split('=')[-1])
-            res = (tp+tn)/(tp+tn+fp+fn)
+            #res = (tp+tn)/(tp+tn+fp+fn)
+            res = fp/(tn+fp)
             if(abs(res-self.requiredLevel) <= self.epsilon):
                 return currAlpha, res
             
@@ -97,7 +99,7 @@ class thresholdSelectionByMetric:
             elif(self.requiredLevel < res):
                 self.upperAlpha = [currAlpha, res]
             
-            print 'currentAlpha=', currAlpha, ' metric=', res 
+            print 'currentAlpha=', currAlpha, ' metric=', res, 'tp=', tp, 'fp=', fp, 'fn=', fn, 'tn=', tn 
                
 
 
