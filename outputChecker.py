@@ -39,7 +39,7 @@ class OutputChecker():
             self.model.trace_fpath = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
             self.model.UNBIAS_CATS_WITH_FREQ = True
             self.model.STAT_FILE = '/u/scratch1/mohame11/pins_repins_fixedcat/Stats_win10'
-            self.model.RESULTS_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/allLikes/pvalues_tr_leftovers/'
+            self.model.RESULTS_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/allLikes/pvalues_tr_leftovers_copa'
             
             self.model.DATA_HAS_USER_INFO = True
             self.model.VARIABLE_SIZED_DATA = False

@@ -142,7 +142,7 @@ class DataGenerator(object):
         cnt = 0
         print '#users', len(self.hyper2id)
         for userName in self.hyper2id:
-            if(cnt % 1000 == 0):
+            if(cnt % 5 == 0):
                 print(str(cnt)+' users are finished ...')
             cnt+=1
             h = self.hyper2id[userName]
@@ -224,15 +224,17 @@ class DataGenerator(object):
 
 
 def main():
-    MODEL_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10_noop_NoLeaveOut.h5'
-    #MODEL_PATH = '/Users/mohame11/Documents/myFiles/Career/Work/New_Linux/PARSED_pins_repins_win10_noop_NoLeaveOut_pinterest.h5'
-    DATA_GEN = '/u/scratch1/mohame11/pins_repins_fixedcat/simulatedData/tr9_simData_matchTraining'
-    TRAIN_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10.trace'
+    #MODEL_PATH = '/u/scratch1/mohame11/pins_repins_fixedcat/pins_repins_win10_noop_NoLeaveOut.h5'
+    MODEL_PATH = '/u/scratch1/mohame11/lastfm_WWW/lastfm_win10_trace_top5000_noop.h5'
+    DATA_GEN = '/u/scratch1/mohame11/lastfm_WWW/tr9_www_simData_perUser10'
+    TRAIN_PATH = '/u/scratch1/mohame11/lastfm_WWW/lastfm_win10_trace_top5000'
     perUserSequences = -1
     
     dg = DataGenerator(MODEL_PATH, DATA_GEN, perUserSequences)
     print('Getting user trajectory lengths from training data ...')
     userTrajLen = dg.getUserTrajectoryLengths(TRAIN_PATH)
+    for u in userTrajLen:
+        userTrajLen[u] = 10
     print('userTrajLen', len(userTrajLen))
     #dg.generate(userTrajLen)
     dg.generate_optimized(userTrajLen)

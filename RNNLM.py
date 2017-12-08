@@ -5,7 +5,7 @@ Created on Feb 16, 2017
 '''
 from DetectionTechnique import *
 from MyEnums import *
-sys.path.append('/home/mohame11/RNNLM_pyWrap/pythonWrap')
+sys.path.append('/homes/mohame11/RNNLM_pyWrap/pythonWrap/')
 import rnnlmlib
 #sys.path.append('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/rnnlm-python-master/rnnlm-python')
 #import rnnlm
@@ -88,7 +88,7 @@ class RNNLM (DetectionTechnique):
                     goldMarkers = ['false']*len(seq)
                 else:
                     indx = tmp.index('###')
-                    seq = tmp[:indx]
+                    seq = tmp[actionStartIndex:indx]
                     goldMarkers = tmp[indx+1:]
             #print(seq,goldMarkers)
             else:

@@ -23,8 +23,20 @@ class OutputChecker():
         self.modelType = modelType
         self.nonExistingUsers = nonExistingUsers
         self.model = None
-        self.CORES = 40
-        
+        self.CORES = 56
+
+    def getPvalueWithoutRanking(self, currentActionRank, keySortedProbs, probabilities):
+	#normConst = 0.0
+	#for i in range(len(probabilities)):
+	#    normConst += probabilities[i]
+	    
+	cdf = 0.0
+	for i in range(currentActionRank+1):
+	    cdf += probabilities[keySortedProbs[i]]
+	
+	#prob = cdf/normConst
+	return cdf        
+
     def seqScoring(self, u, seq, golds, start, end, coreId):
         myCnt = 0    
         print('writing to: ',self.model.RESULTS_PATH+'/outlier_analysis_pvalues_'+str(coreId))
@@ -33,6 +45,7 @@ class OutputChecker():
         pValuesWithRanks = {}
         pValuesWithoutRanks = {}
         for i in range(start, end):       
+            print 'core=', coreId, '@', i, '/', (end)
             probabilities = {}
             scores = {}        
             newSeq = list(seq)
@@ -72,7 +85,7 @@ class OutputChecker():
         writer.write('user##'+str(u)+'||seq##'+str(seq[start:end])+'||PvaluesWithRanks##'+str(pValuesWithRanks)+'||PvaluesWithoutRanks##'+str(pValuesWithoutRanks)+'||goldMarkers##'+str(golds[start:end])+'\n')
         
         writer.flush()
-        print('>>> proc: '+ str(coreId)+' finished '+ str(myCnt)+'/'+str(end-start)+' instances ...')                
+        print('>>> proc: '+ str(coreId)+' is finished ')                
         writer.close()    
         
     
@@ -164,9 +177,9 @@ class OutputChecker():
         golds = None
         for u in leftovers:
             user = u
-            test = leftovers[u]
+            test = leftovers[u][0]
             golds = test.goldMarkers
-            seq = test.seq
+            seq = test.actions
             seqLen = len(seq)
             
         
@@ -191,8 +204,8 @@ class OutputChecker():
             
         
         
-        elapsed_time = time.time() - start_time
-        print 'Elapsed Time=', elapsed_time
+        #elapsed_time = time.time() - start_time
+        #print 'Elapsed Time=', elapsed_time
         
         
   

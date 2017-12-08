@@ -19,12 +19,12 @@ import os.path
 from MyEnums import *
 from TestSample import *
 from DetectionTechnique import *
-from Tribeflow import *
+#from Tribeflow import *
 #from Tribeflowpp import *
 #from MyWord2vec import *
-#from NgramLM import *
+from NgramLM import *
 #from RNNLM import *
-from HMM import *
+#from HMM import *
 import sys
 #from bagOfActions import BagOfActions
 #sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython')
@@ -40,24 +40,24 @@ class OutlierDetection:
     def __init__(self):
         
         #COMMON
-        self.CORES = 2
+        self.CORES = 40
         #cythonOptimize.getLogProb([],0)
         
-        '''          
+        '''
         self.PATH = '/u/scratch1/mohame11/lastFm/'
-        self.RESULTS_PATH = self.PATH + 'simulatedData/pvalues_tr9_www_simData_perUser20'
-        self.SEQ_FILE_PATH = self.PATH + 'simulatedData/tr9_www_simData_perUser20'
-        self.MODEL_PATH = self.PATH + 'lastfm_win10_noob.h5'
-        self.seq_prob = SEQ_PROB.TRIBEFLOW
+        self.RESULTS_PATH = self.PATH + 'simulatedData/pvalues_trpp9_www_simData_perUser20'
+        self.SEQ_FILE_PATH = self.PATH + 'simulatedData/trpp9_www_simData_perUser20'
+        self.MODEL_PATH = self.PATH + 'lastfm_win10_trace_tribeflowpp_model/lastfm_win10_trace_tribeflowpp_model.mcmc'
+        self.seq_prob = SEQ_PROB.TRIBEFLOWPP
         self.useWindow = USE_WINDOW.FALSE
         '''
 
         
-        self.PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/HMM/'
-        self.RESULTS_PATH = self.PATH + 'pvalues'
-        self.SEQ_FILE_PATH = self.PATH + 'likes.trace'
-        self.MODEL_PATH = self.PATH + 'pins_repins_win10.trace_HMM_MODEL.pkl'
-        self.seq_prob = SEQ_PROB.HMM
+        self.PATH = '/u/scratch1/mohame11/lastfm_WWW/'
+        self.RESULTS_PATH = self.PATH + 'pvalues_ngram9_www_simData'
+        self.SEQ_FILE_PATH = self.PATH + 'lastfm_win10_trace_top5000_9gram_simulatedData'
+        self.MODEL_PATH = self.PATH + 'lastfm_win10_trace_top5000_9gram.arpa'
+        self.seq_prob = SEQ_PROB.NGRAM
         self.useWindow = USE_WINDOW.FALSE
         
         
@@ -73,14 +73,15 @@ class OutlierDetection:
         '''
         
 #####################################        
-        self.groupActionsByUser = False   # True will just append all sequences for a user into a long sequence
-        self.DATA_HAS_USER_INFO = True
-        self.VARIABLE_SIZED_DATA = False
+        self.groupActionsByUser = True   # True will just append all sequences for a user into a long sequence
+        self.DATA_HAS_USER_INFO = False
+        self.VARIABLE_SIZED_DATA = True
 
         
         #TRIBEFLOW
         #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace'
-        self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
+        #self.TRACE_PATH = self.PATH + 'lastfm_win10_trace'
+        self.TRACE_PATH = self.PATH + 'lastfm_win10_trace_top5000'
         #self.TRACE_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp.tsv.gz'
         self.STAT_FILE = self.PATH +'Stats_win10'
         self.UNBIAS_CATS_WITH_FREQ = False
@@ -88,8 +89,8 @@ class OutlierDetection:
         
         #NGRM/RNNLM/WORD2VEC/TRIBEFLOWPP
         self.HISTORY_SIZE = 9
-        #self.ALL_ACTIONS_PATH = self.PATH + 'pins_repins_win10.trace_tribeflowpp_actionMappings'
-        self.nonExistingUserFile = self.PATH +'likes.trace_nonExistingUsers'
+        self.ALL_ACTIONS_PATH = self.PATH + 'lastfm_win10_trace_top5000_forLM_ALL_ACTIONS'
+        self.nonExistingUserFile = self.PATH + 'lastfm_win10_trace_top5000_allClusters_HMM_simData_withUsers_injected_0.1_nonExistingUsers'
 
 
                            
@@ -137,6 +138,7 @@ class OutlierDetection:
                 #print 'len(actions)=', len(actions)
                 pValuesWithRanks = {}
                 pValuesWithoutRanks = {}
+                #print 'seq len=', len(seq)
                 for i in range(len(seq)): #for all actions in the sequence.
                     #Take the action with index i and replace it with all possible actions             
                     probabilities = {}
@@ -148,20 +150,21 @@ class OutlierDetection:
                     #print 'current action: ',i
                    
                     for j in range(len(actions)): #for all possible actions that can replace the current action
-                        #print 'replacement# ',j
+                        #print '   replacement# ',j
                         del newSeq[i]                
                         newSeq.insert(i, actions[j])    
                         userId = myModel.getUserId(user)     
                         seqScore = myModel.getProbability(userId, newSeq)  
                         scores[j] = seqScore
+                        #print '   replacement# ',j, ' prob=', seqScore
                     
                     #print 'finished all replacements'
                     
                     #print 'calculating normalizing constant'
                     try:
-                        #allScores = np.array(scores.values(), dtype = 'd').copy()
-                        #logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
-                        logNormalizingConst = self.get_norm_from_logScores(scores.values())
+                        allScores = np.array(scores.values(), dtype = 'd').copy()
+                        logNormalizingConst = cythonOptimize.getLogProb(allScores,len(allScores))
+                        #logNormalizingConst = self.get_norm_from_logScores(scores.values())
                         for j in range(len(actions)): #for all possible actions that can replace the current action
                             logProb = float(scores[j]) - float(logNormalizingConst)
                             probabilities[j] = math.pow(10, logProb)
@@ -192,9 +195,9 @@ class OutlierDetection:
                     #print 'writing sm'
                 else:
                     print('seq len not equal to the number of pvalues !')
-                if(myCnt % 5 == 0):
-                    writer.flush()
-                    print('>>> proc: '+ str(coreId)+' finished '+ str(myCnt)+'/'+str(quota)+' instances ...')                
+                #if(myCnt % 5 == 0):
+                writer.flush()
+                print('>>> proc: '+ str(coreId)+' finished '+ str(myCnt)+'/'+str(quota)+' instances ...')                
         writer.close()    
         #ret = [chiSqs, chiSqs_expected]
         #q.put(ret)                                          
@@ -260,7 +263,7 @@ class OutlierDetection:
             #myModel.ALL_ACTIONS_PATH = self.ALL_ACTIONS_PATH
             myModel.groupActionsByUser = self.groupActionsByUser
             myModel.nonExistingUserFile = self.nonExistingUserFile
-            myModel.actionMappingsPath = self.PATH + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
+            myModel.actionMappingsPath = self.PATH + 'lastfm_win10_trace_top5000_HMM_ACTION_MAPPINGS'
             myModel.loadModel()
         
         elif(self.seq_prob == SEQ_PROB.TRIBEFLOWPP):        
@@ -275,9 +278,10 @@ class OutlierDetection:
             myModel.DATA_HAS_USER_INFO = self.DATA_HAS_USER_INFO
             myModel.VARIABLE_SIZED_DATA = self.VARIABLE_SIZED_DATA
             myModel.groupActionsByUser = self.groupActionsByUser
-            myModel.userMappingsPath = self.PATH + 'pins_repins_win10.trace_tribeflowpp_userMappings'
-            myModel.actionMappingsPath = self.PATH + 'pins_repins_win10.trace_tribeflowpp_actionMappings'
-     
+            #myModel.userMappingsPath = self.PATH + 'pins_repins_win10.trace_tribeflowpp_userMappings'
+            #myModel.actionMappingsPath = self.PATH + 'pins_repins_win10.trace_tribeflowpp_actionMappings'
+            myModel.userMappingsPath = self.PATH + 'lastfm_win10_trace_tribeflowpp_userMappings'
+            myModel.actionMappingsPath = self.PATH + 'lastfm_win10_trace_tribeflowpp_actionMappings'
             if(self.UNBIAS_CATS_WITH_FREQ):
                 print('>>> calculating statistics for unbiasing categories ...')
                 myModel.calculatingItemsFreq(self.smoothingParam)
@@ -322,7 +326,7 @@ class OutlierDetection:
             myModel.groupActionsByUser = self.groupActionsByUser
             myModel.loadModel()
         
-        
+        print('Model is loaded !')
         myModel.RESULTS_PATH = self.RESULTS_PATH      
         testDic,testSetCount = myModel.prepareTestSet()
         print('Number of test samples: '+str(testSetCount))   

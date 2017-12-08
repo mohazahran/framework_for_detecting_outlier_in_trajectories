@@ -52,7 +52,7 @@ class NgramLM (DetectionTechnique):
                     goldMarkers = ['false']*len(seq)
                 else:
                     indx = tmp.index('###')
-                    seq = tmp[:indx]
+                    seq = tmp[actionStartIndex:indx]
                     goldMarkers = tmp[indx+1:]
             #print(seq,goldMarkers)
             else:

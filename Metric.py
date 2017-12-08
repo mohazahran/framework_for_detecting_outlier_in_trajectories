@@ -192,7 +192,7 @@ class Bayesian(Metric):
         
         #self.stats = [fisher_exact([[self.OT, self.OF], [self.NT, self.NF]])]
     
-    def calculateStats(self):
+    def calculateStats_beta(self):
         #trueCount_TgO = 0
         #trueCount_OT = 0
         #trueCount_full = 0
@@ -252,7 +252,7 @@ class Bayesian(Metric):
         self.stats = ['Prob_of_significance', self.probTrue_full]
         
     
-    def calculateStats_dirichelet(self):
+    def calculateStats(self):
         trueCount_TgO = 0
         trueCount_OT = 0
         trueCount_full = 0
@@ -260,8 +260,8 @@ class Bayesian(Metric):
         P_Fprior = float(self.NF+self.OF) / float(self.OF+self.OT+self.NT+self.NF)
         #print 'P_T:', P_T, 'P_F:', P_F
         
+        self.OT_priorConst = 0.0001
         self.OF_priorConst = 0.0001
-        self.NT_priorConst = 0.0001
         self.NT_priorConst = 0.0001
         self.NF_priorConst = 0.0001
         
@@ -393,4 +393,4 @@ if __name__ == "__main__":
     #experiments() 
     #alpha=0.0005, TECHNIQUE.MAJORITY_VOTING, HYP.EMPIRICAL, TScountAdj=False: OT=534, OF=852289, NT=1703, NF=2419088, stats=['Prob_of_significance', 0.0008]
 
-        
+    print 'DONE!'     

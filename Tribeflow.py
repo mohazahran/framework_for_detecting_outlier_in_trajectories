@@ -8,9 +8,11 @@ import sys
 import math
 import numpy as np
 import os.path
-sys.path.append('Cython/')
-#import cythonOptimize
+sys.path.append('myCython/')
+import pyximport; pyximport.install()
+import cythonOptimize
 import MyEnums
+import random
 
 class TribeFlow (DetectionTechnique):
     def __init__(self):
@@ -101,6 +103,8 @@ class TribeFlow (DetectionTechnique):
                 #print(parts, parts[1]) 
                 #self.smoothedProbs[parts[0]] = math.log10(float(parts[1]))                    
                 self.smoothedProbs[parts[0]] = float(parts[1]) 
+            r.close()
+            return
             
         
         freqs = {}            
@@ -159,18 +163,40 @@ class TribeFlow (DetectionTechnique):
         r = open(self.SEQ_FILE_PATH, 'r')    
         for line in r:
             line = line.strip() 
-            tmp = line.split()  
-            actionStartIndex = 1
-            user = tmp[0]   
-            if(user not in self.hyper2id):
-                #print("User: "+str(user)+" is not found in training set !")
-                seqsCountWithNonExistingUsers += 1
-                nonExistingUsers.add(user)
-                continue
-            seq = tmp[actionStartIndex:self.true_mem_size+2]
-            goldMarkers = tmp[self.true_mem_size+2:]
-            if(len(goldMarkers) != len(seq)):
-                goldMarkers = ['false']*len(seq)
+            tmp = line.split() 
+            if(self.DATA_HAS_USER_INFO): 
+                actionStartIndex = 1
+                user = tmp[0]   
+                #user = tmp[self.true_mem_size]
+                #actionStartIndex = self.true_mem_size + 1
+                if(user not in self.hyper2id):
+                    #print("User: "+str(user)+" is not found in training set !")
+                    seqsCountWithNonExistingUsers += 1
+                    nonExistingUsers.add(user)
+                    continue
+            else:
+                actionStartIndex = 0
+                user = random.choice(self.hyper2id.keys())
+
+            if(self.VARIABLE_SIZED_DATA == True):
+                if('###' not in tmp):
+                    seq = tmp[actionStartIndex:]
+                    goldMarkers = ['false']*len(seq)
+                else:
+                    indx = tmp.index('###')
+                    seq = tmp[actionStartIndex:indx]
+                    goldMarkers = tmp[indx+1:]
+            #print(seq,goldMarkers)
+            else:
+                seq = tmp[actionStartIndex:self.true_mem_size+2]
+                goldMarkers = tmp[self.true_mem_size+2:]
+                if(len(goldMarkers) != len(seq)):
+                    goldMarkers = ['false']*len(seq)
+
+            #seq = tmp[actionStartIndex:self.true_mem_size+2]
+            #goldMarkers = tmp[self.true_mem_size+2:]
+            #if(len(goldMarkers) != len(seq)):
+            #    goldMarkers = ['false']*len(seq)
             t = TestSample()  
             t.user = user
             t.actions = list(seq)
@@ -183,10 +209,13 @@ class TribeFlow (DetectionTechnique):
                 testDic[user]=[t]
         r.close()
         if(self.useWindow == USE_WINDOW.FALSE): # we need to use the original sequence instead of overlapping windows
+            print 'WINDOW=', str(self.useWindow)
             testSetCount = len(testDic)
+            totalActionCount = 0
             for u in testDic:
                 tests = testDic[u]
                 originalSeq, originalGoldMarkers = self.formOriginalSeq(tests)
+                totalActionCount += len(originalSeq)
                 t = TestSample()  
                 t.user = u
                 t.actions = list(originalSeq)
@@ -195,6 +224,7 @@ class TribeFlow (DetectionTechnique):
         print 'seqsCountWithNonExistingUsers=',seqsCountWithNonExistingUsers
         print 'number of nonExistingUsers=',len(nonExistingUsers)
         #print nonExistingUsers
+        print 'totalActionCount=', totalActionCount
         ww = open(self.SEQ_FILE_PATH+'_nonExistingUsers', 'w')
         for us in nonExistingUsers:
             ww.write(str(us)+'\n')

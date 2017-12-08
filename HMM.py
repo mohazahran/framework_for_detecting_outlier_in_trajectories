@@ -29,9 +29,9 @@ class HMM(DetectionTechnique):
             origSeq.append(a)    
         return origSeq
     
-    def doFormating(self):
+    def doFormating(self, PATH):
         #PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/pins_repins_win10.trace'
-        PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace'
+        #PATH = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace'
         FILE_TYPE = 'trace'
         ACTION_COUNT = 10
         ACTION_MAPPINGS_PATH = PATH+'_HMM_ACTION_MAPPINGS'
@@ -110,18 +110,20 @@ class HMM(DetectionTechnique):
         
         import warnings
         warnings.filterwarnings('ignore')
-        try:
-            print('Training HMM ...')
-            self.model.fit(training)
-        except:
-            print('Error in training HMM')
+        #try:
+        print('Training HMM ...')
+        self.model.fit(training)
+        #except:
+        #    print('Error in training HMM')
         
         print('Dumping HMM model as pkl ...')
         joblib.dump(self.model, trainPath+'_MODEL.pkl')
         
     
     def loadModel(self):
+        print('loading model with joblib.load')
         self.model = joblib.load(self.model_path) 
+        print('done loading')
         self.obj2id = {}
         self.id2Obj = {}
         r = open(self.actionMappingsPath, 'r')
@@ -154,14 +156,13 @@ class HMM(DetectionTechnique):
                     goldMarkers = ['false']*len(seq)
                 else:
                     indx = tmp.index('###')
-                    seq = tmp[:indx]
+                    seq = tmp[actionStartIndex:indx]
                     goldMarkers = tmp[indx+1:]
             #print(seq,goldMarkers)
             else:
                 seq = tmp[actionStartIndex:self.true_mem_size+2]
                 goldMarkers = tmp[self.true_mem_size+2:]
-                if(len(goldMarkers) != len(seq)):
-                    goldMarkers = ['false']*len(seq)
+
        
             t = TestSample()  
             t.user = user
@@ -227,7 +228,7 @@ class HMM(DetectionTechnique):
                     metric = rpf()
                 
                 cnt = 0
-                print alpha
+                print (alpha)
                 for user in testDic:
                     cnt += 1
                     if(cnt % 10 == 0):
@@ -289,11 +290,11 @@ class HMM(DetectionTechnique):
                 continue
             seq = self.simulatedSeq(int(i))
             if(len(seq) <= 1):
-                print seq
+                print(seq)
             w.write(' '.join(seq)+'\n')
             if(cnt % 10 == 0):
                 w.flush()
-                print cnt
+                print(cnt)
             cnt += 1
         w.close()
         
@@ -337,32 +338,35 @@ def expirements():
 def trainTheHMM():
     h = HMM()
     print('Formating ...')
-    h.doFormating()
+    #h.doFormating()
     #trainPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/pins_repins_win10.trace_HMM'
-    trainPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace_HMM'
+    #trainPath = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace_HMM'
+    trainPath = '/u/scratch1/mohame11/lastfm_WWW/lastfm_win10_trace_top5000'
+
+    h.doFormating(trainPath)
     print('Training HMM ...')
     
-    h.trainHmm(trainPath)
+    h.trainHmm(trainPath+'_HMM')
     
 def doTheOutlierDetection():
     myModel = HMM()
     #path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/HMM/'
-    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastfm/HMM/'
+    path = '/u/scratch1/mohame11/lastfm_WWW/'
     #myModel.SEQ_FILE_PATH = path+'sampleLikes'
     #myModel.SEQ_FILE_PATH = path+'likes.trace'
-    myModel.SEQ_FILE_PATH = path+'HMM_simData_5k'
+    myModel.SEQ_FILE_PATH = path+'lastfm_win10_trace_top5000_allClusters_HMM_simData_withUsers_injected_0.1'
     #myModel.MODEL_PATH = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
-    myModel.MODEL_PATH = path + 'lastfm_win10_trace_HMM_MODEL.pkl'
+    myModel.model_path = path + 'lastfm_win10_trace_top5000_HMM_MODEL.pkl'
     #myModel.nonExistingUserFile = path + 'likes.trace_nonExistingUsers'
-    myModel.nonExistingUserFile = ''
+    myModel.nonExistingUserFile = path+'lastfm_win10_trace_top5000_allClusters_HMM_simData_withUsers_injected_0.1_nonExistingUsers'
     #myModel.actionMappingsPath = path + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
-    myModel.actionMappingsPath = path + 'lastfm_win10_trace_HMM_ACTION_MAPPINGS'
+    myModel.actionMappingsPath = path + 'lastfm_win10_trace_top5000_HMM_ACTION_MAPPINGS'
     myModel.useWindow = USE_WINDOW.FALSE
     myModel.groupActionsByUser = True
-    myModel.DATA_HAS_USER_INFO = False
+    myModel.DATA_HAS_USER_INFO = True
     myModel.VARIABLE_SIZED_DATA = True
     myModel.true_mem_size = 9
-    alphaList = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 2.0]
+    alphaList = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 0.995, 0.9975, 1.0, 2.0]
     #metricList = [METRIC.BAYESIAN, METRIC.FISHER]
     metricList = [METRIC.REC_PREC_FSCORE]
     
@@ -371,24 +375,24 @@ def doTheOutlierDetection():
     
 def doDataGeneration():
     #path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/pins_repins_fixedcat/win10/HMM/'
-    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/'
+    path = '/u/scratch1/mohame11/lastfm_WWW/'
     h = HMM()
-    #h.MODEL_PATH = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
-    h.MODEL_PATH = path + 'lastfm_win10_trace_HMM_MODEL.pkl'
+    #h.model_path = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
+    h.model_path = path + 'lastfm_win10_trace_top5000_HMM_MODEL.pkl'
     #h.actionMappingsPath = path + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
-    h.actionMappingsPath = path + 'lastfm_win10_trace_HMM_ACTION_MAPPINGS'
+    h.actionMappingsPath = path + 'lastfm_win10_trace_top5000_HMM_ACTION_MAPPINGS'
     
     h.loadModel()
     
     #h.simulateData(19, 9, 5000,path+'simData')
     #h.simulateData(9912, 1000, 5000, path+'HMM_simData') #Avg. Trace Length: 9912
-    h.simulateData(20, 0, 5000, path+'HMM_simData') #Avg. Trace Length: 9912
+    h.simulateData(20, 0, 5000, path+'hmm_www_simData') #Avg. Trace Length: 9912
     
     
 if __name__ == "__main__":
     #expirements()
     #doDataGeneration()
-    #doTheOutlierDetection()
+    doTheOutlierDetection()
     #trainTheHMM()
     
     

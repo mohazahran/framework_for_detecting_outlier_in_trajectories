@@ -80,12 +80,20 @@ cpdef double calculateSequenceProb(int[:] theSequence, int theSequenceLen, doubl
 
 
 @boundscheck(False)
-cpdef double calculateSequenceProb_trpp(int[:] theSequence, int theSequenceLen, double[:] logSeqProbZ, int userId, double[:, :] Theta_zh, double[:, :, :] Psi_zss) nogil:
+cpdef double doSum(double[:] arr, int size) nogil:
+    cdef double acc = 0.0
+    for i in xrange(0,size):
+        acc = acc + arr[i]
+    return acc
+
+@boundscheck(False)
+cpdef double calculateSequenceProb_trpp(int[:] theSequence, int theSequenceLen, double[:] logSeqProbZ, int userId, double[:, :] Theta_zh, double[:, :, :] Psi_zss, double a, int s) nogil:
     cdef int envCount = Theta_zh.shape[0]  
     cdef double seqProbZ = 0.0   
     cdef int src = -1
     cdef int dest = -1
     cdef double prob = 0.0
+    cdef double norm = 0.0
     cdef int nexti = 0
     cdef int oneLessSeqLen = theSequenceLen - 1
     cdef int i,z = 0
@@ -95,7 +103,8 @@ cpdef double calculateSequenceProb_trpp(int[:] theSequence, int theSequenceLen, 
             nexti = i+1
             src = theSequence[i]
             dest = theSequence[nexti]
-            prob = Psi_zss[z, src, dest]
+            norm = doSum(Psi_zss[z,src], s)
+            prob = (Psi_zss[z, src, dest] + a) / (norm + a*s)
             seqProbZ += log10(prob)
         logSeqProbZ[z] = seqProbZ
     return getLogProb(logSeqProbZ, envCount) 

@@ -28,7 +28,7 @@ if sys.version_info[:2] < (2, 7):
 def get_packages():
     '''Appends all packages (based on recursive sub dirs)'''
 
-    packages  = ['Cython']
+    packages  = ['myCython']
 
     for package in packages:
         base = os.path.join(package, '**/')

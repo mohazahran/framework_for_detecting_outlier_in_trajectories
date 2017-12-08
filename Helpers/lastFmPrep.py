@@ -3,8 +3,8 @@ Created on Oct 28, 2017
 
 @author: mohame11
 '''
-#import sys
-#sys.path.append('/home/ribeirob/framework_for_detecting_outlier_in_trajectories/')
+import sys
+sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/')
 from TestSample import *
 from sklearn.cluster import KMeans
 
@@ -181,7 +181,7 @@ class LastFm(object):
             user = tmp[self.true_mem_size]
             c = u2c[user]
             f = c2file[c]
-            f.write(line)
+            f.write(line+'\n')
         
         for c in c2file:
             c2file[c].close()
@@ -209,17 +209,22 @@ class LastFm(object):
         
         
 if __name__ == "__main__":
-    #lf = LastFm('/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/lastfm_win10_trace_sample5000', 9)
+    #lf = LastFm('/u/scratch1/mohame11/lastFm/lastfm_win10_trace', 9)
     #lf.sample(5000)
+    #print('reading trace ...')
     #d = lf.readTrace()
+    #print('calculating probs ...')
     #f = lf.cal_and_write_probs(d)
     #probs = lf.read_probs(FILE = lf.PATH_TO_TRACE+'_Artist_probs')
-    #lf.restrict_to_top_k_trace(k=100, probs=probs)
+    #print('restricting to top k ...')
+    #lf.restrict_to_top_k_trace(k=5000, probs=probs)
     
-    path = '/Users/mohame11/Documents/myFiles/Career/Work/Purdue/PhD_courses/projects/outlierDetection/lastFm/'
-    lf = LastFm(path+'lastfm_win10_trace_sample5000_top100', 9)
-    #lf.clusterUsersByTop_k_artists(k=10, probsPath = path+'lastfm_win10_trace_sample5000_Artist_probs', clustersCount = 3)
-    lf.divideTraceByCluster(path + 'lastfm_win10_trace_sample5000_top100_userClusters_kmeans3')
+    path = '/u/scratch1/mohame11/lastFm_filtered/'
+    lf = LastFm(path+'lastfm_win10_trace_top5000', 9)
+    #print 'Clustering ...'
+    #lf.clusterUsersByTop_k_artists(k=200, probsPath = path+'lastfm_win10_trace_Artist_probs', clustersCount = 3)
+    #print 'Dividing by users ...'
+    lf.divideTraceByCluster(path + 'lastfm_win10_trace_top5000_userClusters_kmeans3')
     
     
     print('DONE!')
