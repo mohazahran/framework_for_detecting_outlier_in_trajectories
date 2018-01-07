@@ -22,9 +22,9 @@ from DetectionTechnique import *
 #from Tribeflow import *
 #from Tribeflowpp import *
 #from MyWord2vec import *
-from NgramLM import *
+#from NgramLM import *
 #from RNNLM import *
-#from HMM import *
+from HMM import *
 import sys
 #from bagOfActions import BagOfActions
 #sys.path.append('/homes/mohame11/framework_for_detecting_outlier_in_trajectories/Cython')
@@ -54,10 +54,10 @@ class OutlierDetection:
 
         
         self.PATH = '/u/scratch1/mohame11/lastfm_WWW/'
-        self.RESULTS_PATH = self.PATH + 'pvalues_ngram9_www_simData'
-        self.SEQ_FILE_PATH = self.PATH + 'lastfm_win10_trace_top5000_9gram_simulatedData'
-        self.MODEL_PATH = self.PATH + 'lastfm_win10_trace_top5000_9gram.arpa'
-        self.seq_prob = SEQ_PROB.NGRAM
+        self.RESULTS_PATH = self.PATH + 'pvalues_hmm9_30states_www_simData'
+        self.SEQ_FILE_PATH = self.PATH + 'hmm30_www_simData'
+        self.MODEL_PATH = self.PATH + 'lastfm_win10_trace_top5000_HMM_MODEL_30hiddenStates.pkl'
+        self.seq_prob = SEQ_PROB.HMM
         self.useWindow = USE_WINDOW.FALSE
         
         

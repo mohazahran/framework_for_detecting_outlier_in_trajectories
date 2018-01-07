@@ -99,14 +99,14 @@ class HMM(DetectionTechnique):
         score = self.model.score(actionIds)
         return score
     
-    def trainHmm(self, trainPath):
+    def trainHmm(self, trainPath, hiddenStates):
         r = open(trainPath, 'r')
         training= []
         for line in r:
             t = [int(x) for x in (line.strip().split())]
             training.append(t)
         r.close()
-        self.model = hmm.MultinomialHMM(n_components=10, n_iter=100)
+        self.model = hmm.MultinomialHMM(n_components=hiddenStates, n_iter=100)
         
         import warnings
         warnings.filterwarnings('ignore')
@@ -117,7 +117,7 @@ class HMM(DetectionTechnique):
         #    print('Error in training HMM')
         
         print('Dumping HMM model as pkl ...')
-        joblib.dump(self.model, trainPath+'_MODEL.pkl')
+        joblib.dump(self.model, trainPath+'_MODEL_'+str(hiddenStates)+'hiddenStates'+'.pkl')
         
     
     def loadModel(self):
@@ -346,7 +346,8 @@ def trainTheHMM():
     h.doFormating(trainPath)
     print('Training HMM ...')
     
-    h.trainHmm(trainPath+'_HMM')
+    hiddenStates = 30
+    h.trainHmm(trainPath+'_HMM', hiddenStates)
     
 def doTheOutlierDetection():
     myModel = HMM()
@@ -354,16 +355,16 @@ def doTheOutlierDetection():
     path = '/u/scratch1/mohame11/lastfm_WWW/'
     #myModel.SEQ_FILE_PATH = path+'sampleLikes'
     #myModel.SEQ_FILE_PATH = path+'likes.trace'
-    myModel.SEQ_FILE_PATH = path+'lastfm_win10_trace_top5000_allClusters_HMM_simData_withUsers_injected_0.1'
+    myModel.SEQ_FILE_PATH = path+'hmm30_www_simData'
     #myModel.MODEL_PATH = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
-    myModel.model_path = path + 'lastfm_win10_trace_top5000_HMM_MODEL.pkl'
+    myModel.model_path = path + 'lastfm_win10_trace_top5000_HMM_MODEL_30hiddenStates.pkl'
     #myModel.nonExistingUserFile = path + 'likes.trace_nonExistingUsers'
     myModel.nonExistingUserFile = path+'lastfm_win10_trace_top5000_allClusters_HMM_simData_withUsers_injected_0.1_nonExistingUsers'
     #myModel.actionMappingsPath = path + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
     myModel.actionMappingsPath = path + 'lastfm_win10_trace_top5000_HMM_ACTION_MAPPINGS'
     myModel.useWindow = USE_WINDOW.FALSE
     myModel.groupActionsByUser = True
-    myModel.DATA_HAS_USER_INFO = True
+    myModel.DATA_HAS_USER_INFO = False
     myModel.VARIABLE_SIZED_DATA = True
     myModel.true_mem_size = 9
     alphaList = [1e-100, 1e-90, 1e-80, 1e-70, 1e-60, 1e-50, 1e-40, 1e-30, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 5e-10, 1e-9, 5e-9, 1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1 ,0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 0.995, 0.9975, 1.0, 2.0]
@@ -378,7 +379,8 @@ def doDataGeneration():
     path = '/u/scratch1/mohame11/lastfm_WWW/'
     h = HMM()
     #h.model_path = path + 'pins_repins_win10.trace_HMM_MODEL.pkl'
-    h.model_path = path + 'lastfm_win10_trace_top5000_HMM_MODEL.pkl'
+    #h.model_path = path + 'lastfm_win10_trace_top5000_HMM_MODEL.pkl'
+    h.model_path = path + 'lastfm_win10_trace_top5000_HMM_MODEL_30hiddenStates.pkl'
     #h.actionMappingsPath = path + 'pins_repins_win10.trace_HMM_ACTION_MAPPINGS'
     h.actionMappingsPath = path + 'lastfm_win10_trace_top5000_HMM_ACTION_MAPPINGS'
     
@@ -386,7 +388,7 @@ def doDataGeneration():
     
     #h.simulateData(19, 9, 5000,path+'simData')
     #h.simulateData(9912, 1000, 5000, path+'HMM_simData') #Avg. Trace Length: 9912
-    h.simulateData(20, 0, 5000, path+'hmm_www_simData') #Avg. Trace Length: 9912
+    h.simulateData(20, 0, 7000, path+'hmm30_www_simData') #Avg. Trace Length: 9912
     
     
 if __name__ == "__main__":
